@@ -1,0 +1,119 @@
+import { lazy } from "react";
+import { createBrowserRouter, Navigate } from "react-router-dom";
+import Layout from "./components/layout";
+import { getBasePath } from "./utils/zma";
+import HomePage from "./pages/home";
+
+const MenuPage = lazy(() => import("./pages/menu"));
+const OrderPage = lazy(() => import("./pages/order"));
+const ProfilePage = lazy(() => import("./pages/profile"));
+const SearchPage = lazy(() => import("./pages/search"));
+const ProductDetailPage = lazy(() => import("./pages/product-detail"));
+const CheckoutPage = lazy(() => import("./pages/checkout"));
+const SelectLocationPage = lazy(() => import("./pages/select-location"));
+const OrderSuccessPage = lazy(() => import("./pages/order-success"));
+const OrderDetailPage = lazy(() => import("./pages/order-detail"));
+const ArticlesPage = lazy(() => import("./pages/articles"));
+const NewsPage = lazy(() => import("./pages/news"));
+import { copy } from "@/constants/copy";
+
+const router = createBrowserRouter(
+  [
+    {
+      path: "/",
+      element: <Layout />,
+      children: [
+        { path: "/", element: <HomePage />, handle: { hideHeader: true } },
+        { path: "/menu", element: <MenuPage /> },
+        {
+          path: "/articles",
+          element: <ArticlesPage />,
+          handle: { hideCart: true },
+        },
+        {
+          path: "/news",
+          element: <NewsPage />,
+          handle: { hideCart: true },
+        },
+        {
+          path: "/order",
+          element: <OrderPage />,
+          handle: {
+            hideCart: true,
+          },
+        },
+        {
+          path: "/profile",
+          element: <ProfilePage />,
+          handle: {
+            title: copy.header.profile,
+            back: false,
+            whiteBackground: true,
+            headerPosition: "sticky",
+            hideCart: true,
+          },
+        },
+        { path: "/menu/search", element: <SearchPage /> },
+        {
+          path: "/product/:id",
+          element: <ProductDetailPage />,
+          handle: {
+            whiteBackground: true,
+            hideFooter: true,
+            hideHeader: true,
+          },
+        },
+        {
+          path: "/checkout",
+          element: <CheckoutPage />,
+          handle: {
+            title: copy.header.delivery,
+            back: true,
+            whiteBackground: true,
+            hideFooter: true,
+            headerPosition: "sticky",
+          },
+        },
+        {
+          path: "/select-location",
+          element: <SelectLocationPage />,
+          handle: {
+            back: true,
+            title: copy.header.selectLocation,
+            hideFooter: true,
+            headerPosition: "sticky",
+            whiteBackground: true,
+            hideHeader: true,
+          },
+        },
+        {
+          path: "/order-success",
+          element: <OrderSuccessPage />,
+          handle: {
+            title: copy.header.confirmation,
+            whiteBackground: true,
+            hideFooter: true,
+          },
+        },
+        {
+          path: "/order/:orderId",
+          element: <OrderDetailPage />,
+          handle: {
+            title: " ",
+            back: true,
+            whiteBackground: true,
+            hideFooter: true,
+            headerPosition: "sticky",
+            hideCart: true,
+          },
+        },
+        { path: "*", element: <Navigate to="/" replace /> },
+      ],
+    },
+  ],
+  {
+    basename: getBasePath(),
+  },
+);
+
+export default router;
