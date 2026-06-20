@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button, Sheet } from "zmp-ui";
 import { formatCurrency } from "@/utils/format";
 import { orderService } from "@/services/order/order.api";
-import { openOutApp, saveImageToGallery } from "zmp-sdk/apis";
+import { openOutApp, saveImageToGallery, showToast } from "zmp-sdk/apis";
 
 const BANK_INFO = {
   bankName: "ACB - Chi nhánh Gò Vấp",
@@ -17,29 +17,31 @@ const MAX_WAIT_MS = 15 * 60 * 1000;
 type VerifyState = "waiting" | "confirmed" | "timeout";
 
 interface BankApp {
+  bin: string;
   code: string;
   name: string;
   color: string;
   scheme: string;
 }
 
+// Logo lấy từ VietQR API: https://api.vietqr.io/img/{bin}.png
 const BANK_APPS: BankApp[] = [
-  { code: "VCB", name: "Vietcombank", color: "#007F3D", scheme: "vcbpay://" },
-  { code: "TCB", name: "Techcombank", color: "#D82323", scheme: "techcombank://" },
-  { code: "MB",  name: "MB Bank",     color: "#003087", scheme: "mbmobile://" },
-  { code: "BIDV",name: "BIDV",        color: "#1C428A", scheme: "bidv://" },
-  { code: "VTB", name: "VietinBank",  color: "#0060A8", scheme: "viettinbank://" },
-  { code: "ACB", name: "ACB",         color: "#0068B5", scheme: "acb://" },
-  { code: "VPB", name: "VPBank",      color: "#009E62", scheme: "vpb://" },
-  { code: "TPB", name: "TPBank",      color: "#5E0D97", scheme: "tpbank://" },
-  { code: "STB", name: "Sacombank",   color: "#003087", scheme: "sacombank://" },
-  { code: "AGB", name: "Agribank",    color: "#006633", scheme: "agribank://" },
-  { code: "SHB", name: "SHB",         color: "#CC0000", scheme: "shb://" },
-  { code: "HDB", name: "HDBank",      color: "#B22222", scheme: "hdbank://" },
-  { code: "MSB", name: "MSB",         color: "#0066CC", scheme: "msb://" },
-  { code: "OCB", name: "OCB",         color: "#006D3D", scheme: "ocb://" },
-  { code: "LPB", name: "LienViet+",   color: "#FF6600", scheme: "lpb://" },
-  { code: "NAB", name: "Nam A Bank",  color: "#E07B00", scheme: "namabank://" },
+  { bin: "970436", code: "VCB",  name: "Vietcombank",  color: "#007F3D", scheme: "vcbpay://" },
+  { bin: "970407", code: "TCB",  name: "Techcombank",  color: "#D82323", scheme: "techcombank://" },
+  { bin: "970422", code: "MB",   name: "MB Bank",      color: "#003087", scheme: "mbmobile://" },
+  { bin: "970418", code: "BIDV", name: "BIDV",         color: "#1C428A", scheme: "bidv://" },
+  { bin: "970415", code: "VTB",  name: "VietinBank",   color: "#0060A8", scheme: "viettinbank://" },
+  { bin: "970416", code: "ACB",  name: "ACB",          color: "#0068B5", scheme: "acb://" },
+  { bin: "970432", code: "VPB",  name: "VPBank",       color: "#009E62", scheme: "vpb://" },
+  { bin: "970423", code: "TPB",  name: "TPBank",       color: "#5E0D97", scheme: "tpbank://" },
+  { bin: "970403", code: "STB",  name: "Sacombank",    color: "#003087", scheme: "sacombank://" },
+  { bin: "970405", code: "AGB",  name: "Agribank",     color: "#006633", scheme: "agribank://" },
+  { bin: "970443", code: "SHB",  name: "SHB",          color: "#CC0000", scheme: "shb://" },
+  { bin: "970437", code: "HDB",  name: "HDBank",       color: "#B22222", scheme: "hdbank://" },
+  { bin: "970426", code: "MSB",  name: "MSB",          color: "#0066CC", scheme: "msb://" },
+  { bin: "970448", code: "OCB",  name: "OCB",          color: "#006D3D", scheme: "ocb://" },
+  { bin: "970449", code: "LPB",  name: "LienViet+",    color: "#FF6600", scheme: "lpb://" },
+  { bin: "970428", code: "NAB",  name: "Nam A Bank",   color: "#E07B00", scheme: "namabank://" },
 ];
 
 interface BankTransferSheetProps {
@@ -114,18 +116,14 @@ export default function BankTransferSheet({
   const handleSaveQR = async () => {
     setSaveStatus("saving");
     try {
-      await saveImageToGallery({ url: qrUrl });
+      await saveImageToGallery({ imageUrl: qrUrl });
       setSaveStatus("saved");
+      showToast({ message: "Đã lưu QR vào thư viện ảnh", type: "success", duration: 2000 });
       setTimeout(() => setSaveStatus("idle"), 2500);
     } catch {
-      // ZMP API không khả dụng, mở ảnh trong trình duyệt
-      try {
-        await openOutApp({ url: qrUrl });
-        setSaveStatus("idle");
-      } catch {
-        setSaveStatus("error");
-        setTimeout(() => setSaveStatus("idle"), 2000);
-      }
+      setSaveStatus("error");
+      showToast({ message: "Không lưu được ảnh, hãy thử lại", type: "error", duration: 2000 });
+      setTimeout(() => setSaveStatus("idle"), 2000);
     }
   };
 
@@ -134,7 +132,7 @@ export default function BankTransferSheet({
     try {
       await openOutApp({ url: bank.scheme });
     } catch {
-      // App không cài hoặc scheme không hỗ trợ – không làm gì
+      showToast({ message: `Không tìm thấy app ${bank.name} trên thiết bị`, type: "error", duration: 2500 });
     }
   };
 
@@ -289,13 +287,25 @@ export default function BankTransferSheet({
                 onClick={() => handleOpenBankApp(bank)}
                 className="flex flex-col items-center gap-1.5 active:opacity-60"
               >
-                <div
-                  className="flex h-14 w-14 items-center justify-center rounded-2xl shadow-sm"
-                  style={{ backgroundColor: bank.color }}
-                >
-                  <span className="text-xs font-bold leading-tight text-white">
-                    {bank.code}
-                  </span>
+                <div className="h-14 w-14 overflow-hidden rounded-2xl shadow-sm">
+                  <img
+                    src={`https://api.vietqr.io/img/${bank.bin}.png`}
+                    alt={bank.name}
+                    className="h-full w-full object-cover"
+                    onError={(e) => {
+                      const el = e.currentTarget;
+                      el.style.display = "none";
+                      const parent = el.parentElement!;
+                      parent.style.backgroundColor = bank.color;
+                      parent.style.display = "flex";
+                      parent.style.alignItems = "center";
+                      parent.style.justifyContent = "center";
+                      const span = document.createElement("span");
+                      span.textContent = bank.code;
+                      span.className = "text-xs font-bold text-white";
+                      parent.appendChild(span);
+                    }}
+                  />
                 </div>
                 <span className="w-full text-center text-[10px] leading-tight text-text-secondary line-clamp-2">
                   {bank.name}
