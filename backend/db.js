@@ -72,7 +72,7 @@ function normalizeOrder(order) {
     subtotal + shippingFee - discount;
 
   const paymentMethod = order.payment?.method || order.paymentMethod || "bank_transfer";
-  const paymentStatus = order.payment?.status || order.paymentStatus || "pending";
+  const paymentStatus = order.paymentStatus || order.payment?.status || "pending";
   const state = order.state || "pending";
   const deliveryType = order.deliveryType || "delivery";
 
