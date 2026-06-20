@@ -41,9 +41,14 @@ router.post("/sepay-webhook", (req, res) => {
     accountNumber,
   } = req.body;
 
-  // 1. Xác thực API key từ Sepay
-  if (apiKey !== process.env.SEPAY_API_KEY) {
-    console.warn("[Sepay] API key không hợp lệ:", apiKey);
+  // 1. Xác thực API key từ Sepay (header Authorization hoặc body)
+  const headerAuth = req.headers["authorization"] || "";
+  const headerApiKey = headerAuth.startsWith("Apikey ")
+    ? headerAuth.slice(7).trim()
+    : null;
+  const receivedApiKey = headerApiKey || apiKey;
+  if (receivedApiKey !== process.env.SEPAY_API_KEY) {
+    console.warn("[Sepay] API key không hợp lệ:", receivedApiKey);
     return res.status(401).json({ error: "Unauthorized" });
   }
 
