@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button, Sheet } from "zmp-ui";
 import { formatCurrency } from "@/utils/format";
 import { orderService } from "@/services/order/order.api";
-import { openExternalLink, saveImageToGallery } from "zmp-sdk/apis";
+import { openOutApp, saveImageToGallery } from "zmp-sdk/apis";
 
 const BANK_INFO = {
   bankName: "ACB - Chi nhánh Gò Vấp",
@@ -120,7 +120,7 @@ export default function BankTransferSheet({
     } catch {
       // ZMP API không khả dụng, mở ảnh trong trình duyệt
       try {
-        await openExternalLink({ url: qrUrl });
+        await openOutApp({ url: qrUrl });
         setSaveStatus("idle");
       } catch {
         setSaveStatus("error");
@@ -132,7 +132,7 @@ export default function BankTransferSheet({
   const handleOpenBankApp = async (bank: BankApp) => {
     setShowBankList(false);
     try {
-      await openExternalLink({ url: bank.scheme });
+      await openOutApp({ url: bank.scheme });
     } catch {
       // App không cài hoặc scheme không hỗ trợ – không làm gì
     }
