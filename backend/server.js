@@ -34,6 +34,13 @@ app.use(
 
 app.use(express.json());
 
+// ── Request logging ──
+app.use((req, _res, next) => {
+  const origin = req.headers.origin || "-";
+  console.log(`[HTTP] ${req.method} ${req.path} | origin: ${origin}`);
+  next();
+});
+
 // ── Health check ──
 app.get("/health", (_req, res) => res.json({ status: "ok" }));
 
