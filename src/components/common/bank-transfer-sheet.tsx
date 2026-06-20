@@ -12,7 +12,7 @@ const BANK_INFO = {
 };
 
 const POLL_INTERVAL_MS = 5000;
-const MAX_WAIT_MS = 15 * 60 * 1000;
+const MAX_WAIT_MS = 30 * 60 * 1000; // 30 phút
 
 type VerifyState = "waiting" | "confirmed" | "timeout";
 
@@ -131,7 +131,7 @@ export default function BankTransferSheet({
 
           <div className="flex-1 overflow-y-auto">
             {/* Trạng thái xác minh */}
-            <VerifyStatusBanner state={verifyState} />
+            <VerifyStatusBanner state={verifyState} orderCode={orderCode} />
 
             {/* QR code */}
             <div className="flex flex-col items-center px-4 pt-3 pb-1">
@@ -199,10 +199,13 @@ export default function BankTransferSheet({
 
               {/* Nội dung CK + sao chép */}
               <div className="flex items-center justify-between gap-2">
-                <div>
+                <div className="flex-1 min-w-0">
                   <p className="text-xs text-text-secondary">Nội dung CK</p>
-                  <p className="mt-0.5 text-sm font-semibold text-text-primary">
+                  <p className="mt-0.5 text-sm font-semibold text-text-primary break-all">
                     {orderCode}
+                  </p>
+                  <p className="mt-0.5 text-xs text-orange-500">
+                    ⚠️ Nhập chính xác — sai 1 ký tự sẽ không tự xác nhận
                   </p>
                 </div>
                 <CopyButton
@@ -249,7 +252,7 @@ export default function BankTransferSheet({
 
 /* ---------- sub-components ---------- */
 
-function VerifyStatusBanner({ state }: { state: VerifyState }) {
+function VerifyStatusBanner({ state, orderCode }: { state: VerifyState; orderCode: string }) {
   if (state === "confirmed") {
     return (
       <div className="mx-4 mt-4 flex items-center gap-2 rounded-xl bg-green-50 px-4 py-3">
@@ -268,15 +271,22 @@ function VerifyStatusBanner({ state }: { state: VerifyState }) {
 
   if (state === "timeout") {
     return (
-      <div className="mx-4 mt-4 flex items-center gap-2 rounded-xl bg-orange-50 px-4 py-3">
-        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-orange-100">
-          <svg className="h-4 w-4 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
-        </div>
-        <div>
-          <p className="text-sm font-semibold text-orange-700">Chưa nhận được chuyển khoản</p>
-          <p className="text-xs text-orange-600">Vui lòng kiểm tra lại hoặc liên hệ hỗ trợ.</p>
+      <div className="mx-4 mt-4 rounded-xl bg-orange-50 px-4 py-3">
+        <div className="flex items-start gap-2">
+          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-orange-100">
+            <svg className="h-4 w-4 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-orange-700">Chưa nhận được xác nhận tự động</p>
+            <p className="mt-0.5 text-xs text-orange-600">
+              Nếu bạn đã chuyển khoản, vui lòng nhắn tin Zalo kèm ảnh chụp màn hình giao dịch để được xác nhận thủ công.
+            </p>
+            <p className="mt-1 text-xs text-orange-500">
+              Mã đơn hàng của bạn: <span className="font-semibold">{orderCode}</span>
+            </p>
+          </div>
         </div>
       </div>
     );

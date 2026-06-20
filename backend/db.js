@@ -1,8 +1,14 @@
 const fs = require("fs");
 const path = require("path");
 
-const DATA_DIR = path.join(__dirname, "data");
+// DATA_DIR có thể override bằng env var DATA_DIR để dùng Railway Volume (persistent).
+// Mặc định: thư mục data/ cạnh file này (sẽ mất khi Railway redeploy nếu không mount Volume).
+const DATA_DIR = process.env.DATA_DIR
+  ? path.resolve(process.env.DATA_DIR)
+  : path.join(__dirname, "data");
 const ORDERS_FILE = path.join(DATA_DIR, "orders.json");
+
+console.log(`[DB] Thư mục lưu đơn hàng: ${DATA_DIR}`);
 
 const STATE_LABELS = {
   pending: "Chờ xác nhận",
