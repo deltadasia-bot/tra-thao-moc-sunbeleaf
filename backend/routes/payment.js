@@ -57,46 +57,68 @@ router.post("/sepay-webhook", (req, res) => {
     return res.json({ success: true, message: "Bỏ qua giao dịch ra" });
   }
 
-  // 3. Trích xuất orderCode từ nội dung chuyển khoản
-  //    Định dạng orderCode: DH-YYYYMMDD-NNN
+  // 3. Bỏ qua nếu sai tài khoản ngân hàng
   if (
     accountNumber &&
     String(accountNumber).replace(/\s/g, "") !== EXPECTED_BANK_ACCOUNT
   ) {
-    console.warn("[Sepay] Bo qua giao dich khac tai khoan:", accountNumber);
-    return res.json({ success: true, message: "Khong dung tai khoan ACB" });
+    console.warn("[Sepay] Bỏ qua giao dịch khác tài khoản:", accountNumber);
+    return res.json({ success: true, message: "Không đúng tài khoản ACB" });
   }
+
+  // 4. Tìm đơn hàng – ưu tiên theo mã DH-, fallback theo số tiền + thời gian
+  let order = null;
 
   const orderCodeMatch = (code || content || "").match(/DH-\d{8}-\d+/i);
-  if (!orderCodeMatch) {
-    console.log("[Sepay] Không tìm thấy orderCode trong:", code || content);
-    // Vẫn trả 200 để Sepay không retry liên tục
-    return res.json({ success: true, message: "Không khớp đơn hàng nào" });
+  if (orderCodeMatch) {
+    // Ưu tiên 1: khớp chính xác theo mã đơn hàng
+    const orderCode = orderCodeMatch[0].toUpperCase();
+    const byCode = db.findOrderByCode(orderCode);
+    if (byCode) {
+      if (Math.abs(transferAmount - byCode.amount) > 1000) {
+        console.warn(`[Sepay] Mã ${orderCode} khớp nhưng số tiền lệch: nhận ${transferAmount}đ, cần ${byCode.amount}đ`);
+        return res.json({ success: true, message: "Số tiền không khớp" });
+      }
+      order = byCode;
+      console.log(`[Sepay] Khớp theo mã đơn: ${orderCode}`);
+    } else {
+      console.log(`[Sepay] Không tìm thấy đơn với mã: ${orderCode} – thử khớp theo số tiền`);
+    }
   }
 
-  const orderCode = orderCodeMatch[0].toUpperCase();
-  const order = db.findOrderByCode(orderCode);
-
   if (!order) {
-    console.log("[Sepay] Không tìm thấy đơn hàng với mã:", orderCode);
-    return res.json({ success: true, message: "Không tìm thấy đơn hàng" });
+    // Ưu tiên 2: khớp theo số tiền + đơn bank_transfer pending trong vòng 2 tiếng
+    const TWO_HOURS_MS = 2 * 60 * 60 * 1000;
+    const now = Date.now();
+    const candidates = db.getAllOrders()
+      .filter((o) =>
+        o.paymentMethod === "bank_transfer" &&
+        o.paymentStatus  === "pending" &&
+        Math.abs((o.amount ?? 0) - transferAmount) <= 1000 &&
+        now - new Date(o.createdAt).getTime() <= TWO_HOURS_MS,
+      )
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    if (candidates.length === 0) {
+      console.log(`[Sepay] Không tìm thấy đơn pending nào khớp ${transferAmount}đ trong 2 tiếng qua`);
+      return res.json({ success: true, message: "Không khớp đơn hàng nào" });
+    }
+
+    order = candidates[0];
+    if (candidates.length > 1) {
+      console.warn(`[Sepay] ⚠️  ${candidates.length} đơn cùng số tiền ${transferAmount}đ – chọn đơn gần nhất: ${order.orderCode}`);
+    } else {
+      console.log(`[Sepay] Khớp theo số tiền: ${order.orderCode} – ${transferAmount}đ`);
+    }
   }
 
   if (order.paymentStatus === "paid") {
     return res.json({ success: true, message: "Đơn hàng đã xác nhận trước đó" });
   }
 
-  // 4. Kiểm tra số tiền (±1000đ để tránh phí giao dịch ngân hàng)
-  if (Math.abs(transferAmount - order.amount) > 1000) {
-    console.warn(
-      `[Sepay] Số tiền không khớp: nhận ${transferAmount}, cần ${order.amount}`,
-    );
-    return res.json({ success: true, message: "Số tiền không khớp" });
-  }
-
   // 5. Đánh dấu đã thanh toán
   const updated = db.markAsPaid(order.id, sepayId);
-  console.log(`[Sepay] ✅ Xác nhận thanh toán: ${orderCode} – ${transferAmount}đ`);
+  console.log(`[Sepay] ✅ Xác nhận thanh toán: ${order.orderCode} – ${transferAmount}đ`);
 
   // 6. Cập nhật Sapo + gửi thông báo (chạy nền)
   setImmediate(async () => {
