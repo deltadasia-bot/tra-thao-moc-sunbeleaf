@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button, Sheet } from "zmp-ui";
 import { formatCurrency } from "@/utils/format";
 import { orderService } from "@/services/order/order.api";
-import { openOutApp, saveImageToGallery, showToast } from "zmp-sdk/apis";
+import { saveImageToGallery, showToast } from "zmp-sdk/apis";
 
 const BANK_INFO = {
   bankName: "ACB - Chi nhánh Gò Vấp",
@@ -15,36 +15,6 @@ const POLL_INTERVAL_MS = 5000;
 const MAX_WAIT_MS = 15 * 60 * 1000;
 
 type VerifyState = "waiting" | "confirmed" | "timeout";
-
-interface BankApp {
-  bin: string;
-  code: string;
-  name: string;
-  color: string;
-  // openOutApp chỉ hỗ trợ https — dùng Universal Link của từng ngân hàng
-  // iOS/Android sẽ tự mở app nếu đã cài, ngược lại mở trình duyệt
-  universalLink: string;
-}
-
-// Logo lấy từ VietQR CDN: https://api.vietqr.io/img/{bin}.png
-const BANK_APPS: BankApp[] = [
-  { bin: "970436", code: "VCB",  name: "Vietcombank", color: "#007F3D", universalLink: "https://vcbpay.vn" },
-  { bin: "970407", code: "TCB",  name: "Techcombank", color: "#D82323", universalLink: "https://mfast.vn/app/techcombank" },
-  { bin: "970422", code: "MB",   name: "MB Bank",     color: "#003087", universalLink: "https://app.mbbank.com.vn" },
-  { bin: "970418", code: "BIDV", name: "BIDV",        color: "#1C428A", universalLink: "https://smartbanking.bidv.com.vn" },
-  { bin: "970415", code: "VTB",  name: "VietinBank",  color: "#0060A8", universalLink: "https://ipay.vietinbank.vn" },
-  { bin: "970416", code: "ACB",  name: "ACB",         color: "#0068B5", universalLink: "https://acbmobile.acb.com.vn" },
-  { bin: "970432", code: "VPB",  name: "VPBank",      color: "#009E62", universalLink: "https://neo.vpbank.com.vn" },
-  { bin: "970423", code: "TPB",  name: "TPBank",      color: "#5E0D97", universalLink: "https://tpbankplus.vn" },
-  { bin: "970403", code: "STB",  name: "Sacombank",   color: "#003087", universalLink: "https://mbanking.sacombank.com.vn" },
-  { bin: "970405", code: "AGB",  name: "Agribank",    color: "#006633", universalLink: "https://agribank.com.vn/agribank-e-mobile-banking" },
-  { bin: "970443", code: "SHB",  name: "SHB",         color: "#CC0000", universalLink: "https://shbmobile.shb.com.vn" },
-  { bin: "970437", code: "HDB",  name: "HDBank",      color: "#B22222", universalLink: "https://hdbank.com.vn/vi/personal/digital-banking" },
-  { bin: "970426", code: "MSB",  name: "MSB",         color: "#0066CC", universalLink: "https://mobilebanking.msb.com.vn" },
-  { bin: "970448", code: "OCB",  name: "OCB",         color: "#006D3D", universalLink: "https://ocbomni.ocb.com.vn" },
-  { bin: "970449", code: "LPB",  name: "LienViet+",   color: "#FF6600", universalLink: "https://lienviettransfer.vn" },
-  { bin: "970428", code: "NAB",  name: "Nam A Bank",  color: "#E07B00", universalLink: "https://namabank.com.vn/internet-banking" },
-];
 
 interface BankTransferSheetProps {
   visible: boolean;
@@ -65,7 +35,6 @@ export default function BankTransferSheet({
 }: BankTransferSheetProps) {
   const [copiedField, setCopiedField]     = useState<string | null>(null);
   const [verifyState, setVerifyState]     = useState<VerifyState>("waiting");
-  const [showBankList, setShowBankList]   = useState(false);
   const [saveStatus, setSaveStatus]       = useState<"idle" | "saving" | "saved" | "error">("idle");
   const intervalRef  = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef = useRef<number>(Date.now());
@@ -150,20 +119,8 @@ export default function BankTransferSheet({
     }
   };
 
-  const handleOpenBankApp = async (bank: BankApp) => {
-    setShowBankList(false);
-    // openOutApp chỉ hỗ trợ https — dùng Universal Link
-    // iOS/Android tự mở app nếu đã cài, nếu không mở trình duyệt
-    try {
-      await openOutApp({ url: bank.universalLink });
-    } catch {
-      showToast({ message: "Không mở được, hãy tự mở app ngân hàng và quét QR", type: "error", duration: 3000 });
-    }
-  };
-
   return (
-    <>
-      <Sheet autoHeight visible={visible} onClose={onClose} maskClosable={false}>
+    <Sheet autoHeight visible={visible} onClose={onClose} maskClosable={false}>
         <div className="flex max-h-[88vh] flex-col bg-white pb-safe">
           {/* Header */}
           <div className="flex items-center border-b border-divider01 px-4 py-3">
@@ -186,14 +143,19 @@ export default function BankTransferSheet({
               <p className="mt-1.5 text-xs text-text-secondary">
                 Quét mã để chuyển khoản nhanh
               </p>
+              <p className="mt-1 px-2 text-center text-xs text-text-secondary">
+                Hoặc bấm <strong>Tải QR xuống</strong>, mở app ngân hàng của bạn
+                rồi chọn <strong>Quét QR</strong> / Tải ảnh từ thư viện để thanh
+                toán.
+              </p>
             </div>
 
-            {/* Nút tiện ích QR */}
-            <div className="flex gap-2 px-4 pb-3 pt-1">
+            {/* Nút tải QR */}
+            <div className="px-4 pb-3 pt-2">
               <button
                 onClick={handleSaveQR}
                 disabled={saveStatus === "saving"}
-                className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-divider01 bg-white py-2.5 text-xs font-medium text-text-primary shadow-sm active:opacity-60 disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-divider01 bg-white py-2.5 text-sm font-medium text-text-primary shadow-sm active:opacity-60 disabled:opacity-50"
               >
                 {saveStatus === "saving" ? (
                   <SpinnerIcon small />
@@ -207,14 +169,6 @@ export default function BankTransferSheet({
                   : saveStatus === "error"
                     ? "Không lưu được"
                     : "Tải QR xuống"}
-              </button>
-
-              <button
-                onClick={() => setShowBankList(true)}
-                className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-divider01 bg-white py-2.5 text-xs font-medium text-text-primary shadow-sm active:opacity-60"
-              >
-                <BankAppIcon />
-                Mở app ngân hàng
               </button>
             </div>
 
@@ -290,61 +244,6 @@ export default function BankTransferSheet({
           </div>
         </div>
       </Sheet>
-
-      {/* Bank app selection sheet */}
-      <Sheet
-        autoHeight
-        visible={showBankList}
-        onClose={() => setShowBankList(false)}
-        maskClosable
-      >
-        <div className="pb-safe">
-          <div className="flex items-center border-b border-divider01 px-4 py-3">
-            <span className="flex-1 text-center text-base font-semibold">
-              Chọn ứng dụng ngân hàng
-            </span>
-          </div>
-
-          <div className="grid grid-cols-4 gap-x-2 gap-y-4 px-4 py-4">
-            {BANK_APPS.map((bank) => (
-              <button
-                key={bank.code}
-                onClick={() => handleOpenBankApp(bank)}
-                className="flex flex-col items-center gap-1.5 active:opacity-60"
-              >
-                <div className="h-14 w-14 overflow-hidden rounded-2xl shadow-sm">
-                  <img
-                    src={`https://api.vietqr.io/img/${bank.bin}.png`}
-                    alt={bank.name}
-                    className="h-full w-full object-cover"
-                    onError={(e) => {
-                      const el = e.currentTarget;
-                      el.style.display = "none";
-                      const parent = el.parentElement!;
-                      parent.style.backgroundColor = bank.color;
-                      parent.style.display = "flex";
-                      parent.style.alignItems = "center";
-                      parent.style.justifyContent = "center";
-                      const span = document.createElement("span");
-                      span.textContent = bank.code;
-                      span.className = "text-xs font-bold text-white";
-                      parent.appendChild(span);
-                    }}
-                  />
-                </div>
-                <span className="w-full text-center text-[10px] leading-tight text-text-secondary line-clamp-2">
-                  {bank.name}
-                </span>
-              </button>
-            ))}
-          </div>
-
-          <p className="px-4 pb-5 text-center text-xs text-text-secondary">
-            Sau khi mở app, chọn <strong>Quét QR</strong> để thanh toán
-          </p>
-        </div>
-      </Sheet>
-    </>
   );
 }
 
@@ -451,14 +350,6 @@ function DownloadIcon() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-    </svg>
-  );
-}
-
-function BankAppIcon() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
     </svg>
   );
 }
