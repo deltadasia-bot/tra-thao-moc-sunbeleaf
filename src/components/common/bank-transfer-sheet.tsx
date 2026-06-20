@@ -21,27 +21,29 @@ interface BankApp {
   code: string;
   name: string;
   color: string;
-  scheme: string;
+  // openOutApp chỉ hỗ trợ https — dùng Universal Link của từng ngân hàng
+  // iOS/Android sẽ tự mở app nếu đã cài, ngược lại mở trình duyệt
+  universalLink: string;
 }
 
-// Logo lấy từ VietQR API: https://api.vietqr.io/img/{bin}.png
+// Logo lấy từ VietQR CDN: https://api.vietqr.io/img/{bin}.png
 const BANK_APPS: BankApp[] = [
-  { bin: "970436", code: "VCB",  name: "Vietcombank",  color: "#007F3D", scheme: "vcbpay://" },
-  { bin: "970407", code: "TCB",  name: "Techcombank",  color: "#D82323", scheme: "techcombank://" },
-  { bin: "970422", code: "MB",   name: "MB Bank",      color: "#003087", scheme: "mbmobile://" },
-  { bin: "970418", code: "BIDV", name: "BIDV",         color: "#1C428A", scheme: "bidv://" },
-  { bin: "970415", code: "VTB",  name: "VietinBank",   color: "#0060A8", scheme: "viettinbank://" },
-  { bin: "970416", code: "ACB",  name: "ACB",          color: "#0068B5", scheme: "acb://" },
-  { bin: "970432", code: "VPB",  name: "VPBank",       color: "#009E62", scheme: "vpb://" },
-  { bin: "970423", code: "TPB",  name: "TPBank",       color: "#5E0D97", scheme: "tpbank://" },
-  { bin: "970403", code: "STB",  name: "Sacombank",    color: "#003087", scheme: "sacombank://" },
-  { bin: "970405", code: "AGB",  name: "Agribank",     color: "#006633", scheme: "agribank://" },
-  { bin: "970443", code: "SHB",  name: "SHB",          color: "#CC0000", scheme: "shb://" },
-  { bin: "970437", code: "HDB",  name: "HDBank",       color: "#B22222", scheme: "hdbank://" },
-  { bin: "970426", code: "MSB",  name: "MSB",          color: "#0066CC", scheme: "msb://" },
-  { bin: "970448", code: "OCB",  name: "OCB",          color: "#006D3D", scheme: "ocb://" },
-  { bin: "970449", code: "LPB",  name: "LienViet+",    color: "#FF6600", scheme: "lpb://" },
-  { bin: "970428", code: "NAB",  name: "Nam A Bank",   color: "#E07B00", scheme: "namabank://" },
+  { bin: "970436", code: "VCB",  name: "Vietcombank", color: "#007F3D", universalLink: "https://vcbpay.vn" },
+  { bin: "970407", code: "TCB",  name: "Techcombank", color: "#D82323", universalLink: "https://mfast.vn/app/techcombank" },
+  { bin: "970422", code: "MB",   name: "MB Bank",     color: "#003087", universalLink: "https://app.mbbank.com.vn" },
+  { bin: "970418", code: "BIDV", name: "BIDV",        color: "#1C428A", universalLink: "https://smartbanking.bidv.com.vn" },
+  { bin: "970415", code: "VTB",  name: "VietinBank",  color: "#0060A8", universalLink: "https://ipay.vietinbank.vn" },
+  { bin: "970416", code: "ACB",  name: "ACB",         color: "#0068B5", universalLink: "https://acbmobile.acb.com.vn" },
+  { bin: "970432", code: "VPB",  name: "VPBank",      color: "#009E62", universalLink: "https://neo.vpbank.com.vn" },
+  { bin: "970423", code: "TPB",  name: "TPBank",      color: "#5E0D97", universalLink: "https://tpbankplus.vn" },
+  { bin: "970403", code: "STB",  name: "Sacombank",   color: "#003087", universalLink: "https://mbanking.sacombank.com.vn" },
+  { bin: "970405", code: "AGB",  name: "Agribank",    color: "#006633", universalLink: "https://agribank.com.vn/agribank-e-mobile-banking" },
+  { bin: "970443", code: "SHB",  name: "SHB",         color: "#CC0000", universalLink: "https://shbmobile.shb.com.vn" },
+  { bin: "970437", code: "HDB",  name: "HDBank",      color: "#B22222", universalLink: "https://hdbank.com.vn/vi/personal/digital-banking" },
+  { bin: "970426", code: "MSB",  name: "MSB",         color: "#0066CC", universalLink: "https://mobilebanking.msb.com.vn" },
+  { bin: "970448", code: "OCB",  name: "OCB",         color: "#006D3D", universalLink: "https://ocbomni.ocb.com.vn" },
+  { bin: "970449", code: "LPB",  name: "LienViet+",   color: "#FF6600", universalLink: "https://lienviettransfer.vn" },
+  { bin: "970428", code: "NAB",  name: "Nam A Bank",  color: "#E07B00", universalLink: "https://namabank.com.vn/internet-banking" },
 ];
 
 interface BankTransferSheetProps {
@@ -116,23 +118,46 @@ export default function BankTransferSheet({
   const handleSaveQR = async () => {
     setSaveStatus("saving");
     try {
-      await saveImageToGallery({ imageUrl: qrUrl });
+      // Dùng canvas để chuyển QR thành base64 rồi lưu gallery
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = () => reject(new Error("load"));
+        img.src = qrUrl;
+      });
+      const canvas = document.createElement("canvas");
+      canvas.width  = img.naturalWidth  || 300;
+      canvas.height = img.naturalHeight || 300;
+      canvas.getContext("2d")!.drawImage(img, 0, 0);
+      const base64 = canvas.toDataURL("image/png").split(",")[1];
+      await saveImageToGallery({ imageBase64Data: base64 });
       setSaveStatus("saved");
       showToast({ message: "Đã lưu QR vào thư viện ảnh", type: "success", duration: 2000 });
       setTimeout(() => setSaveStatus("idle"), 2500);
     } catch {
-      setSaveStatus("error");
-      showToast({ message: "Không lưu được ảnh, hãy thử lại", type: "error", duration: 2000 });
-      setTimeout(() => setSaveStatus("idle"), 2000);
+      // Fallback: truyền URL trực tiếp
+      try {
+        await saveImageToGallery({ imageUrl: qrUrl });
+        setSaveStatus("saved");
+        showToast({ message: "Đã lưu QR vào thư viện ảnh", type: "success", duration: 2000 });
+        setTimeout(() => setSaveStatus("idle"), 2500);
+      } catch {
+        setSaveStatus("error");
+        showToast({ message: "Không lưu được, hãy chụp màn hình để lưu QR", type: "error", duration: 3000 });
+        setTimeout(() => setSaveStatus("idle"), 2500);
+      }
     }
   };
 
   const handleOpenBankApp = async (bank: BankApp) => {
     setShowBankList(false);
+    // openOutApp chỉ hỗ trợ https — dùng Universal Link
+    // iOS/Android tự mở app nếu đã cài, nếu không mở trình duyệt
     try {
-      await openOutApp({ url: bank.scheme });
+      await openOutApp({ url: bank.universalLink });
     } catch {
-      showToast({ message: `Không tìm thấy app ${bank.name} trên thiết bị`, type: "error", duration: 2500 });
+      showToast({ message: "Không mở được, hãy tự mở app ngân hàng và quét QR", type: "error", duration: 3000 });
     }
   };
 
