@@ -22,8 +22,8 @@ const EXPECTED_BANK_ACCOUNT = process.env.BANK_ACCOUNT_NUMBER || "34931868";
  *   "gateway": "ACB",
  *   "transactionDate": "2024-06-18 10:30:00",
  *   "accountNumber": "34931868",
- *   "code": "ORD-20240618-042",        ← nội dung chuyển khoản
- *   "content": "ORD-20240618-042 tra tien",
+ *   "code": "DH-20240618-042",        ← nội dung chuyển khoản
+ *   "content": "DH-20240618-042 tra tien",
  *   "transferType": "in",              ← "in" = nhận tiền
  *   "transferAmount": 94250,
  *   "referenceCode": "FT24169XXXXX",
@@ -53,7 +53,7 @@ router.post("/sepay-webhook", (req, res) => {
   }
 
   // 3. Trích xuất orderCode từ nội dung chuyển khoản
-  //    Định dạng orderCode: ORD-YYYYMMDD-NNN
+  //    Định dạng orderCode: DH-YYYYMMDD-NNN
   if (
     accountNumber &&
     String(accountNumber).replace(/\s/g, "") !== EXPECTED_BANK_ACCOUNT
@@ -62,7 +62,7 @@ router.post("/sepay-webhook", (req, res) => {
     return res.json({ success: true, message: "Khong dung tai khoan ACB" });
   }
 
-  const orderCodeMatch = (code || content || "").match(/ORD-\d{8}-\d+/i);
+  const orderCodeMatch = (code || content || "").match(/DH-\d{8}-\d+/i);
   if (!orderCodeMatch) {
     console.log("[Sepay] Không tìm thấy orderCode trong:", code || content);
     // Vẫn trả 200 để Sepay không retry liên tục

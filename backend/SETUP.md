@@ -181,7 +181,7 @@ curl -X POST http://localhost:3000/api/payment/sepay-webhook \
     "apiKey": "your_sepay_api_key",
     "transferType": "in",
     "transferAmount": 98950,
-    "code": "ORD-20260618-275",
+    "code": "DH-20260618-275",
     "id": "test-001",
     "gateway": "ACB",
     "accountNumber": "34931868"
@@ -194,7 +194,7 @@ curl -X POST http://localhost:3000/api/orders \
   -H "Content-Type: application/json" \
   -d '{
     "id": "test-order-001",
-    "orderCode": "ORD-20260618-TEST",
+    "orderCode": "DH-20260618-TEST",
     "amount": 98950,
     "paymentMethod": "bank_transfer",
     "deliveryType": "delivery",

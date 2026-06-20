@@ -4,7 +4,7 @@ import { getShippingFee } from "../../utils/shipping";
 export const mockOrders: Order[] = [
   {
     id: "order-sunbeleaf-completed",
-    orderCode: "ORD-20260610-108",
+    orderCode: "DH-20260610-108",
     deliveryType: "delivery",
     deliveryTypeLabel: "Giao hàng",
     state: "completed",
@@ -44,7 +44,7 @@ export const mockOrders: Order[] = [
   },
   {
     id: "order-001",
-    orderCode: "ORD-20260106-001",
+    orderCode: "DH-20260106-001",
     deliveryType: "delivery",
     deliveryTypeLabel: "Giao hàng",
     state: "delivering",
@@ -103,7 +103,7 @@ export const mockOrders: Order[] = [
   },
   {
     id: "order-002",
-    orderCode: "ORD-20260105-042",
+    orderCode: "DH-20260105-042",
     deliveryType: "pickup",
     deliveryTypeLabel: "Tự đến lấy",
     state: "ready",
@@ -173,7 +173,7 @@ export function createMockOrder(
   const total = subtotal + shippingFee;
 
   const orderId = `order-${Date.now()}`;
-  const orderCode = `ORD-${new Date().toISOString().split("T")[0].replace(/-/g, "")}-${Math.floor(Math.random() * 900) + 100}`;
+  const orderCode = `DH-${new Date().toISOString().split("T")[0].replace(/-/g, "")}-${Math.floor(Math.random() * 900) + 100}`;
 
   return {
     id: orderId,
