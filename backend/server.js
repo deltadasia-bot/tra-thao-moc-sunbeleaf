@@ -10,7 +10,10 @@ const adminRouter   = require("./routes/admin");
 const app  = express();
 const PORT = process.env.PORT || 3000;
 
-// ── CORS: chỉ cho phép domain Mini App và localhost dev ──
+// ── CORS ──
+// Nếu ALLOWED_ORIGINS được set → chỉ cho phép những domain đó.
+// Nếu không set (mặc định) → cho phép tất cả origins (Mini App WebView,
+// Zalo Studio simulator, Postman, curl …)
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || "")
   .split(",")
   .map((s) => s.trim())
@@ -19,8 +22,11 @@ const allowedOrigins = (process.env.ALLOWED_ORIGINS || "")
 app.use(
   cors({
     origin(origin, cb) {
-      // Cho phép request không có origin (Postman, curl, server-to-server)
-      if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+      // Không có origin header (WebView, Postman, curl, server-to-server)
+      if (!origin) return cb(null, true);
+      // Nếu chưa cấu hình allowlist → cho phép tất cả
+      if (allowedOrigins.length === 0) return cb(null, true);
+      if (allowedOrigins.includes(origin)) return cb(null, true);
       cb(new Error(`Origin không được phép: ${origin}`));
     },
   }),
