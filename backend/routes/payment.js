@@ -69,10 +69,11 @@ router.post("/sepay-webhook", (req, res) => {
   // 4. Tìm đơn hàng – ưu tiên theo mã DH-, fallback theo số tiền + thời gian
   let order = null;
 
-  const orderCodeMatch = (code || content || "").match(/DH-\d{8}-\d+/i);
+  // Dấu gạch tùy chọn: khớp cả "DH-20260620-562" lẫn "DH20260620562" (MoMo strip dashes)
+  const orderCodeMatch = (code || content || "").match(/DH-?(\d{8})-?(\d+)/i);
   if (orderCodeMatch) {
     // Ưu tiên 1: khớp chính xác theo mã đơn hàng
-    const orderCode = orderCodeMatch[0].toUpperCase();
+    const orderCode = `DH-${orderCodeMatch[1]}-${orderCodeMatch[2]}`.toUpperCase();
     const byCode = db.findOrderByCode(orderCode);
     if (byCode) {
       if (Math.abs(transferAmount - byCode.amount) > 1000) {
