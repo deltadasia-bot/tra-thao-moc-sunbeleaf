@@ -34,9 +34,10 @@ router.get("/oauth/start", (req, res) => {
     );
   }
 
+  const domain = store.includes(".") ? store : `${store}.mysapo.net`;
   const scopes = "read_orders,write_orders,read_products";
   const authUrl =
-    `https://${store}.mysapo.net/admin/oauth/authorize` +
+    `https://${domain}/admin/oauth/authorize` +
     `?client_id=${apiKey}` +
     `&scope=${scopes}` +
     `&redirect_uri=${encodeURIComponent(redirectUri)}`;
@@ -230,12 +231,13 @@ router.get("/oauth/callback", async (req, res) => {
     `);
   }
 
-  // Làm sạch store name nhận từ query (ví dụ: "deltadasia.mysapo.net" -> "deltadasia")
-  const cleanStoreName = (store || process.env.SAPO_STORE || "").replace(/\.mysapo\.net$/i, "");
+  // Lấy domain từ query hoặc env
+  const rawStore = store || process.env.SAPO_STORE || "";
+  const domain = rawStore.includes(".") ? rawStore : `${rawStore}.mysapo.net`;
 
   try {
     const tokenRes = await fetch(
-      `https://${cleanStoreName}.mysapo.net/admin/oauth/access_token`,
+      `https://${domain}/admin/oauth/access_token`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -262,7 +264,7 @@ router.get("/oauth/callback", async (req, res) => {
     const token = data.access_token;
     
     // Tự động ghi đè token và store name vào file .env để người dùng không cần làm tay
-    const isSaved = updateEnvFile(token, cleanStoreName);
+    const isSaved = updateEnvFile(token, domain);
 
     return res.send(`
       <!DOCTYPE html>

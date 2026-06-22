@@ -31,9 +31,25 @@ import {
 } from "@/utils/promotion";
 import { formatCurrency } from "@/utils/format";
 import { useCartStore } from "@/stores/cart.store";
+import {
+  getTrendingKeywords,
+  recordProductInterest,
+  recordSearchQuery,
+} from "@/services/search/search-insights.storage";
 import { useSnackbar } from "zmp-ui";
 
 type ShopTab = "shop" | "products" | "categories" | "customers";
+
+function formatSearchSuggestionLabel(keyword: string) {
+  const compact = keyword
+    .replace(/\s+-\s+.*/g, "")
+    .replace(/\bSunbeleaf\b/gi, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+
+  if (compact.length <= 18) return compact;
+  return `${compact.slice(0, 18).trim()}...`;
+}
 
 const TIKTOK_CHANNEL_URL = "https://www.tiktok.com/@thaomocsunbeleaf";
 const TIKTOK_STATS_ENDPOINT =
@@ -196,6 +212,7 @@ export default function HomePage() {
   const [activeBanner, setActiveBanner] = useState(0);
   const [activeDiscoveryBanner, setActiveDiscoveryBanner] = useState(0);
   const [shopSearchQuery, setShopSearchQuery] = useState("");
+  const [isShopSearchFocused, setIsShopSearchFocused] = useState(false);
   const [termsVisible, setTermsVisible] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const promoPopupVisible = useCartStore((state) => state.promoPopupVisible);
@@ -375,6 +392,11 @@ export default function HomePage() {
       })
       .slice(0, 5);
   }, [searchableProducts, shopSearchQuery]);
+
+  const suggestedKeywords = useMemo(
+    () => getTrendingKeywords(searchableProducts || [], 8),
+    [searchableProducts],
+  );
 
   const bestSellingProducts = useMemo(
     () =>
@@ -881,6 +903,10 @@ export default function HomePage() {
             <SearchBar
               value={shopSearchQuery}
               onChange={(event) => setShopSearchQuery(event.target.value)}
+              onFocus={() => setIsShopSearchFocused(true)}
+              onBlur={() =>
+                window.setTimeout(() => setIsShopSearchFocused(false), 120)
+              }
               onKeyDown={(event) => {
                 if (event.key === "Enter") submitSearch();
               }}
@@ -888,6 +914,40 @@ export default function HomePage() {
               enterKeyHint="search"
               className="liquid-glass-input text-gray-900 caret-gray-900 placeholder:text-gray-400"
             />
+            {isShopSearchFocused && !shopSearchQuery.trim() && (
+              <div className="liquid-glass-strong absolute left-0 right-0 top-12 z-[110] rounded-2xl px-4 py-3 text-gray-900">
+                <div className="mb-2 text-base font-semibold leading-6 text-gray-900">
+                  Có thể bạn cần tìm
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {suggestedKeywords.map((keyword) => (
+                    <button
+                      key={keyword}
+                      type="button"
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={() => {
+                        setShopSearchQuery(keyword);
+                        const matchedProducts = (searchableProducts || []).filter(
+                          (product) =>
+                            product.name
+                              .toLowerCase()
+                              .includes(keyword.toLowerCase()) ||
+                            product.description
+                              .toLowerCase()
+                              .includes(keyword.toLowerCase()),
+                        );
+                        if (matchedProducts.length > 0) {
+                          recordSearchQuery(keyword, matchedProducts);
+                        }
+                      }}
+                      className="rounded-md bg-[#eef5ff] px-3 py-1.5 text-xs font-medium leading-5 text-[#2f6fed] active:scale-[0.98]"
+                    >
+                      {formatSearchSuggestionLabel(keyword)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             {shopSearchQuery.trim() && (
               <div className="liquid-glass-strong absolute left-0 right-0 top-12 z-[110] max-h-72 overflow-y-auto rounded-2xl text-gray-900">
                 {suggestedProducts.length > 0 ? (
@@ -895,7 +955,11 @@ export default function HomePage() {
                     <button
                       type="button"
                       key={product.id}
-                      onClick={() => navigate(`/product/${product.id}`)}
+                      onClick={() => {
+                        recordProductInterest(product.id, "click");
+                        recordSearchQuery(shopSearchQuery, [product]);
+                        navigate(`/product/${product.id}`);
+                      }}
                       className="flex w-full items-center gap-3 border-b border-gray-100 px-3 py-2.5 text-left last:border-b-0 active:bg-gray-50"
                     >
                       <img

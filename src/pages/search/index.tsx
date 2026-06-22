@@ -9,6 +9,17 @@ import {
   recordSearchQuery,
 } from "@/services/search/search-insights.storage";
 
+function formatSuggestionLabel(keyword: string) {
+  const compact = keyword
+    .replace(/\s+-\s+.*/g, "")
+    .replace(/\bSunbeleaf\b/gi, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+
+  if (compact.length <= 18) return compact;
+  return `${compact.slice(0, 18).trim()}...`;
+}
+
 export default function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
@@ -62,22 +73,28 @@ export default function SearchPage() {
   }, [filteredProducts, searchQuery]);
 
   const showSuggestions = isFocused && !searchQuery.trim();
+  const showResults = searchQuery.trim().length > 0;
 
   return (
-    <div className="relative mx-3.5 mb-6 flex h-full flex-col">
-      <div className="mb-2">
+    <div className="relative mx-3.5 mb-6 flex h-full flex-col bg-white pt-2">
+      <div className="mb-3">
         <SearchBar
           clearable
           autoFocus
           value={searchQuery}
-          onChange={(e) => setSearchQuery((e.target as HTMLInputElement).value)}
+          onChange={(e) =>
+            setSearchQuery((e.target as HTMLInputElement).value)
+          }
           onFocus={() => setIsFocused(true)}
           onBlur={() => window.setTimeout(() => setIsFocused(false), 120)}
+          placeholder="Tìm kiếm sản phẩm..."
+          className="border border-[#e5e7eb] bg-white text-gray-900 placeholder:text-gray-400"
         />
       </div>
+
       {showSuggestions && (
-        <div className="mb-3 rounded-2xl bg-white px-3 py-3 shadow-sm">
-          <div className="mb-2 text-sm font-semibold text-gray-900">
+        <div className="mb-3">
+          <div className="mb-2 text-base font-semibold leading-6 text-gray-900">
             Có thể bạn cần tìm
           </div>
           <div className="flex flex-wrap gap-2">
@@ -88,30 +105,40 @@ export default function SearchPage() {
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => {
                   setSearchQuery(keyword);
-                  const matchedProducts = mockListOfProduct.filter((product) =>
-                    product.name.toLowerCase().includes(keyword.toLowerCase()) ||
-                    product.description
-                      .toLowerCase()
-                      .includes(keyword.toLowerCase()),
+                  const matchedProducts = mockListOfProduct.filter(
+                    (product) =>
+                      product.name
+                        .toLowerCase()
+                        .includes(keyword.toLowerCase()) ||
+                      product.description
+                        .toLowerCase()
+                        .includes(keyword.toLowerCase()),
                   );
                   if (matchedProducts.length > 0) {
                     recordSearchQuery(keyword, matchedProducts);
                   }
                 }}
-                className="rounded-full bg-[#eef5ff] px-3 py-1.5 text-xs font-medium text-[#2f6fed]"
+                className="rounded-md bg-[#eef5ff] px-3 py-1.5 text-xs font-medium leading-5 text-[#2f6fed] active:scale-[0.98]"
               >
-                {keyword}
+                {formatSuggestionLabel(keyword)}
               </button>
             ))}
           </div>
         </div>
       )}
-      <div className="no-scrollbar flex flex-1 flex-col gap-2 overflow-y-scroll">
-        <ProductGrid
-          products={filteredProducts}
-          onProductClick={(product) => recordProductInterest(product.id, "click")}
-        />
-      </div>
+
+      {showResults ? (
+        <div className="no-scrollbar flex flex-1 flex-col gap-2 overflow-y-scroll">
+          <ProductGrid
+            products={filteredProducts}
+            onProductClick={(product) =>
+              recordProductInterest(product.id, "click")
+            }
+          />
+        </div>
+      ) : (
+        <div className="flex-1 bg-white" />
+      )}
     </div>
   );
 }

@@ -28,7 +28,8 @@ function authHeaders() {
 }
 
 function sapoUrl(path) {
-  return `https://${SAPO_STORE}.mysapo.net/admin${path}`;
+  const domain = SAPO_STORE.includes(".") ? SAPO_STORE : `${SAPO_STORE}.mysapo.net`;
+  return `https://${domain}/admin${path}`;
 }
 
 async function parseJsonSafe(res) {
