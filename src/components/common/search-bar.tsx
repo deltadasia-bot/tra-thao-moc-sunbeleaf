@@ -44,9 +44,12 @@ const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>(
           <button
             type="button"
             onClick={handleClear}
-            className="absolute right-1 top-1/2 flex h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-primary text-white shadow-sm transition hover:bg-primary/80 active:scale-95"
+            aria-label="Xóa nội dung tìm kiếm"
+            className="absolute right-0 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-white transition active:scale-95"
           >
-            <CloseIcon color="white" size={10} strokeWidth={3} />
+            <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-primary shadow-sm">
+              <CloseIcon color="white" size={10} strokeWidth={3} />
+            </span>
           </button>
         )}
       </div>

@@ -516,5 +516,38 @@ router.get("/oauth/callback", async (req, res) => {
     return res.status(500).send(`Lỗi hệ thống trong quá trình đổi token: ${err.message}`);
   }
 });
+// ── API dành cho Chrome Extension (Đồng bộ không cần API Key/OAuth) ──
+
+// Lấy danh sách đơn hàng chưa đồng bộ sang Sapo
+router.get("/extension/pending", (req, res) => {
+  try {
+    const allOrders = require("../db").getAllOrders();
+    // Lọc các đơn chưa có sapoOrderId và không bị hủy
+    const pending = allOrders.filter(
+      (order) => !order.sapoOrderId && order.state !== "cancelled"
+    );
+    return res.json({ orders: pending });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+// Ghi nhận đồng bộ đơn hàng thành công từ Extension
+router.post("/extension/success", (req, res) => {
+  const { id, sapoOrderId } = req.body;
+  if (!id || !sapoOrderId) {
+    return res.status(400).json({ error: "Thiếu id đơn hàng hoặc sapoOrderId" });
+  }
+  try {
+    const updated = require("../db").setSapoOrderId(id, sapoOrderId);
+    if (!updated) {
+      return res.status(404).json({ error: "Không tìm thấy đơn hàng trên Zalo" });
+    }
+    console.log(`[Sapo Extension] Đồng bộ thành công: Zalo ID ${id} -> Sapo ID #${sapoOrderId}`);
+    return res.json({ success: true, order: updated });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+});
 
 module.exports = router;

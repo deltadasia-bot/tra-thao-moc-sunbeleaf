@@ -3,6 +3,7 @@ import { createBrowserRouter, Navigate } from "react-router-dom";
 import Layout from "./components/layout";
 import { getBasePath } from "./utils/zma";
 import HomePage from "./pages/home";
+import AppErrorState from "./components/common/app-error-state";
 
 const MenuPage = lazy(() => import("./pages/menu"));
 const OrderPage = lazy(() => import("./pages/order"));
@@ -22,6 +23,7 @@ const router = createBrowserRouter(
     {
       path: "/",
       element: <Layout />,
+      errorElement: <AppErrorState />,
       children: [
         { path: "/", element: <HomePage />, handle: { hideHeader: true } },
         { path: "/menu", element: <MenuPage /> },
