@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "Sunbeleaf Sapo Assistant",
+  "version": "1.0",
+  "description": "Tự động đồng bộ đơn hàng từ Zalo Mini App sang Sapo Go",
+  "permissions": [
+    "storage",
+    "alarms"
+  ],
+  "host_permissions": [
+    "https://*.mysapogo.com/*",
+    "https://tra-thao-moc-sunbeleaf-production.up.railway.app/*",
+    "http://localhost:3000/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*.mysapogo.com/admin*"],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  }
+}

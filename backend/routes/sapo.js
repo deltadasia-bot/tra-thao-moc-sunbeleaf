@@ -550,4 +550,63 @@ router.post("/extension/success", (req, res) => {
   }
 });
 
+// Lấy danh sách đơn cần cập nhật mã vận đơn thực tế từ Sapo
+router.get("/extension/pending-tracking", (req, res) => {
+  try {
+    const allOrders = require("../db").getAllOrders();
+    // Lọc các đơn đã có sapoOrderId nhưng chưa có mã vận đơn thực tế của Sapo (mã trống hoặc mã giả lập sandbox)
+    const pendingTracking = allOrders.filter((order) => {
+      if (!order.sapoOrderId) return false;
+      if (order.state === "cancelled" || order.state === "completed") return false;
+      
+      // Nếu mã vận đơn trống hoặc là mã giả lập sandbox (bắt đầu bằng SPXVN0...) thì cần cập nhật
+      const hasMockOrEmpty = !order.trackingNumber || order.trackingNumber.startsWith("SPXVN0");
+      return hasMockOrEmpty;
+    });
+    return res.json({ orders: pendingTracking });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+// Cập nhật mã vận đơn thực tế từ Sapo
+router.post("/extension/update-tracking", (req, res) => {
+  const { id, trackingNumber, shippingCarrier, trackingUrl } = req.body;
+  if (!id || !trackingNumber) {
+    return res.status(400).json({ error: "Thiếu id đơn hàng hoặc trackingNumber" });
+  }
+  try {
+    const dbHelper = require("../db");
+    const order = dbHelper.getOrder(id);
+    if (!order) {
+      return res.status(404).json({ error: "Không tìm thấy đơn hàng trên Zalo" });
+    }
+
+    const patch = {
+      trackingNumber,
+      shippingCarrier: shippingCarrier || "SPX Express",
+      trackingUrl: trackingUrl || `https://spx.vn/#/detail/${trackingNumber}`
+    };
+
+    // Nếu mã vận đơn mới thực sự khác mã cũ thì ghi nhận hành trình
+    if (order.trackingNumber !== trackingNumber) {
+      const trackingHistory = [...(order.trackingHistory || [])];
+      trackingHistory.push({
+        status: "confirmed",
+        statusLabel: "Đã bàn giao vận chuyển",
+        location: "Hãng vận chuyển SPX Express",
+        description: `Đơn hàng đã được Sapo chuyển sang SPX Express. Mã vận đơn thực tế: ${trackingNumber}`,
+        time: new Date().toISOString()
+      });
+      patch.trackingHistory = trackingHistory;
+    }
+
+    const updated = dbHelper.updateOrder(id, patch);
+    console.log(`[Sapo Extension] Đã cập nhật vận đơn cho đơn Zalo ${id} -> Mã SPX: ${trackingNumber}`);
+    return res.json({ success: true, order: updated });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;
