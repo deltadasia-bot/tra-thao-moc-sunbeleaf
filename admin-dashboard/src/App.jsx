@@ -390,27 +390,47 @@ export default function App() {
                       <p>Trạng thái: {selectedOrder.paymentStatus}</p>
                       <p>Tổng tiền: {formatCurrency(selectedOrder.totalAmount)}đ</p>
                     </div>
-                  </div>
-
-                  <div className="detail-card">
-                    <h3>Sản phẩm</h3>
-                    <div className="line-items">
-                      {selectedOrder.items.map((item) => (
-                        <div key={item.id} className="line-item">
-                          <div>
-                            <strong>{item.name}</strong>
-                            <div className="subtle">
-                              {item.quantity} x {formatCurrency(item.price)}đ
-                            </div>
+                    {selectedOrder.deliveryType === "delivery" && (
+                      <div className="detail-card" style={{ gridColumn: "span 2" }}>
+                        <h3>Vận chuyển (SPX Express)</h3>
+                        <p>Nhà vận chuyển: {selectedOrder.shippingCarrier || "SPX Express"}</p>
+                        <p>
+                          Mã vận đơn:{" "}
+                          <strong>{selectedOrder.trackingNumber || "Chưa tạo"}</strong>
+                          {selectedOrder.trackingUrl && (
+                            <a
+                              href={selectedOrder.trackingUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{ marginLeft: "10px", color: "#0084FF", textDecoration: "underline" }}
+                            >
+                              Tra cứu vận đơn →
+                            </a>
+                          )}
+                        </p>
+                        {selectedOrder.trackingHistory && selectedOrder.trackingHistory.length > 0 && (
+                          <div style={{ marginTop: "10px", maxHeight: "150px", overflowY: "auto", fontSize: "12px", border: "1px solid #eee", padding: "8px", borderRadius: "4px" }}>
+                            <strong>Hành trình giao hàng SPX:</strong>
+                            <ul style={{ margin: "5px 0 0 0", paddingLeft: "15px" }}>
+                              {[...selectedOrder.trackingHistory].reverse().map((milestone, idx) => (
+                                <li key={idx} style={{ marginBottom: "6px" }}>
+                                  <span style={{ color: idx === 0 ? "#EE4D2D" : "#888", fontWeight: idx === 0 ? "bold" : "normal" }}>
+                                    {milestone.statusLabel}
+                                  </span>{" "}
+                                  - {milestone.location || "Hệ thống SPX"} (
+                                  {new Date(milestone.time).toLocaleTimeString("vi-VN")} {new Date(milestone.time).toLocaleDateString("vi-VN")}
+                                  )
+                                </li>
+                              ))}
+                            </ul>
                           </div>
-                          <div>{formatCurrency(item.quantity * item.price)}đ</div>
-                        </div>
-                      ))}
-                    </div>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   <div className="detail-card">
-                    <h3>Cập nhật trạng thái</h3>
+                    <h3>Cập nhật trạng thái & Vận đơn</h3>
                     <div className="inline-controls">
                       <select
                         value={selectedOrder.state}
@@ -445,8 +465,63 @@ export default function App() {
                       </select>
                     </div>
 
+                    {selectedOrder.deliveryType === "delivery" && (
+                      <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                        <div style={{ display: "flex", gap: "10px" }}>
+                          <label style={{ flex: 1, fontSize: "12px", fontWeight: "bold", color: "#555" }}>
+                            Mã vận đơn SPX
+                            <input
+                              type="text"
+                              value={selectedOrder.trackingNumber || ""}
+                              onChange={(event) =>
+                                setSelectedOrder((current) => ({
+                                  ...current,
+                                  trackingNumber: event.target.value,
+                                  trackingUrl: event.target.value 
+                                    ? `https://spx.vn/detail?t=${event.target.value}`
+                                    : "",
+                                }))
+                              }
+                              placeholder="SPXVN..."
+                              style={{ width: "100%", padding: "6px", marginTop: "4px", boxSizing: "border-box", border: "1px solid #ccc", borderRadius: "4px" }}
+                            />
+                          </label>
+                          <label style={{ flex: 1, fontSize: "12px", fontWeight: "bold", color: "#555" }}>
+                            Đơn vị vận chuyển
+                            <input
+                              type="text"
+                              value={selectedOrder.shippingCarrier || ""}
+                              onChange={(event) =>
+                                setSelectedOrder((current) => ({
+                                  ...current,
+                                  shippingCarrier: event.target.value,
+                                }))
+                              }
+                              placeholder="SPX Express"
+                              style={{ width: "100%", padding: "6px", marginTop: "4px", boxSizing: "border-box", border: "1px solid #ccc", borderRadius: "4px" }}
+                            />
+                          </label>
+                        </div>
+                        <label style={{ fontSize: "12px", fontWeight: "bold", color: "#555" }}>
+                          Đường dẫn tra cứu
+                          <input
+                            type="text"
+                            value={selectedOrder.trackingUrl || ""}
+                            onChange={(event) =>
+                              setSelectedOrder((current) => ({
+                                ...current,
+                                trackingUrl: event.target.value,
+                              }))
+                            }
+                            placeholder="https://spx.vn/..."
+                            style={{ width: "100%", padding: "6px", marginTop: "4px", boxSizing: "border-box", border: "1px solid #ccc", borderRadius: "4px" }}
+                          />
+                        </label>
+                      </div>
+                    )}
+
                     <textarea
-                      rows="4"
+                      rows="3"
                       value={selectedOrder.adminNote || ""}
                       onChange={(event) =>
                         setSelectedOrder((current) => ({
@@ -455,6 +530,7 @@ export default function App() {
                         }))
                       }
                       placeholder="Ghi chú nội bộ cho đơn hàng"
+                      style={{ marginTop: "10px" }}
                     />
 
                     <button
@@ -463,6 +539,9 @@ export default function App() {
                           state: selectedOrder.state,
                           paymentStatus: selectedOrder.paymentStatus,
                           adminNote: selectedOrder.adminNote || "",
+                          trackingNumber: selectedOrder.trackingNumber || "",
+                          shippingCarrier: selectedOrder.shippingCarrier || "",
+                          trackingUrl: selectedOrder.trackingUrl || "",
                         })
                       }
                       disabled={savingOrder}

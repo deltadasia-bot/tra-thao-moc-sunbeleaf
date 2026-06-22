@@ -1337,6 +1337,23 @@ const rawMockListOfProduct: Product[] = [
     variantGroups: [],
     features: ["vegetarian", "hot"],
   },
+  {
+    // TEMP TEST PRODUCT: remove after checkout verification is finished.
+    id: 999001,
+    categoryId: "vietnamese",
+    subCategoryId: "vietnamese-food",
+    image: "/temp/test-product.svg",
+    images: ["/temp/test-product.svg"],
+    description:
+      "San pham test tam thoi de kiem tra quy trinh dat hang va thanh toan. Khi mua san pham nay he thong se mien phi van chuyen.",
+    name: "test",
+    price: 2000,
+    variantGroups: [],
+    features: ["bestseller"],
+    sales: {
+      freeShipping: true,
+    },
+  },
 ];
 
 const categoryBySubCategory: Record<string, string> = {

@@ -52,6 +52,17 @@ function writeOrders(orders) {
   fs.writeFileSync(ORDERS_FILE, JSON.stringify(orders, null, 2), "utf8");
 }
 
+const STATE_MILESTONE_LABELS = {
+  pending: "Đơn hàng đang chờ cửa hàng xác nhận từ hệ thống",
+  confirmed: "Đơn hàng đã được cửa hàng xác nhận thành công",
+  preparing: "Người bán đang chuẩn bị đóng gói hàng hóa",
+  ready: "Hàng đã chuẩn bị xong, chờ bàn giao cho đơn vị vận chuyển",
+  delivering: "Shipper của SPX Express đã lấy hàng và đang trên đường giao đến bạn",
+  delivered: "Giao hàng thành công. Người nhận đã ký xác nhận",
+  completed: "Đơn hàng đã hoàn thành. Cảm ơn bạn đã mua sắm tại Sunbeleaf",
+  cancelled: "Đơn hàng đã bị hủy bởi người dùng hoặc hệ thống",
+};
+
 function normalizeOrder(order) {
   const subtotal =
     order.payment?.subtotal ??
@@ -75,6 +86,7 @@ function normalizeOrder(order) {
   const paymentStatus = order.paymentStatus || order.payment?.status || "pending";
   const state = order.state || "pending";
   const deliveryType = order.deliveryType || "delivery";
+  const customerPhone = order.customerPhone || order.deliveryAddress?.phoneNumber || "";
 
   return {
     ...order,
@@ -98,6 +110,11 @@ function normalizeOrder(order) {
       total: Number(total),
       status: paymentStatus,
     },
+    customerPhone: String(customerPhone).trim(),
+    trackingNumber: order.trackingNumber || "",
+    shippingCarrier: order.shippingCarrier || "",
+    trackingUrl: order.trackingUrl || "",
+    trackingHistory: Array.isArray(order.trackingHistory) ? order.trackingHistory : [],
     adminNote: order.adminNote || "",
     items: Array.isArray(order.items) ? order.items : [],
   };
@@ -128,6 +145,11 @@ module.exports = {
       sapoOrderId: existing?.sapoOrderId ?? null,
       state: existing?.state ?? "pending",
       stateLabel: existing?.stateLabel ?? STATE_LABELS.pending,
+      customerPhone: order.customerPhone || existing?.customerPhone || "",
+      trackingNumber: order.trackingNumber || existing?.trackingNumber || "",
+      shippingCarrier: order.shippingCarrier || existing?.shippingCarrier || "",
+      trackingUrl: order.trackingUrl || existing?.trackingUrl || "",
+      trackingHistory: order.trackingHistory || existing?.trackingHistory || [],
       adminNote: existing?.adminNote ?? "",
       createdAt: existing?.createdAt ?? new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -178,6 +200,23 @@ module.exports = {
 
     const nextState = patch.state || order.state;
     const nextPaymentStatus = patch.paymentStatus || order.paymentStatus;
+    const trackingHistory = [...(order.trackingHistory || [])];
+
+    // Nếu thay đổi trạng thái đơn hàng, tự động thêm mốc hành trình vận chuyển
+    if (patch.state && patch.state !== order.state) {
+      const isSPX = order.trackingNumber || patch.trackingNumber;
+      const location = ["delivering", "delivered"].includes(patch.state)
+        ? (isSPX ? "Bưu cục SPX Express" : "Đơn vị vận chuyển")
+        : "Cửa hàng Sunbeleaf";
+
+      trackingHistory.push({
+        status: patch.state,
+        statusLabel: STATE_LABELS[patch.state] || patch.state,
+        location: location,
+        description: STATE_MILESTONE_LABELS[patch.state] || STATE_LABELS[patch.state],
+        time: new Date().toISOString(),
+      });
+    }
 
     return upsertOrder({
       ...order,
@@ -185,6 +224,7 @@ module.exports = {
       state: nextState,
       stateLabel: STATE_LABELS[nextState] || order.stateLabel,
       paymentStatus: nextPaymentStatus,
+      trackingHistory,
       paidAt:
         nextPaymentStatus === "paid"
           ? patch.paidAt || order.paidAt || new Date().toISOString()

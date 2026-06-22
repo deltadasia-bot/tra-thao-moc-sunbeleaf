@@ -83,7 +83,11 @@ export default function CheckoutPage() {
 
   const totalItems = calculateCartTotal(cartItems);
   const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-  const shippingFee = getShippingFee(totalQuantity);
+  const shippingFee = getShippingFee(
+    totalQuantity,
+    "inner_city",
+    cartItems.map((item) => item.productId),
+  );
   const totalWithDelivery = totalItems + shippingFee;
   const totalWithoutDelivery = totalItems;
   const finalTotal =

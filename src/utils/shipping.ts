@@ -34,6 +34,18 @@ export function estimateWeightGrams(totalQuantity: number): number {
 
 export type ShippingZone = "inner_city" | "inter_province";
 
+// TEMP TEST PRODUCT: remove this ID and related logic after test cleanup.
+export const FREE_SHIPPING_PRODUCT_IDS = new Set<number>([999001]);
+
+export function hasFreeShippingProduct(
+  productIds: Array<number | undefined>,
+): boolean {
+  return productIds.some(
+    (productId) =>
+      typeof productId === "number" && FREE_SHIPPING_PRODUCT_IDS.has(productId),
+  );
+}
+
 /**
  * Tính phí SPX Express.
  * @param weightGrams  Trọng lượng ước tính (g)
@@ -55,7 +67,12 @@ export function calculateSpxFee(
 export function getShippingFee(
   totalQuantity: number,
   zone: ShippingZone = "inner_city",
+  productIds: Array<number | undefined> = [],
 ): number {
+  if (hasFreeShippingProduct(productIds)) {
+    return 0;
+  }
+
   const weight = estimateWeightGrams(totalQuantity);
   return calculateSpxFee(weight, zone);
 }

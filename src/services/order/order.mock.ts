@@ -168,7 +168,14 @@ export function createMockOrder(
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
-  const shippingFee = deliveryType === "delivery" ? getShippingFee(totalQuantity) : 0;
+  const shippingFee =
+    deliveryType === "delivery"
+      ? getShippingFee(
+          totalQuantity,
+          "inner_city",
+          items.map((item) => item.productId),
+        )
+      : 0;
   const discount = 0;
   const total = subtotal + shippingFee;
 

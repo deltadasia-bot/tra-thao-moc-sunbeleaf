@@ -152,6 +152,18 @@ router.patch("/orders/:id", (req, res) => {
     patch.adminNote = req.body.adminNote.trim();
   }
 
+  if (typeof req.body.trackingNumber === "string") {
+    patch.trackingNumber = req.body.trackingNumber.trim();
+  }
+
+  if (typeof req.body.shippingCarrier === "string") {
+    patch.shippingCarrier = req.body.shippingCarrier.trim();
+  }
+
+  if (typeof req.body.trackingUrl === "string") {
+    patch.trackingUrl = req.body.trackingUrl.trim();
+  }
+
   if (Object.keys(patch).length === 0) {
     return res.status(400).json({ error: "Không có dữ liệu cần cập nhật" });
   }

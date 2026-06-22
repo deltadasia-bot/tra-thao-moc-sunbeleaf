@@ -4,8 +4,9 @@ import { copy } from "@/constants/copy";
 import { formatCurrency } from "@/utils/format";
 import { PlusIcon } from "./vectors";
 import {
-  getPromotionalListPrice,
-  getPromotionalPrice,
+  getDisplayListPrice,
+  getDisplayPromotionalPrice,
+  isPromotionDisabledForProduct,
 } from "@/utils/promotion";
 
 interface ProductCardProps {
@@ -19,8 +20,8 @@ export default function ProductCard({
   onClick,
   onAddToCart,
 }: ProductCardProps) {
-  const promotionalPrice = getPromotionalPrice(product.price);
-  const listPrice = getPromotionalListPrice(product.price);
+  const promotionalPrice = getDisplayPromotionalPrice(product);
+  const listPrice = getDisplayListPrice(product);
 
   return (
     <div
@@ -84,13 +85,17 @@ export default function ProductCard({
                 <span className="text-xlarge-sb font-semibold text-[#ee4d2d]">
                   {formatCurrency(promotionalPrice)}
                 </span>
-                <span className="rounded-sm bg-[#fff1ee] px-1 text-[10px] font-semibold text-[#ee4d2d]">
-                  -50%
-                </span>
+                {!isPromotionDisabledForProduct(product) && (
+                  <span className="rounded-sm bg-[#fff1ee] px-1 text-[10px] font-semibold text-[#ee4d2d]">
+                    -50%
+                  </span>
+                )}
               </div>
-              <div className="text-xs text-gray-400 line-through">
-                {formatCurrency(listPrice)}
-              </div>
+              {!isPromotionDisabledForProduct(product) && (
+                <div className="text-xs text-gray-400 line-through">
+                  {formatCurrency(listPrice)}
+                </div>
+              )}
             </div>
             <Button
               fullWidth

@@ -48,6 +48,14 @@ export interface OrderPayment {
   status: "pending" | "paid" | "refunded";
 }
 
+export interface TrackingMilestone {
+  status: string;
+  statusLabel: string;
+  location?: string;
+  description?: string;
+  time: string | Date;
+}
+
 export interface Order {
   id: string;
   orderCode?: string;
@@ -73,6 +81,10 @@ export interface Order {
   canCancel: boolean;
   note?: string;
   userId?: string;
+  trackingNumber?: string;
+  shippingCarrier?: string;
+  trackingUrl?: string;
+  trackingHistory?: TrackingMilestone[];
 }
 
 export interface OrderHistory {

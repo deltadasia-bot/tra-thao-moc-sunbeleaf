@@ -1,10 +1,31 @@
+import { Product } from "@/types/product.types";
+
 const PRICE_INCREASE_RATE = 1.5;
 const DISCOUNT_RATE = 0.5;
 
 export const PROMOTION_DISCOUNT_PERCENT = 50;
+export const TEMP_TEST_PRODUCT_ID = 999001;
+
+export const isPromotionDisabledForProduct = (
+  product: Pick<Product, "id">,
+) => product.id === TEMP_TEST_PRODUCT_ID;
 
 export const getPromotionalListPrice = (price: number) =>
   Math.round(price * PRICE_INCREASE_RATE);
 
 export const getPromotionalPrice = (price: number) =>
   Math.round(getPromotionalListPrice(price) * DISCOUNT_RATE);
+
+export const getDisplayListPrice = (
+  product: Pick<Product, "id" | "price">,
+  amount: number = product.price,
+) =>
+  isPromotionDisabledForProduct(product)
+    ? amount
+    : getPromotionalListPrice(amount);
+
+export const getDisplayPromotionalPrice = (
+  product: Pick<Product, "id" | "price">,
+  amount: number = product.price,
+) =>
+  isPromotionDisabledForProduct(product) ? amount : getPromotionalPrice(amount);

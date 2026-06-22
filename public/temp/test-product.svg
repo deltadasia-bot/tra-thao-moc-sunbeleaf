@@ -1,0 +1,10 @@
+<svg width="1200" height="1200" viewBox="0 0 1200 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="1200" rx="120" fill="#F4F1EA"/>
+  <rect x="180" y="170" width="840" height="860" rx="60" fill="#FFFFFF" stroke="#1F5A3D" stroke-width="24"/>
+  <rect x="255" y="270" width="690" height="160" rx="36" fill="#1F5A3D"/>
+  <text x="600" y="372" text-anchor="middle" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="96" font-weight="700">TEST</text>
+  <circle cx="600" cy="612" r="150" fill="#E7F4EA" stroke="#1F5A3D" stroke-width="20"/>
+  <path d="M600 500C555 560 520 611 520 662C520 718 556 760 600 760C644 760 680 718 680 662C680 611 645 560 600 500Z" fill="#3E9B5F"/>
+  <path d="M600 530C629 571 651 611 651 649C651 689 627 715 600 715C573 715 549 689 549 649C549 611 571 571 600 530Z" fill="#A6D97A"/>
+  <text x="600" y="914" text-anchor="middle" fill="#1F5A3D" font-family="Arial, sans-serif" font-size="64" font-weight="700">San pham mau de test</text>
+</svg>

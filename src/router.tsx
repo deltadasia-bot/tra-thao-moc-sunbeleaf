@@ -39,6 +39,10 @@ const router = createBrowserRouter(
           path: "/order",
           element: <OrderPage />,
           handle: {
+            title: "Lịch sử đơn hàng",
+            back: true,
+            whiteBackground: true,
+            headerPosition: "sticky",
             hideCart: true,
           },
         },

@@ -10,6 +10,7 @@ import {
 } from "@/services/category/category.queries";
 import {
   useProductFeatures,
+  useProducts,
   useProductsGroupBySubcategory,
 } from "@/services/product/product.queries";
 import { Category } from "@/types/category.types";
@@ -24,11 +25,13 @@ import { SUNBELEAF_LOGO_URL } from "@/components/common/logo";
 import TermsSheet from "@/components/common/terms-sheet";
 import { Product } from "@/types/product.types";
 import {
-  getPromotionalListPrice,
-  getPromotionalPrice,
+  getDisplayListPrice,
+  getDisplayPromotionalPrice,
+  isPromotionDisabledForProduct,
 } from "@/utils/promotion";
 import { formatCurrency } from "@/utils/format";
 import { useCartStore } from "@/stores/cart.store";
+import { useSnackbar } from "zmp-ui";
 
 type ShopTab = "shop" | "products" | "categories" | "customers";
 
@@ -182,6 +185,7 @@ function BannerCarousel({
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const { openSnackbar } = useSnackbar();
   const productContainerRef = useRef<HTMLDivElement>(null);
   const bannerTouchStartX = useRef<number | null>(null);
   const discoveryBannerTouchStartX = useRef<number | null>(null);
@@ -196,6 +200,48 @@ export default function HomePage() {
   const [isScrolled, setIsScrolled] = useState(false);
   const promoPopupVisible = useCartStore((state) => state.promoPopupVisible);
   const setPromoPopupVisible = useCartStore((state) => state.setPromoPopupVisible);
+
+  const [loggedInPhone, setLoggedInPhone] = useState<string>(() => {
+    try {
+      return localStorage.getItem("sunbeleaf_logged_in_phone") || "";
+    } catch {
+      return "";
+    }
+  });
+  const [loginPhoneInput, setLoginPhoneInput] = useState("");
+
+  const handleLogin = () => {
+    const trimmed = loginPhoneInput.trim();
+    if (!trimmed) {
+      openSnackbar({ text: "Vui lòng nhập số điện thoại!", type: "warning" });
+      return;
+    }
+    const phoneRegex = /^(0[3|5|7|8|9])[0-9]{8}$/;
+    if (!phoneRegex.test(trimmed)) {
+      openSnackbar({ text: "Số điện thoại không hợp lệ! Vui lòng nhập lại số điện thoại 10 chữ số.", type: "error" });
+      return;
+    }
+
+    try {
+      localStorage.setItem("sunbeleaf_logged_in_phone", trimmed);
+      setLoggedInPhone(trimmed);
+      openSnackbar({ text: "Đăng nhập thành công!", type: "success" });
+    } catch (e) {
+      console.error(e);
+      openSnackbar({ text: "Đã xảy ra lỗi khi đăng nhập", type: "error" });
+    }
+  };
+
+  const handleLogout = () => {
+    try {
+      localStorage.removeItem("sunbeleaf_logged_in_phone");
+      setLoggedInPhone("");
+      setLoginPhoneInput("");
+      openSnackbar({ text: "Đã đăng xuất tài khoản", type: "info" });
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   useEffect(() => {
     const hasShown = sessionStorage.getItem("promo_popup_shown");
@@ -262,6 +308,7 @@ export default function HomePage() {
       selectedCategory?.id || "",
       selectedProductFeature?.id || "",
     );
+  const { data: searchableProducts } = useProducts("vietnamese", "");
 
   const visibleSubCategoryIds = useMemo(
     () =>
@@ -315,7 +362,7 @@ export default function HomePage() {
 
     if (!query) return [];
 
-    return allProducts
+    return (searchableProducts || [])
       .filter((product, index, products) => {
         const normalizedName = product.name
           .normalize("NFD")
@@ -327,7 +374,7 @@ export default function HomePage() {
         );
       })
       .slice(0, 5);
-  }, [allProducts, shopSearchQuery]);
+  }, [searchableProducts, shopSearchQuery]);
 
   const bestSellingProducts = useMemo(
     () =>
@@ -566,15 +613,17 @@ export default function HomePage() {
                   alt={product.name}
                   className="h-full w-full object-cover"
                 />
-                <span className="absolute bottom-0 left-0 bg-[#ee4d2d] px-2 py-1 text-[10px] text-white">
-                  -50%
-                </span>
+                {!isPromotionDisabledForProduct(product) && (
+                  <span className="absolute bottom-0 left-0 bg-[#ee4d2d] px-2 py-1 text-[10px] text-white">
+                    -50%
+                  </span>
+                )}
               </div>
               <div className="mt-2 line-clamp-2 h-8 text-xs font-medium leading-tight text-gray-900">
                 {product.name}
               </div>
               <div className="mt-1 font-semibold text-[#ee4d2d]">
-                {formatCurrency(getPromotionalPrice(product.price))}
+                {formatCurrency(getDisplayPromotionalPrice(product))}
               </div>
               <div className="text-[11px] text-gray-500">Đã bán 100+</div>
             </button>
@@ -712,11 +761,13 @@ export default function HomePage() {
                   {product.name}
                 </div>
                 <div className="mt-1 text-sm font-semibold text-[#ee4d2d]">
-                  {formatCurrency(getPromotionalPrice(product.price))}
+                  {formatCurrency(getDisplayPromotionalPrice(product))}
                 </div>
-                <div className="text-[11px] text-gray-400 line-through">
-                  {formatCurrency(getPromotionalListPrice(product.price))}
-                </div>
+                {!isPromotionDisabledForProduct(product) && (
+                  <div className="text-[11px] text-gray-400 line-through">
+                    {formatCurrency(getDisplayListPrice(product))}
+                  </div>
+                )}
               </div>
             </button>
           ))}
@@ -858,7 +909,7 @@ export default function HomePage() {
                           {product.name}
                         </span>
                         <span className="mt-1 block text-sm font-semibold text-[#ee4d2d]">
-                          {formatCurrency(getPromotionalPrice(product.price))}
+                          {formatCurrency(getDisplayPromotionalPrice(product))}
                         </span>
                       </span>
                     </button>
@@ -946,15 +997,40 @@ export default function HomePage() {
         {activeTab === "categories" && renderCategoryTab()}
         {activeTab === "customers" && (
           <div className="mx-3.5 flex flex-col gap-4">
-            <div className="flex flex-col items-center bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+            {/* Giao diện hiển thị thông tin khách hàng */}
+            <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col items-center relative overflow-hidden">
+              <div className="absolute right-4 top-4">
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="px-2.5 py-1 text-[10px] font-semibold text-gray-400 border border-gray-200 rounded-full hover:text-red-500 hover:border-red-200 active:bg-red-50 transition"
+                >
+                  Đăng xuất
+                </button>
+              </div>
               <div className="h-16 w-16 rounded-full bg-[#2e7145]/10 flex items-center justify-center text-[#2e7145] text-xl font-bold mb-3">
                 SB
               </div>
               <div className="font-semibold text-gray-900">Khách hàng Sunbeleaf</div>
-              <div className="text-xs text-gray-500 mt-1">Chào mừng bạn đến với trà thảo mộc Sunbeleaf</div>
+              <div className="text-xs font-mono text-gray-500 mt-1">
+                {loggedInPhone ? (loggedInPhone.slice(0, 3) + "****" + loggedInPhone.slice(-3)) : ""}
+              </div>
             </div>
             
             <div className="bg-white rounded-2xl border border-gray-100 divide-y divide-gray-50 overflow-hidden shadow-sm">
+              <button
+                type="button"
+                onClick={() => navigate("/order")}
+                className="flex w-full items-center justify-between px-4 py-3.5 text-left text-sm font-medium text-gray-800 active:bg-gray-50"
+              >
+                <div className="flex items-center gap-2.5">
+                  <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                  </svg>
+                  <span>Lịch sử đặt hàng</span>
+                </div>
+                <span className="text-gray-400">›</span>
+              </button>
               <button
                 type="button"
                 onClick={() => setTermsVisible(true)}

@@ -1,4 +1,4 @@
-﻿import {
+import {
   Order,
   CreateOrderRequest,
   OrderListResponse,
@@ -15,8 +15,6 @@ export const orderService = {
    * Sau khi tạo mock order, đồng bộ sang backend để theo dõi thanh toán.
    */
   createOrder: async (request: CreateOrderRequest): Promise<Order> => {
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
     const newOrder = createMockOrder(
       request.items.map((item, idx) => ({
         id: `temp-${idx}`,
@@ -29,47 +27,118 @@ export const orderService = {
       request.note,
     );
 
-    orders = [newOrder, ...orders];
+    let finalOrder = newOrder;
 
-    // Đồng bộ sang backend – fire-and-forget, không block checkout nếu backend không khả dụng
-    void (async () => {
-      try {
-        await fetch(`${BACKEND_URL}/api/orders`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            id:              newOrder.id,
-            orderCode:       newOrder.orderCode,
-            amount:          newOrder.totalAmount,
-            paymentMethod:   request.paymentMethod,
-            deliveryType:    request.deliveryType,
-            shippingFee:     newOrder.payment?.shippingFee ?? 0,
-            deliveryAddress: request.deliveryAddress ?? null,
-            items:           newOrder.items.map((item) => ({
-              name:     item.name,
-              quantity: item.quantity,
-              price:    item.price,
-            })),
-            note: request.note ?? "",
-          }),
-        });
-      } catch {
-        // Backend chưa chạy hoặc không kết nối được – không block checkout
+    try {
+      const loggedPhone = localStorage.getItem("sunbeleaf_logged_in_phone") || "";
+      const res = await fetch(`${BACKEND_URL}/api/orders`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id:              newOrder.id,
+          orderCode:       newOrder.orderCode,
+          amount:          newOrder.totalAmount,
+          paymentMethod:   request.paymentMethod,
+          deliveryType:    request.deliveryType,
+          shippingFee:     newOrder.payment?.shippingFee ?? 0,
+          deliveryAddress: request.deliveryAddress ?? null,
+          items:           newOrder.items.map((item) => ({
+            name:     item.name,
+            quantity: item.quantity,
+            price:    item.price,
+          })),
+          note: request.note ?? "",
+          customerPhone: loggedPhone,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json() as { success: boolean; order: Order };
+        if (data.success && data.order) {
+          finalOrder = data.order;
+        }
       }
-    })();
+    } catch (err) {
+      console.warn("Backend is not running. Using fallback mock order.", err);
+    }
 
-    return newOrder;
+    // Lưu ID đơn hàng vào localStorage để tra cứu lịch sử
+    try {
+      const existingIdsRaw = localStorage.getItem("sunbeleaf_placed_order_ids");
+      const existingIds: string[] = existingIdsRaw ? JSON.parse(existingIdsRaw) : [];
+      if (!existingIds.includes(finalOrder.id)) {
+        existingIds.unshift(finalOrder.id);
+        localStorage.setItem("sunbeleaf_placed_order_ids", JSON.stringify(existingIds));
+      }
+    } catch (e) {
+      console.error("Lỗi khi lưu localStorage:", e);
+    }
+
+    orders = [finalOrder, ...orders.filter(o => o.id !== finalOrder.id)];
+
+    return finalOrder;
   },
 
   /**
    * Lấy danh sách orders (có phân trang)
-   * TODO: Thay bằng GET /api/orders?page=1&pageSize=10
+   * Thay bằng GET /api/orders?phone=... hoặc GET /api/orders?ids=...
    */
   getOrders: async (
     page: number = 1,
     pageSize: number = 10
   ): Promise<OrderListResponse> => {
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    let loggedPhone = "";
+    try {
+      loggedPhone = localStorage.getItem("sunbeleaf_logged_in_phone") || "";
+    } catch (e) {
+      console.error("Lỗi đọc localStorage:", e);
+    }
+
+    if (loggedPhone) {
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/orders?phone=${encodeURIComponent(loggedPhone)}`);
+        if (res.ok) {
+          const data = await res.json() as { orders: Order[]; total: number };
+          orders = data.orders;
+          return {
+            orders: data.orders,
+            total: data.total,
+            page,
+            pageSize,
+          };
+        }
+      } catch (err) {
+        console.warn("Không kết nối được backend khi lấy orders theo phone, dùng mock.");
+      }
+    } else {
+      let placedIds: string[] = [];
+      try {
+        const stored = localStorage.getItem("sunbeleaf_placed_order_ids");
+        if (stored) {
+          placedIds = JSON.parse(stored);
+        }
+      } catch (e) {
+        console.error("Lỗi đọc localStorage:", e);
+      }
+
+      if (placedIds.length > 0) {
+        try {
+          const res = await fetch(`${BACKEND_URL}/api/orders?ids=${placedIds.join(",")}`);
+          if (res.ok) {
+            const data = await res.json() as { orders: Order[]; total: number };
+            orders = data.orders;
+            return {
+              orders: data.orders,
+              total: data.total,
+              page,
+              pageSize,
+            };
+          }
+        } catch (err) {
+          console.warn("Không kết nối được backend khi lấy orders theo ids, dùng mock.");
+        }
+      }
+    }
 
     const startIndex = (page - 1) * pageSize;
     const endIndex = startIndex + pageSize;
@@ -85,10 +154,24 @@ export const orderService = {
 
   /**
    * Lấy chi tiết 1 order
-   * TODO: Thay bằng GET /api/orders/:orderId
+   * Thay bằng GET /api/orders/:orderId
    */
   getOrderById: async (orderId: string): Promise<Order> => {
-    await new Promise((resolve) => setTimeout(resolve, 200));
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/orders/${orderId}`);
+      if (res.ok) {
+        const orderData = await res.json() as Order;
+        const idx = orders.findIndex(o => o.id === orderId);
+        if (idx !== -1) {
+          orders[idx] = orderData;
+        } else {
+          orders.push(orderData);
+        }
+        return orderData;
+      }
+    } catch (err) {
+      console.warn("Không kết nối được backend khi lấy chi tiết đơn, dùng mock.");
+    }
 
     const order = orders.find((o) => o.id === orderId);
 
@@ -101,10 +184,27 @@ export const orderService = {
 
   /**
    * Hủy order
-   * TODO: Thay bằng PATCH /api/orders/:orderId/cancel
+   * Thay bằng PATCH /api/orders/:orderId/cancel
    */
   cancelOrder: async (orderId: string): Promise<Order> => {
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/orders/${orderId}/cancel`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+      });
+      if (res.ok) {
+        const data = await res.json() as { success: boolean; order: Order };
+        if (data.success && data.order) {
+          const idx = orders.findIndex(o => o.id === orderId);
+          if (idx !== -1) {
+            orders[idx] = data.order;
+          }
+          return data.order;
+        }
+      }
+    } catch (err) {
+      console.warn("Không kết nối được backend khi hủy đơn, dùng mock.");
+    }
 
     const orderIndex = orders.findIndex((o) => o.id === orderId);
 

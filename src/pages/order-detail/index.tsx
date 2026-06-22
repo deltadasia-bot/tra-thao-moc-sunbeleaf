@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import OrderCheckImg from "@/static/order.png";
 import { useOrderById } from "@/services/order/order.queries";
-import { Button, Sheet, Spinner, Text } from "zmp-ui";
+import { Button, Sheet, Spinner, Text, useSnackbar } from "zmp-ui";
 import { copy } from "@/constants/copy";
 import { formatCurrency } from "@/utils/format";
 import { formatOrderDate, getPaymentMethodLabel } from "@/utils/order";
@@ -15,12 +15,14 @@ import {
 export default function OrderDetailPage() {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
+  const { openSnackbar } = useSnackbar();
   const [reviewItem, setReviewItem] = useState<OrderItem | null>(null);
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewContent, setReviewContent] = useState("");
   const [reviewedItemIds, setReviewedItemIds] = useState<string[]>([]);
 
   const { data: order, isLoading, error } = useOrderById(orderId || "");
+  const constIsLoading = isLoading; // to keep original imports logic stable
   const canReviewOrder =
     order?.state === "delivered" || order?.state === "completed";
 
@@ -99,6 +101,119 @@ export default function OrderDetailPage() {
             </div>
           </div>
         </div>
+
+        {/* Hành trình giao hàng SPX / Nhận hàng tại quầy */}
+        {order && (
+          <div className="mx-3.5 mb-3 rounded-lg bg-white px-4 py-4">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-3">
+              <div className="text-large-m font-semibold flex items-center gap-2">
+                <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 9h4l3 3v5h-2M1 18V8a2 2 0 012-2h10a2 2 0 012 2v10H1z" />
+                </svg>
+                <span>Hành trình đơn hàng</span>
+              </div>
+              <div className="text-xxsmall font-medium px-2 py-0.5 rounded bg-orange-100 text-orange-600">
+                {order.deliveryType === "delivery" ? "SPX Express" : "Tại cửa hàng"}
+              </div>
+            </div>
+
+            {order.deliveryType === "delivery" ? (
+              <div>
+                <div className="flex items-center justify-between rounded-lg bg-gray-50 p-2.5 mb-4">
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-xxsmall text-gray-400">Mã vận đơn SPX</span>
+                    <span className="text-small-m font-semibold text-gray-800">
+                      {order.trackingNumber || "Đang tạo vận đơn..."}
+                    </span>
+                  </div>
+                  {order.trackingNumber && (
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(order.trackingNumber || "");
+                        openSnackbar({
+                          text: "Đã sao chép mã vận đơn SPX!",
+                          type: "success",
+                        });
+                      }}
+                      className="px-3 py-1 text-xxsmall font-semibold border border-orange-500 text-orange-500 rounded-full active:bg-orange-50"
+                    >
+                      Sao chép
+                    </button>
+                  )}
+                </div>
+
+                {order.trackingHistory && order.trackingHistory.length > 0 ? (
+                  <div className="relative pl-6 border-l border-dashed border-gray-200 ml-3.5 my-2">
+                    {[...(order.trackingHistory || [])].reverse().map((milestone, index) => {
+                      const isLatest = index === 0;
+                      return (
+                        <div key={index} className="relative mb-5 last:mb-0">
+                          {/* Bullet node */}
+                          <span
+                            className={`absolute -left-[32px] top-1 flex h-4.5 w-4.5 items-center justify-center rounded-full border-2 ${
+                              isLatest
+                                ? "bg-orange-500 border-orange-200 animate-pulse"
+                                : "bg-gray-200 border-white"
+                            }`}
+                          >
+                            {isLatest && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
+                          </span>
+                          
+                          <div className="flex flex-col gap-0.5">
+                            <div
+                              className={`text-small-m ${
+                                isLatest ? "text-orange-600 font-semibold" : "text-text-primary"
+                              }`}
+                            >
+                              {milestone.statusLabel}
+                            </div>
+                            {milestone.description && (
+                              <div className="text-xxsmall text-text-secondary">
+                                {milestone.description}
+                              </div>
+                            )}
+                            {milestone.location && (
+                              <div className="text-[10px] text-gray-400">
+                                Vị trí: {milestone.location}
+                              </div>
+                            )}
+                            <div className="text-[10px] text-gray-400">
+                              {formatOrderDate(milestone.time)}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center py-4 text-xxsmall text-gray-400 italic">
+                    Đang kết nối đơn vị vận chuyển SPX...
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div>
+                {/* Pickup Order details */}
+                <div className="bg-blue-50 text-blue-800 rounded-lg p-3 mb-3">
+                  <div className="text-xxsmall-m font-semibold mb-1 text-center">Mã nhận hàng tại quầy</div>
+                  <div className="text-xl font-bold tracking-widest text-center py-1">
+                    {order.pickupCode || `#PICK-${order.orderCode?.slice(-5) || order.id.slice(-5).toUpperCase()}`}
+                  </div>
+                  <div className="text-[10px] text-center mt-1">
+                    Xuất trình mã này cho nhân viên thu ngân để nhận sản phẩm.
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1 text-xxsmall text-text-secondary bg-gray-50 rounded-lg p-3">
+                  <div className="font-semibold text-text-primary text-xxsmall-m">Cửa hàng lấy trà:</div>
+                  <div>{order.pickupStore?.name || "Sunbeleaf Flagship Store"}</div>
+                  <div>Địa chỉ: {order.pickupStore?.address || "123 Nguyễn Trãi, Quận 1, TP. Hồ Chí Minh"}</div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="mx-3.5 mb-3 rounded-lg bg-white px-4 py-4">
           <div className="mb-3 text-large-m">{copy.orderDetail.items}</div>

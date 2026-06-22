@@ -4,18 +4,21 @@ import SectionTitle from "./section-title";
 import { Product } from "@/types/product.types";
 import { useCartStore } from "@/stores/cart.store";
 import { getDefaultVariants } from "@/utils/product";
-import { getPromotionalPrice } from "@/utils/promotion";
+import { getDisplayPromotionalPrice } from "@/utils/promotion";
+import { recordProductInterest } from "@/services/search/search-insights.storage";
 
 interface ProductGridProps extends React.HTMLAttributes<HTMLDivElement> {
   products: Product[];
   category?: string;
   categoryImg?: string;
+  onProductClick?: (product: Product) => void;
 }
 
 export default function ProductGrid({
   products,
   category,
   categoryImg,
+  onProductClick,
   ...props
 }: ProductGridProps) {
   const navigate = useNavigate();
@@ -39,13 +42,14 @@ export default function ProductGrid({
       productId: product.id,
       productName: product.name,
       productImage: product.image,
-      basePrice: getPromotionalPrice(product.price),
+      basePrice: getDisplayPromotionalPrice(product),
       selectedVariants: defaultVariants.map((variant) => ({
         ...variant,
-        extraPrice: getPromotionalPrice(variant.extraPrice),
+        extraPrice: getDisplayPromotionalPrice(product, variant.extraPrice),
       })),
       quantity: 1,
     });
+    recordProductInterest(product.id, "add_to_cart");
     openCheckoutSheet();
   };
 
@@ -58,6 +62,7 @@ export default function ProductGrid({
         {products.map((product) => (
           <ProductCard
             onClick={() => {
+              onProductClick?.(product);
               navigate(`/product/${product.id}`);
             }}
             onAddToCart={() => handleQuickAddToCart(product)}

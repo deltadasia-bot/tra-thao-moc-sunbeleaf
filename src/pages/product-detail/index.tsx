@@ -11,10 +11,12 @@ import { Button, Sheet, Spinner, Text } from "zmp-ui";
 import { copy } from "@/constants/copy";
 import { formatCurrency } from "@/utils/format";
 import {
-  getPromotionalListPrice,
-  getPromotionalPrice,
+  getDisplayListPrice,
+  getDisplayPromotionalPrice,
+  isPromotionDisabledForProduct,
 } from "@/utils/promotion";
 import { getProductReviews } from "@/services/review/review.storage";
+import { recordProductInterest } from "@/services/search/search-insights.storage";
 
 // Type cho variant selections
 type VariantSelections = {
@@ -97,6 +99,7 @@ export default function ProductDetailPage() {
   useEffect(() => {
     if (!product) return;
 
+    recordProductInterest(product.id, "view");
     setActiveMedia(
       product.video
         ? { type: "video", src: product.video }
@@ -283,7 +286,7 @@ export default function ProductDetailPage() {
       }
     });
 
-    return getPromotionalPrice(basePrice + variantPrice) * quantity;
+    return getDisplayPromotionalPrice(product, basePrice + variantPrice) * quantity;
   }, [product, variantSelections, quantity]);
 
   const unitPrice = useMemo(() => {
@@ -309,7 +312,7 @@ export default function ProductDetailPage() {
       }
     });
 
-    return getPromotionalListPrice(amount);
+    return getDisplayListPrice(product, amount);
   }, [product, variantSelections]);
 
   const shippingEstimate = useMemo(() => {
@@ -393,7 +396,7 @@ export default function ProductDetailPage() {
                 groupTitle: variantGroup.title,
                 optionId: option.id,
                 optionName: option.name,
-                extraPrice: getPromotionalPrice(option.extraPrice),
+                extraPrice: getDisplayPromotionalPrice(product, option.extraPrice),
               });
             }
           }
@@ -411,7 +414,7 @@ export default function ProductDetailPage() {
                   groupTitle: variantGroup.title,
                   optionId: option.id,
                   optionName: option.name,
-                  extraPrice: getPromotionalPrice(option.extraPrice),
+                  extraPrice: getDisplayPromotionalPrice(product, option.extraPrice),
                 });
               }
             });
@@ -434,7 +437,7 @@ export default function ProductDetailPage() {
                   groupTitle: variantGroup.title,
                   optionId: option.id,
                   optionName: option.name,
-                  extraPrice: getPromotionalPrice(option.extraPrice),
+                  extraPrice: getDisplayPromotionalPrice(product, option.extraPrice),
                   quantity: qty,
                 });
               }
@@ -448,7 +451,7 @@ export default function ProductDetailPage() {
       productId: product.id,
       productName: product.name,
       productImage: displayedProductImage,
-      basePrice: getPromotionalPrice(product.price),
+      basePrice: getDisplayPromotionalPrice(product),
       selectedVariants,
       quantity,
       note: note || undefined,
@@ -609,14 +612,21 @@ export default function ProductDetailPage() {
                 <span className="text-2xl font-semibold text-[#ee4d2d]">
                   {formatCurrency(unitPrice)}
                 </span>
-                <span className="text-sm text-gray-400 line-through">
-                  {formatCurrency(unitListPrice)}
-                </span>
-                <span className="rounded-sm bg-[#fff1ee] px-1.5 py-0.5 text-sm font-medium text-[#ee4d2d]">
-                  -50%
-                </span>
+                {!isPromotionDisabledForProduct(product) && (
+                  <span className="text-sm text-gray-400 line-through">
+                    {formatCurrency(unitListPrice)}
+                  </span>
+                )}
+                {!isPromotionDisabledForProduct(product) && (
+                  <span className="rounded-sm bg-[#fff1ee] px-1.5 py-0.5 text-sm font-medium text-[#ee4d2d]">
+                    -50%
+                  </span>
+                )}
               </div>
-              <div className="mt-2 inline-flex border border-[#ee4d2d] px-2 py-1 text-xs text-[#ee4d2d]">
+              <div
+                className="mt-2 inline-flex border border-[#ee4d2d] px-2 py-1 text-xs text-[#ee4d2d]"
+                hidden={isPromotionDisabledForProduct(product)}
+              >
                 Giá khuyến mãi có thời hạn
               </div>
             </div>
