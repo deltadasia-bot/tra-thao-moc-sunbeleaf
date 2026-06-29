@@ -241,12 +241,16 @@ function LoginForm({
   );
 }
 
-function StatCard({ label, value }) {
+function StatCard({ label, value, active = false, onClick }) {
   return (
-    <div className="stat-card">
+    <button
+      type="button"
+      className={`stat-card ${active ? "active" : ""}`}
+      onClick={onClick}
+    >
       <div className="stat-label">{label}</div>
       <div className="stat-value">{value}</div>
-    </div>
+    </button>
   );
 }
 
@@ -262,6 +266,7 @@ export default function App() {
   const [filters, setFilters] = useState({
     q: "",
     state: "",
+    stateGroup: "",
     paymentStatus: "",
   });
   const [savingOrder, setSavingOrder] = useState(false);
@@ -299,6 +304,7 @@ export default function App() {
       const query = new URLSearchParams();
       if (filters.q) query.set("q", filters.q);
       if (filters.state) query.set("state", filters.state);
+      if (filters.stateGroup) query.set("stateGroup", filters.stateGroup);
       if (filters.paymentStatus) query.set("paymentStatus", filters.paymentStatus);
 
       const [statsData, ordersData] = await Promise.all([
@@ -322,7 +328,7 @@ export default function App() {
 
   useEffect(() => {
     void loadDashboard();
-  }, [session, filters.state, filters.paymentStatus]);
+  }, [session, filters.state, filters.stateGroup, filters.paymentStatus]);
 
   useEffect(() => {
     if (!session?.token) return;
@@ -440,6 +446,17 @@ export default function App() {
     }
   }
 
+  function applyStatFilter(nextFilter) {
+    setSelectedOrder(null);
+    setFilters({
+      q: "",
+      state: "",
+      stateGroup: "",
+      paymentStatus: "",
+      ...nextFilter,
+    });
+  }
+
   if (!session?.token) {
     return (
       <LoginForm
@@ -484,7 +501,11 @@ export default function App() {
             <select
               value={filters.state}
               onChange={(event) =>
-                setFilters((current) => ({ ...current, state: event.target.value }))
+                setFilters((current) => ({
+                  ...current,
+                  state: event.target.value,
+                  stateGroup: "",
+                }))
               }
             >
               {STATE_OPTIONS.map((option) => (
@@ -521,11 +542,36 @@ export default function App() {
 
       <main className="content">
         <section className="stats-grid">
-          <StatCard label="Tổng đơn" value={stats?.totalOrders ?? "-"} />
-          <StatCard label="Chưa thanh toán" value={stats?.pendingPayment ?? "-"} />
-          <StatCard label="Đã thanh toán" value={stats?.paidOrders ?? "-"} />
-          <StatCard label="Đang xử lý" value={stats?.processingOrders ?? "-"} />
-          <StatCard label="Hoàn thành" value={stats?.completedOrders ?? "-"} />
+          <StatCard
+            label="Tổng đơn"
+            value={stats?.totalOrders ?? "-"}
+            active={!filters.q && !filters.state && !filters.stateGroup && !filters.paymentStatus}
+            onClick={() => applyStatFilter({})}
+          />
+          <StatCard
+            label="Chưa thanh toán"
+            value={stats?.pendingPayment ?? "-"}
+            active={filters.paymentStatus === "pending" && !filters.state && !filters.stateGroup}
+            onClick={() => applyStatFilter({ paymentStatus: "pending" })}
+          />
+          <StatCard
+            label="Đã thanh toán"
+            value={stats?.paidOrders ?? "-"}
+            active={filters.paymentStatus === "paid" && !filters.state && !filters.stateGroup}
+            onClick={() => applyStatFilter({ paymentStatus: "paid" })}
+          />
+          <StatCard
+            label="Đang xử lý"
+            value={stats?.processingOrders ?? "-"}
+            active={filters.stateGroup === "processing" && !filters.paymentStatus}
+            onClick={() => applyStatFilter({ stateGroup: "processing" })}
+          />
+          <StatCard
+            label="Hoàn thành"
+            value={stats?.completedOrders ?? "-"}
+            active={filters.stateGroup === "completed" && !filters.paymentStatus}
+            onClick={() => applyStatFilter({ stateGroup: "completed" })}
+          />
         </section>
 
         <section className="orders-panel">

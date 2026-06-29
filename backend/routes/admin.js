@@ -312,12 +312,21 @@ router.get("/stats", (_req, res) => {
 });
 
 router.get("/orders", (req, res) => {
-  const { q = "", state = "", paymentStatus = "" } = req.query;
+  const { q = "", state = "", stateGroup = "", paymentStatus = "" } = req.query;
   const keyword = String(q).trim().toLowerCase();
   let orders = sortOrders(db.getAllOrders());
 
   if (state) {
     orders = orders.filter((order) => order.state === state);
+  } else if (stateGroup) {
+    const stateGroups = {
+      processing: ["pending", "confirmed", "preparing", "ready", "delivering"],
+      completed: ["delivered", "completed"],
+    };
+    const allowedStates = stateGroups[stateGroup] || [];
+    if (allowedStates.length) {
+      orders = orders.filter((order) => allowedStates.includes(order.state));
+    }
   }
 
   if (paymentStatus) {
