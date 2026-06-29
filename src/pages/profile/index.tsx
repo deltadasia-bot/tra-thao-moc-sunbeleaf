@@ -49,7 +49,7 @@ const TruckIcon = () => (
 
 const ReturnIcon = () => (
   <svg className="w-7 h-7 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89M9 11l3-3 3 3m-3-3v8" />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
   </svg>
 );
 
@@ -438,39 +438,10 @@ export default function ProfilePage() {
         style={{ backgroundImage: `url(${ProfileBgImg})` }}
       >
         {/* Liquid Glass Card wrapping info, settings, and cart */}
-        <div className="liquid-glass rounded-2xl p-4 relative text-gray-900 shadow-xl">
-          {/* Settings & Cart icons in Top Right of the card */}
-          <div 
-            className="flex items-center gap-4"
-            style={{ position: "absolute", top: "16px", right: "16px", zIndex: 10 }}
-          >
-            <button
-              type="button"
-              onClick={handleEditNameClick}
-              className="p-1 text-gray-700 hover:text-primary active:scale-95 transition"
-              aria-label="Cài đặt thông tin"
-            >
-              <SettingsIcon />
-            </button>
-            <button
-              type="button"
-              onClick={() => setCartVisible(true)}
-              className="p-1 text-gray-700 hover:text-primary active:scale-95 transition relative"
-              aria-label="Giỏ hàng"
-            >
-              <CustomCartIcon />
-              {totalItems > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-primary px-1 text-[9px] font-bold text-white">
-                  {totalItems}
-                </span>
-              )}
-            </button>
-          </div>
-
+        {/* Liquid Glass Card wrapping info, settings, and cart */}
+        <div className="liquid-glass rounded-2xl p-4 flex items-center justify-between text-gray-900 shadow-xl gap-2">
           {/* Profile info block */}
-
-
-          <div className="flex items-center gap-3.5 pr-16 text-start">
+          <div className="flex items-center gap-3.5 min-w-0 flex-1 text-start">
             <button
               type="button"
               onClick={handleAvatarClick}
@@ -510,6 +481,31 @@ export default function ProfilePage() {
               </div>
               <div className="text-xs text-gray-500 mt-1 font-mono">{loggedPhone}</div>
             </div>
+          </div>
+
+          {/* Settings & Cart icons on the right side - centered vertically */}
+          <div className="flex items-center gap-3 pl-2 shrink-0">
+            <button
+              type="button"
+              onClick={handleEditNameClick}
+              className="p-1.5 text-gray-700 hover:text-primary active:scale-95 transition"
+              aria-label="Cài đặt thông tin"
+            >
+              <SettingsIcon />
+            </button>
+            <button
+              type="button"
+              onClick={() => setCartVisible(true)}
+              className="p-1.5 text-gray-700 hover:text-primary active:scale-95 transition relative"
+              aria-label="Giỏ hàng"
+            >
+              <CustomCartIcon />
+              {totalItems > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-primary px-1 text-[9px] font-bold text-white">
+                  {totalItems}
+                </span>
+              )}
+            </button>
           </div>
         </div>
       </div>
