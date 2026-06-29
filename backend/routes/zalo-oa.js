@@ -14,7 +14,7 @@ router.get("/stats", async (req, res) => {
     // Fallback to avoid crashing the frontend when Zalo OA environment variables are not fully configured
     return res.json({
       followerCount: 8712, // Gần với con số 8,7k mặc định
-      oaName: "Trà thảo mộc Sunbeleaf",
+      oaName: "Trà thảo mộc Delta D'Asia",
       updatedAt: new Date().toISOString(),
       cached: true,
       error: err.message
