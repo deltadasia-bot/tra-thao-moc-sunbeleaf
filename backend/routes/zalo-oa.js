@@ -62,11 +62,11 @@ router.get("/debug", async (req, res) => {
   try {
     const crypto = require("crypto");
     const proof = crypto
-      .createHmac("sha256", appSecret)
-      .update(accessToken)
+      .createHmac("sha256", appSecret.trim())
+      .update(accessToken.trim())
       .digest("hex");
     const url2 = `https://openapi.zalo.me/v2.0/oa/getoa?appsecret_proof=${proof}`;
-    const res2 = await fetch(url2, { headers: { access_token: accessToken } });
+    const res2 = await fetch(url2, { headers: { access_token: accessToken.trim() } });
     results.test2_with_proof = await res2.json();
   } catch (err) {
     results.test2_error = err.message;

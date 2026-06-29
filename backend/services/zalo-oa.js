@@ -59,8 +59,8 @@ let cachedStatsExpiresAt = 0;
 function buildZaloAppSecretProof(accessToken) {
   if (!accessToken || !ZALO_OA_APP_SECRET) return null;
   return crypto
-    .createHmac("sha256", ZALO_OA_APP_SECRET)
-    .update(accessToken)
+    .createHmac("sha256", ZALO_OA_APP_SECRET.trim())
+    .update(accessToken.trim())
     .digest("hex");
 }
 
@@ -79,11 +79,11 @@ async function refreshZaloToken() {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
-      secret_key: ZALO_OA_APP_SECRET,
+      secret_key: ZALO_OA_APP_SECRET.trim(),
     },
     body: new URLSearchParams({
-      refresh_token: refreshToken,
-      app_id: ZALO_OA_APP_ID,
+      refresh_token: refreshToken.trim(),
+      app_id: ZALO_OA_APP_ID.trim(),
       grant_type: "refresh_token",
     }),
   });
@@ -116,7 +116,7 @@ async function callZaloOfficialAccountApi(url, retried = false) {
 
   const response = await fetch(url, {
     headers: {
-      access_token: accessToken,
+      access_token: accessToken.trim(),
     },
   });
 
