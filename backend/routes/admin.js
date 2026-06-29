@@ -315,9 +315,39 @@ router.get("/stats", (_req, res) => {
 });
 
 router.get("/orders", (req, res) => {
-  const { q = "", state = "", stateGroup = "", paymentStatus = "" } = req.query;
+  const {
+    q = "",
+    state = "",
+    stateGroup = "",
+    paymentStatus = "",
+    dateFrom = "",
+    dateTo = "",
+    shippingCarrier = "",
+    paymentMethod = "",
+  } = req.query;
   const keyword = String(q).trim().toLowerCase();
+  const carrierKeyword = String(shippingCarrier).trim().toLowerCase();
   let orders = sortOrders(db.getAllOrders());
+
+  if (dateFrom) {
+    const from = new Date(`${dateFrom}T00:00:00.000`);
+    if (!Number.isNaN(from.getTime())) {
+      orders = orders.filter((order) => {
+        const createdAt = new Date(order.createdAt).getTime();
+        return Number.isFinite(createdAt) && createdAt >= from.getTime();
+      });
+    }
+  }
+
+  if (dateTo) {
+    const to = new Date(`${dateTo}T23:59:59.999`);
+    if (!Number.isNaN(to.getTime())) {
+      orders = orders.filter((order) => {
+        const createdAt = new Date(order.createdAt).getTime();
+        return Number.isFinite(createdAt) && createdAt <= to.getTime();
+      });
+    }
+  }
 
   if (state) {
     orders = orders.filter((order) => order.state === state);
@@ -340,6 +370,18 @@ router.get("/orders", (req, res) => {
 
   if (paymentStatus) {
     orders = orders.filter((order) => order.paymentStatus === paymentStatus);
+  }
+
+  if (paymentMethod) {
+    orders = orders.filter((order) => order.paymentMethod === paymentMethod);
+  }
+
+  if (carrierKeyword) {
+    orders = orders.filter((order) => {
+      const carrier =
+        order.shippingCarrier || (order.deliveryType === "delivery" ? "SPX Express" : "");
+      return String(carrier).toLowerCase().includes(carrierKeyword);
+    });
   }
 
   if (keyword) {

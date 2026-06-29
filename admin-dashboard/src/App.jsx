@@ -23,6 +23,15 @@ const PAYMENT_OPTIONS = [
   { value: "refunded", label: "Đã hoàn tiền" },
 ];
 
+const PAYMENT_METHOD_OPTIONS = [
+  { value: "", label: "Tất cả phương thức" },
+  { value: "bank_transfer", label: "Chuyển khoản ngân hàng" },
+  { value: "cash", label: "Tiền mặt" },
+  { value: "zalopay", label: "ZaloPay" },
+  { value: "momo", label: "MoMo" },
+  { value: "credit_card", label: "Thẻ tín dụng" },
+];
+
 function formatCurrency(value) {
   return new Intl.NumberFormat("vi-VN").format(Number(value || 0));
 }
@@ -278,6 +287,10 @@ export default function App() {
     state: "",
     stateGroup: "",
     paymentStatus: "",
+    dateFrom: "",
+    dateTo: "",
+    shippingCarrier: "",
+    paymentMethod: "",
   });
   const [savingOrder, setSavingOrder] = useState(false);
 
@@ -316,6 +329,10 @@ export default function App() {
       if (filters.state) query.set("state", filters.state);
       if (filters.stateGroup) query.set("stateGroup", filters.stateGroup);
       if (filters.paymentStatus) query.set("paymentStatus", filters.paymentStatus);
+      if (filters.dateFrom) query.set("dateFrom", filters.dateFrom);
+      if (filters.dateTo) query.set("dateTo", filters.dateTo);
+      if (filters.shippingCarrier) query.set("shippingCarrier", filters.shippingCarrier);
+      if (filters.paymentMethod) query.set("paymentMethod", filters.paymentMethod);
 
       const [statsData, ordersData] = await Promise.all([
         apiFetch("/api/admin/stats"),
@@ -338,7 +355,16 @@ export default function App() {
 
   useEffect(() => {
     void loadDashboard();
-  }, [session, filters.state, filters.stateGroup, filters.paymentStatus]);
+  }, [
+    session,
+    filters.state,
+    filters.stateGroup,
+    filters.paymentStatus,
+    filters.dateFrom,
+    filters.dateTo,
+    filters.shippingCarrier,
+    filters.paymentMethod,
+  ]);
 
   useEffect(() => {
     if (!session?.token) return;
@@ -463,6 +489,10 @@ export default function App() {
       state: "",
       stateGroup: "",
       paymentStatus: "",
+      dateFrom: "",
+      dateTo: "",
+      shippingCarrier: "",
+      paymentMethod: "",
       ...nextFilter,
     });
   }
@@ -506,6 +536,28 @@ export default function App() {
               placeholder="Mã đơn, tên khách, số điện thoại"
             />
           </label>
+          <div className="filter-two-columns">
+            <label>
+              Từ ngày
+              <input
+                type="date"
+                value={filters.dateFrom}
+                onChange={(event) =>
+                  setFilters((current) => ({ ...current, dateFrom: event.target.value }))
+                }
+              />
+            </label>
+            <label>
+              Đến ngày
+              <input
+                type="date"
+                value={filters.dateTo}
+                onChange={(event) =>
+                  setFilters((current) => ({ ...current, dateTo: event.target.value }))
+                }
+              />
+            </label>
+          </div>
           <label>
             Trạng thái đơn
             <select
@@ -543,6 +595,44 @@ export default function App() {
               ))}
             </select>
           </label>
+          <label>
+            Phương thức thanh toán
+            <select
+              value={filters.paymentMethod}
+              onChange={(event) =>
+                setFilters((current) => ({
+                  ...current,
+                  paymentMethod: event.target.value,
+                }))
+              }
+            >
+              {PAYMENT_METHOD_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Đơn vị vận chuyển
+            <input
+              value={filters.shippingCarrier}
+              onChange={(event) =>
+                setFilters((current) => ({
+                  ...current,
+                  shippingCarrier: event.target.value,
+                }))
+              }
+              placeholder="VD: SPX Express"
+            />
+          </label>
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={() => applyStatFilter({})}
+          >
+            Xóa bộ lọc
+          </button>
         </div>
 
         <button className="secondary-button" onClick={handleLogout}>
