@@ -256,6 +256,26 @@ function countRevenueOrdersBetween(orders, start, end) {
   }).length;
 }
 
+function countOrdersBetween(orders, start, end, predicate = () => true) {
+  const startTime = start.getTime();
+  const endTime = end.getTime();
+  return orders.filter((order) => {
+    if (!predicate(order)) return false;
+    const createdAt = toValidDate(order.createdAt);
+    if (!createdAt) return false;
+    const time = createdAt.getTime();
+    return time >= startTime && time <= endTime;
+  }).length;
+}
+
+function daysInVietnamMonth(year, month) {
+  return new Date(Date.UTC(year, month, 0)).getUTCDate();
+}
+
+function monthLabel(month) {
+  return `Tháng ${String(month).padStart(2, "0")}`;
+}
+
 function growthPercent(current, previous) {
   if (!previous) return current > 0 ? 100 : 0;
   return Math.round(((current - previous) / previous) * 1000) / 10;
@@ -501,6 +521,118 @@ router.get("/reports/sales", (_req, res) => {
       month: { from: monthStart.toISOString(), to: monthEnd.toISOString() },
     },
     chart,
+  });
+});
+
+router.get("/kpi", (req, res) => {
+  const currentParts = getVietnamDateParts(new Date());
+  const year = Number(req.query.year || currentParts.year);
+  if (!Number.isInteger(year) || year < 2020 || year > 2100) {
+    return res.status(400).json({ error: "Nam KPI khong hop le" });
+  }
+
+  return res.json({
+    year,
+    months: db.getAdminKpi(year),
+  });
+});
+
+router.put("/kpi/:year", (req, res) => {
+  const year = Number(req.params.year);
+  if (!Number.isInteger(year) || year < 2020 || year > 2100) {
+    return res.status(400).json({ error: "Nam KPI khong hop le" });
+  }
+
+  const months = db.setAdminKpi(year, req.body.months || {});
+  return res.json({
+    success: true,
+    year,
+    months,
+  });
+});
+
+router.get("/reports/monthly", (req, res) => {
+  const now = new Date();
+  const currentParts = getVietnamDateParts(now);
+  const year = Number(req.query.year || currentParts.year);
+  const month = Number(req.query.month || currentParts.month + 1);
+
+  if (!Number.isInteger(year) || year < 2020 || year > 2100) {
+    return res.status(400).json({ error: "Nam bao cao khong hop le" });
+  }
+  if (!Number.isInteger(month) || month < 1 || month > 12) {
+    return res.status(400).json({ error: "Thang bao cao khong hop le" });
+  }
+
+  const orders = db.getAllOrders();
+  const kpiMonths = db.getAdminKpi(year);
+  const monthlyTarget = Number(kpiMonths[String(month)] || 0);
+  const daysInMonth = daysInVietnamMonth(year, month);
+  const dailyTarget = monthlyTarget > 0 ? monthlyTarget / daysInMonth : 0;
+  let cumulativeRevenue = 0;
+  let cumulativeTarget = 0;
+
+  const days = Array.from({ length: daysInMonth }, (_, index) => {
+    const dayNumber = index + 1;
+    const start = makeVietnamBoundary(year, month - 1, dayNumber);
+    const end = new Date(start.getTime() + 24 * 60 * 60 * 1000 - 1);
+    const revenue = sumRevenueBetween(orders, start, end);
+    const orderCount = countRevenueOrdersBetween(orders, start, end);
+    const returnOrders = countOrdersBetween(
+      orders,
+      start,
+      end,
+      (order) => order.state === "returned" || order.paymentStatus === "refunded",
+    );
+    const returnCost = returnOrders * 20000;
+    const targetRevenue = dailyTarget;
+
+    cumulativeRevenue += revenue;
+    cumulativeTarget += targetRevenue;
+
+    return {
+      date: start.toISOString().slice(0, 10),
+      label: new Intl.DateTimeFormat("vi-VN", {
+        timeZone: REPORT_TIME_ZONE,
+        day: "2-digit",
+        month: "2-digit",
+      }).format(start),
+      orders: orderCount,
+      revenue,
+      targetRevenue: Math.round(targetRevenue),
+      kpiRate: targetRevenue > 0 ? Math.round((revenue / targetRevenue) * 1000) / 10 : 0,
+      cumulativeRevenue,
+      cumulativeTarget: Math.round(cumulativeTarget),
+      cumulativeKpiRate:
+        cumulativeTarget > 0 ? Math.round((cumulativeRevenue / cumulativeTarget) * 1000) / 10 : 0,
+      returnOrders,
+      returnCost,
+    };
+  });
+
+  const totalRevenue = days.reduce((sum, day) => sum + day.revenue, 0);
+  const totalOrders = days.reduce((sum, day) => sum + day.orders, 0);
+  const totalReturnCost = days.reduce((sum, day) => sum + day.returnCost, 0);
+  const bestDay = days.reduce(
+    (best, day) => (day.revenue > (best?.revenue || 0) ? day : best),
+    null,
+  );
+
+  return res.json({
+    generatedAt: now.toISOString(),
+    year,
+    month,
+    title: `${monthLabel(month)} ${year}`,
+    target: monthlyTarget,
+    dailyTarget: Math.round(dailyTarget),
+    totals: {
+      revenue: totalRevenue,
+      orders: totalOrders,
+      returnCost: totalReturnCost,
+      kpiRate: monthlyTarget > 0 ? Math.round((totalRevenue / monthlyTarget) * 1000) / 10 : 0,
+    },
+    bestDay,
+    days,
   });
 });
 

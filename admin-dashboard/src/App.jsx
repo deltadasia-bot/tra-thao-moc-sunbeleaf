@@ -3,6 +3,12 @@ import { useEffect, useMemo, useState } from "react";
 const API_BASE = import.meta.env.VITE_ADMIN_API_BASE ?? "";
 const STORAGE_KEY = "sunbeleaf-admin-session";
 const AD_COST_KEY = "sunbeleaf-admin-ad-cost";
+const DAILY_AD_COST_KEY = "sunbeleaf-admin-daily-ad-costs";
+
+const MONTH_OPTIONS = Array.from({ length: 12 }, (_, index) => ({
+  value: index + 1,
+  label: `Tháng ${index + 1}`,
+}));
 
 const STATE_OPTIONS = [
   { value: "", label: "Tất cả trạng thái đơn" },
@@ -279,13 +285,13 @@ function StatCard({ label, value, active = false, onClick }) {
   );
 }
 
-function DashboardTopbar({ session, onRefresh, loading }) {
+function DashboardTopbar({ session, onRefresh, loading, title, description }) {
   return (
     <div className="dashboard-topbar">
       <div>
         <p className="eyebrow">Sunbeleaf Control Center</p>
-        <h2>Dashboard</h2>
-        <span>Quản lý doanh thu, đơn hàng và trạng thái vận hành trong một màn hình.</span>
+        <h2>{title}</h2>
+        <span>{description}</span>
       </div>
       <div className="topbar-actions">
         <button type="button" className="icon-button" onClick={onRefresh} disabled={loading} title="Làm mới">
@@ -398,6 +404,221 @@ function SalesDashboard({ report, adCost, onAdCostChange }) {
   );
 }
 
+function readDailyAdCosts() {
+  try {
+    const raw = localStorage.getItem(DAILY_AD_COST_KEY);
+    const parsed = raw ? JSON.parse(raw) : {};
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function MonthlyReport({ report, year, month, onYearChange, onMonthChange, adCosts, onAdCostChange, loading }) {
+  const days = report?.days || [];
+  const maxRevenue = Math.max(...days.map((day) => Number(day.revenue || 0)), 1);
+  const totalAdCost = days.reduce((sum, day) => sum + Number(adCosts[day.date] || 0), 0);
+  const totalCost = Number(report?.totals?.returnCost || 0) + totalAdCost;
+  const profit = Number(report?.totals?.revenue || 0) - totalCost;
+  const dailyProfit = days.map((day) => {
+    const adCost = Number(adCosts[day.date] || 0);
+    return {
+      ...day,
+      adCost,
+      totalCost: Number(day.returnCost || 0) + adCost,
+      profit: Number(day.revenue || 0) - Number(day.returnCost || 0) - adCost,
+    };
+  });
+
+  return (
+    <section className="monthly-dashboard">
+      <div className="section-header">
+        <div>
+          <p className="eyebrow">Báo cáo tháng</p>
+          <h2>Doanh số, chi phí và KPI theo từng ngày</h2>
+          <span>
+            Theo dõi doanh thu thực tế, mục tiêu ngày, chi phí trả hàng, quảng cáo và lãi lỗ.
+          </span>
+        </div>
+        <div className="month-controls">
+          <label>
+            Năm
+            <input
+              type="number"
+              value={year}
+              min="2020"
+              max="2100"
+              onChange={(event) => onYearChange(Number(event.target.value))}
+            />
+          </label>
+          <label>
+            Tháng
+            <select value={month} onChange={(event) => onMonthChange(Number(event.target.value))}>
+              {MONTH_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div className="month-summary-grid">
+        <div className="month-metric primary">
+          <span>Doanh thu tháng</span>
+          <strong>{formatCurrency(report?.totals?.revenue)}đ</strong>
+          <small>Mục tiêu: {formatCurrency(report?.target)}đ</small>
+        </div>
+        <div className="month-metric">
+          <span>Tỷ lệ đạt KPI</span>
+          <strong>{formatPercent(report?.totals?.kpiRate).replace("+", "")}</strong>
+          <small>Mục tiêu ngày: {formatCurrency(report?.dailyTarget)}đ</small>
+        </div>
+        <div className="month-metric">
+          <span>Số đơn đã thanh toán</span>
+          <strong>{report?.totals?.orders ?? 0}</strong>
+          <small>Ngày tốt nhất: {report?.bestDay?.label || "-"}</small>
+        </div>
+        <div className={`month-metric ${profit >= 0 ? "profit" : "loss"}`}>
+          <span>Lãi lỗ tạm tính</span>
+          <strong>{formatCurrency(profit)}đ</strong>
+          <small>Chi phí: {formatCurrency(totalCost)}đ</small>
+        </div>
+      </div>
+
+      <div className="monthly-visual-card">
+        <div className="chart-header">
+          <div>
+            <h3>Nhịp doanh thu trong tháng</h3>
+            <p>{loading ? "Đang tải dữ liệu..." : `${days.length} ngày trong kỳ báo cáo`}</p>
+          </div>
+          <strong>{formatShortCurrency(maxRevenue)}đ cao nhất</strong>
+        </div>
+        <div className="daily-revenue-bars">
+          {days.map((day) => (
+            <div className="daily-revenue-item" key={day.date}>
+              <span
+                className={day.revenue >= day.targetRevenue && day.targetRevenue > 0 ? "bar-hit" : ""}
+                style={{ height: `${Math.max((Number(day.revenue || 0) / maxRevenue) * 100, 3)}%` }}
+                title={`${day.label}: ${formatCurrency(day.revenue)}đ`}
+              />
+              <small>{day.label.slice(0, 2)}</small>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="monthly-table-card">
+        <div className="panel-header">
+          <div>
+            <h2>Bảng theo dõi ngày</h2>
+            <p>Nhập chi phí quảng cáo từng ngày nếu có để tính lãi lỗ chính xác hơn.</p>
+          </div>
+        </div>
+        <div className="monthly-table-wrap">
+          <table className="monthly-table">
+            <thead>
+              <tr>
+                <th>Ngày</th>
+                <th>Đơn</th>
+                <th>Doanh số</th>
+                <th>Mục tiêu</th>
+                <th>KPI</th>
+                <th>Chi phí QC</th>
+                <th>Trả hàng</th>
+                <th>Lãi lỗ</th>
+              </tr>
+            </thead>
+            <tbody>
+              {dailyProfit.map((day) => (
+                <tr key={day.date}>
+                  <td>{day.label}</td>
+                  <td>{day.orders}</td>
+                  <td>{formatCurrency(day.revenue)}đ</td>
+                  <td>{formatCurrency(day.targetRevenue)}đ</td>
+                  <td>
+                    <span className={day.kpiRate >= 100 ? "kpi-pill hit" : "kpi-pill"}>
+                      {formatPercent(day.kpiRate).replace("+", "")}
+                    </span>
+                  </td>
+                  <td>
+                    <input
+                      className="table-money-input"
+                      type="number"
+                      min="0"
+                      value={adCosts[day.date] || ""}
+                      onChange={(event) => onAdCostChange(day.date, event.target.value)}
+                      placeholder="0"
+                    />
+                  </td>
+                  <td>{formatCurrency(day.returnCost)}đ</td>
+                  <td className={day.profit >= 0 ? "profit-text" : "loss-text"}>
+                    {formatCurrency(day.profit)}đ
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function KpiDashboard({ year, months, onYearChange, onMonthChange, onSave, saving }) {
+  const totalTarget = Object.values(months || {}).reduce((sum, value) => sum + Number(value || 0), 0);
+
+  return (
+    <section className="kpi-dashboard">
+      <div className="section-header">
+        <div>
+          <p className="eyebrow">KPI năm</p>
+          <h2>Thiết lập mục tiêu doanh thu 12 tháng</h2>
+          <span>
+            Mục tiêu này được dùng để tính % đạt KPI trong dashboard báo cáo tháng.
+          </span>
+        </div>
+        <label className="year-picker">
+          Năm KPI
+          <input
+            type="number"
+            value={year}
+            min="2020"
+            max="2100"
+            onChange={(event) => onYearChange(Number(event.target.value))}
+          />
+        </label>
+      </div>
+
+      <div className="kpi-total-card">
+        <div>
+          <span>Tổng mục tiêu năm</span>
+          <strong>{formatCurrency(totalTarget)}đ</strong>
+        </div>
+        <button type="button" onClick={onSave} disabled={saving}>
+          {saving ? "Đang lưu..." : "Lưu KPI"}
+        </button>
+      </div>
+
+      <div className="kpi-grid">
+        {MONTH_OPTIONS.map((option) => (
+          <label className="kpi-card" key={option.value}>
+            <span>{option.label}</span>
+            <input
+              type="number"
+              min="0"
+              value={months?.[String(option.value)] || ""}
+              onChange={(event) => onMonthChange(option.value, event.target.value)}
+              placeholder="Nhập doanh thu mục tiêu"
+            />
+          </label>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function paymentStatusLabel(status) {
   const labels = {
     pending: "Chưa thanh toán",
@@ -409,6 +630,7 @@ function paymentStatusLabel(status) {
 
 export default function App() {
   const [session, setSession] = useState(readSession);
+  const currentDate = new Date();
   const [authError, setAuthError] = useState("");
   const [authMessage, setAuthMessage] = useState("");
   const [loadingAuth, setLoadingAuth] = useState(false);
@@ -416,7 +638,16 @@ export default function App() {
   const [orders, setOrders] = useState([]);
   const [stats, setStats] = useState(null);
   const [salesReport, setSalesReport] = useState(null);
+  const [activeView, setActiveView] = useState("dashboard");
+  const [monthlyYear, setMonthlyYear] = useState(currentDate.getFullYear());
+  const [monthlyMonth, setMonthlyMonth] = useState(currentDate.getMonth() + 1);
+  const [monthlyReport, setMonthlyReport] = useState(null);
+  const [loadingMonthly, setLoadingMonthly] = useState(false);
+  const [kpiYear, setKpiYear] = useState(currentDate.getFullYear());
+  const [kpiMonths, setKpiMonths] = useState({});
+  const [savingKpi, setSavingKpi] = useState(false);
   const [adCost, setAdCost] = useState(() => localStorage.getItem(AD_COST_KEY) || "");
+  const [dailyAdCosts, setDailyAdCosts] = useState(readDailyAdCosts);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [filters, setFilters] = useState({
     q: "",
@@ -429,6 +660,32 @@ export default function App() {
     paymentMethod: "",
   });
   const [savingOrder, setSavingOrder] = useState(false);
+  const viewMeta = {
+    dashboard: {
+      title: "Dashboard",
+      description: "Quản lý doanh thu, đơn hàng và trạng thái vận hành trong một màn hình.",
+    },
+    monthly: {
+      title: "Báo cáo tháng",
+      description: "Theo dõi doanh thu từng ngày, chi phí, lãi lỗ và tiến độ KPI.",
+    },
+    kpi: {
+      title: "KPI năm",
+      description: "Thiết lập mục tiêu doanh thu cho 12 tháng trong năm.",
+    },
+    orders: {
+      title: "Tất cả đơn",
+      description: "Danh sách đơn hàng tạo từ Mini App và bộ lọc vận hành.",
+    },
+    unpaid: {
+      title: "Chưa thanh toán",
+      description: "Các đơn đang chờ xác nhận thanh toán.",
+    },
+    returns: {
+      title: "Trả hàng",
+      description: "Theo dõi đơn hoàn trả, xác nhận đã nhận hàng và hoàn tiền.",
+    },
+  };
 
   const authHeaders = useMemo(() => {
     if (!session?.token) return {};
@@ -491,6 +748,41 @@ export default function App() {
     }
   }
 
+  async function loadMonthlyReport(year = monthlyYear, month = monthlyMonth) {
+    if (!session?.token) return;
+    setLoadingMonthly(true);
+    try {
+      const data = await apiFetch(`/api/admin/reports/monthly?year=${year}&month=${month}`);
+      setMonthlyReport(data);
+    } finally {
+      setLoadingMonthly(false);
+    }
+  }
+
+  async function loadKpi(year = kpiYear) {
+    if (!session?.token) return;
+    const data = await apiFetch(`/api/admin/kpi?year=${year}`);
+    setKpiMonths(data.months || {});
+  }
+
+  async function saveKpi() {
+    setSavingKpi(true);
+    try {
+      const data = await apiFetch(`/api/admin/kpi/${kpiYear}`, {
+        method: "PUT",
+        body: JSON.stringify({ months: kpiMonths }),
+      });
+      setKpiMonths(data.months || {});
+      if (monthlyYear === kpiYear) {
+        await loadMonthlyReport(monthlyYear, monthlyMonth);
+      }
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setSavingKpi(false);
+    }
+  }
+
   useEffect(() => {
     void loadDashboard();
   }, [
@@ -511,6 +803,14 @@ export default function App() {
     }, 250);
     return () => clearTimeout(timer);
   }, [filters.q]);
+
+  useEffect(() => {
+    void loadMonthlyReport(monthlyYear, monthlyMonth);
+  }, [session, monthlyYear, monthlyMonth]);
+
+  useEffect(() => {
+    void loadKpi(kpiYear);
+  }, [session, kpiYear]);
 
   async function handleLogin(form) {
     setLoadingAuth(true);
@@ -609,6 +909,33 @@ export default function App() {
     localStorage.setItem(AD_COST_KEY, cleanValue);
   }
 
+  function handleDailyAdCostChange(date, value) {
+    const cleanValue = String(value || "").replace(/[^\d]/g, "");
+    setDailyAdCosts((current) => {
+      const next = { ...current };
+      if (cleanValue) {
+        next[date] = cleanValue;
+      } else {
+        delete next[date];
+      }
+      localStorage.setItem(DAILY_AD_COST_KEY, JSON.stringify(next));
+      return next;
+    });
+  }
+
+  function handleKpiMonthChange(month, value) {
+    const cleanValue = String(value || "").replace(/[^\d]/g, "");
+    setKpiMonths((current) => ({
+      ...current,
+      [String(month)]: cleanValue ? Number(cleanValue) : 0,
+    }));
+  }
+
+  function openOrderView(view, nextFilter) {
+    setActiveView(view);
+    applyStatFilter(nextFilter);
+  }
+
   async function updateSelectedOrder(patch) {
     if (!selectedOrder) return;
     setSavingOrder(true);
@@ -673,10 +1000,48 @@ export default function App() {
         </div>
 
         <nav className="side-nav" aria-label="Admin">
-          <button className="side-nav-item active" type="button">Dashboard</button>
-          <button className="side-nav-item" type="button" onClick={() => applyStatFilter({})}>Tất cả đơn</button>
-          <button className="side-nav-item" type="button" onClick={() => applyStatFilter({ paymentStatus: "pending" })}>Chưa thanh toán</button>
-          <button className="side-nav-item" type="button" onClick={() => applyStatFilter({ stateGroup: "returns" })}>Trả hàng</button>
+          <button
+            className={`side-nav-item ${activeView === "dashboard" ? "active" : ""}`}
+            type="button"
+            onClick={() => setActiveView("dashboard")}
+          >
+            Dashboard
+          </button>
+          <button
+            className={`side-nav-item ${activeView === "monthly" ? "active" : ""}`}
+            type="button"
+            onClick={() => setActiveView("monthly")}
+          >
+            Báo cáo tháng
+          </button>
+          <button
+            className={`side-nav-item ${activeView === "kpi" ? "active" : ""}`}
+            type="button"
+            onClick={() => setActiveView("kpi")}
+          >
+            KPI năm
+          </button>
+          <button
+            className={`side-nav-item ${activeView === "orders" ? "active" : ""}`}
+            type="button"
+            onClick={() => openOrderView("orders", {})}
+          >
+            Tất cả đơn
+          </button>
+          <button
+            className={`side-nav-item ${activeView === "unpaid" ? "active" : ""}`}
+            type="button"
+            onClick={() => openOrderView("unpaid", { paymentStatus: "pending" })}
+          >
+            Chưa thanh toán
+          </button>
+          <button
+            className={`side-nav-item ${activeView === "returns" ? "active" : ""}`}
+            type="button"
+            onClick={() => openOrderView("returns", { stateGroup: "returns" })}
+          >
+            Trả hàng
+          </button>
         </nav>
 
         <div className="filters">
@@ -803,50 +1168,80 @@ export default function App() {
           session={session}
           loading={loading}
           onRefresh={() => void loadDashboard()}
+          title={viewMeta[activeView]?.title || "Dashboard"}
+          description={viewMeta[activeView]?.description || ""}
         />
 
-        <SalesDashboard
-          report={salesReport}
-          adCost={adCost}
-          onAdCostChange={handleAdCostChange}
-        />
+        {activeView === "dashboard" ? (
+          <SalesDashboard
+            report={salesReport}
+            adCost={adCost}
+            onAdCostChange={handleAdCostChange}
+          />
+        ) : null}
 
+        {activeView === "monthly" ? (
+          <MonthlyReport
+            report={monthlyReport}
+            year={monthlyYear}
+            month={monthlyMonth}
+            loading={loadingMonthly}
+            adCosts={dailyAdCosts}
+            onYearChange={setMonthlyYear}
+            onMonthChange={setMonthlyMonth}
+            onAdCostChange={handleDailyAdCostChange}
+          />
+        ) : null}
+
+        {activeView === "kpi" ? (
+          <KpiDashboard
+            year={kpiYear}
+            months={kpiMonths}
+            saving={savingKpi}
+            onYearChange={setKpiYear}
+            onMonthChange={handleKpiMonthChange}
+            onSave={() => void saveKpi()}
+          />
+        ) : null}
+
+        {["dashboard", "orders", "unpaid", "returns"].includes(activeView) ? (
+          <>
         <section className="stats-grid">
           <StatCard
             label="Tổng đơn"
             value={stats?.totalOrders ?? "-"}
             active={!filters.q && !filters.state && !filters.stateGroup && !filters.paymentStatus}
-            onClick={() => applyStatFilter({})}
+            onClick={() => openOrderView("orders", {})}
           />
           <StatCard
             label="Chưa thanh toán"
             value={stats?.pendingPayment ?? "-"}
             active={filters.paymentStatus === "pending" && !filters.state && !filters.stateGroup}
-            onClick={() => applyStatFilter({ paymentStatus: "pending" })}
+            onClick={() => openOrderView("unpaid", { paymentStatus: "pending" })}
           />
           <StatCard
             label="Đã thanh toán"
             value={stats?.paidOrders ?? "-"}
             active={filters.paymentStatus === "paid" && !filters.state && !filters.stateGroup}
-            onClick={() => applyStatFilter({ paymentStatus: "paid" })}
+            onClick={() => openOrderView("orders", { paymentStatus: "paid" })}
           />
           <StatCard
             label="Đang xử lý"
             value={stats?.processingOrders ?? "-"}
             active={filters.stateGroup === "processing" && !filters.paymentStatus}
-            onClick={() => applyStatFilter({ stateGroup: "processing" })}
+            onClick={() => openOrderView("orders", { stateGroup: "processing" })}
           />
           <StatCard
             label="Hoàn thành"
             value={stats?.completedOrders ?? "-"}
             active={filters.stateGroup === "completed" && !filters.paymentStatus}
-            onClick={() => applyStatFilter({ stateGroup: "completed" })}
+            onClick={() => openOrderView("orders", { stateGroup: "completed" })}
           />
           <StatCard
             label="Trả hàng"
             value={stats?.returnOrders ?? "-"}
             active={filters.stateGroup === "returns" && !filters.paymentStatus}
-            onClick={() => applyStatFilter({ stateGroup: "returns" })}
+            onClick={() => openOrderView("returns", { stateGroup: "returns" })}
           />
         </section>
 
@@ -1134,6 +1529,8 @@ export default function App() {
             </div>
           </div>
         </section>
+          </>
+        ) : null}
       </main>
     </div>
   );

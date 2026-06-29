@@ -9,6 +9,7 @@ const DATA_DIR = process.env.DATA_DIR
 const ORDERS_FILE = path.join(DATA_DIR, "orders.json");
 const VIEWS_FILE = path.join(DATA_DIR, "article_views.json");
 const ADMIN_AUTH_FILE = path.join(DATA_DIR, "admin_auth.json");
+const ADMIN_KPI_FILE = path.join(DATA_DIR, "admin_kpi.json");
 
 console.log(`[DB] Thư mục lưu đơn hàng: ${DATA_DIR}`);
 
@@ -93,6 +94,35 @@ function readAdminAuth() {
 function writeAdminAuth(auth) {
   ensureStore();
   fs.writeFileSync(ADMIN_AUTH_FILE, JSON.stringify(auth, null, 2), "utf8");
+}
+
+function readAdminKpi() {
+  ensureStore();
+  if (!fs.existsSync(ADMIN_KPI_FILE)) {
+    fs.writeFileSync(ADMIN_KPI_FILE, "{}", "utf8");
+  }
+  try {
+    const raw = fs.readFileSync(ADMIN_KPI_FILE, "utf8");
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+  } catch (err) {
+    console.error("[DB] Khong doc duoc admin_kpi.json:", err.message);
+    return {};
+  }
+}
+
+function writeAdminKpi(kpi) {
+  ensureStore();
+  fs.writeFileSync(ADMIN_KPI_FILE, JSON.stringify(kpi, null, 2), "utf8");
+}
+
+function normalizeKpiMonths(months) {
+  const normalized = {};
+  for (let month = 1; month <= 12; month += 1) {
+    const value = Number(months?.[month] ?? months?.[String(month)] ?? 0);
+    normalized[String(month)] = Number.isFinite(value) && value > 0 ? Math.round(value) : 0;
+  }
+  return normalized;
 }
 
 
@@ -336,5 +366,17 @@ module.exports = {
       updatedAt: new Date().toISOString(),
     });
     return this.getAdminAuth();
+  },
+
+  getAdminKpi(year) {
+    const kpis = readAdminKpi();
+    return normalizeKpiMonths(kpis[String(year)] || {});
+  },
+
+  setAdminKpi(year, months) {
+    const kpis = readAdminKpi();
+    kpis[String(year)] = normalizeKpiMonths(months);
+    writeAdminKpi(kpis);
+    return this.getAdminKpi(year);
   },
 };
