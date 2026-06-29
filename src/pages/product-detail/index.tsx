@@ -17,6 +17,8 @@ import {
 } from "@/utils/promotion";
 import { getProductReviews } from "@/services/review/review.storage";
 import { recordProductInterest } from "@/services/search/search-insights.storage";
+import { useProductSalesSummary } from "@/services/order/order.queries";
+import { formatSoldCount } from "@/utils/order-sales";
 
 // Type cho variant selections
 type VariantSelections = {
@@ -77,6 +79,8 @@ export default function ProductDetailPage() {
   const isEditMode = !!editCartItemId;
 
   const { data: product, isLoading, isError } = useProduct(id || "");
+  const { data: salesSummary } = useProductSalesSummary();
+  const soldCount = product ? (salesSummary?.soldCounts[product.id] || 0) : 0;
   const { addToCart, updateCartItem, items, totalItems } = useCartStore();
   const displayedReviews = useMemo(
     () => (product ? getProductReviews(product.id) : []),
@@ -653,7 +657,7 @@ export default function ProductDetailPage() {
               </div>
             </div>
             <div className="flex shrink-0 items-center gap-2 text-sm text-gray-600">
-              <span>Đã bán 100</span>
+              <span>{formatSoldCount(soldCount)}</span>
               <button
                 type="button"
                 onClick={() => setIsFavorite((value) => !value)}

@@ -18,7 +18,7 @@ import { ProductFeature } from "@/types/product.types";
 import { useSubcategoryVisibility } from "@/hooks/use-subcategory-visibility";
 import { scrollToId } from "@/utils/scroll-to";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { openWebview } from "zmp-sdk";
 import { copy } from "@/constants/copy";
 import { SUNBELEAF_LOGO_URL } from "@/components/common/logo";
@@ -38,6 +38,8 @@ import {
 } from "@/services/search/search-insights.storage";
 import { useSnackbar } from "zmp-ui";
 import { getZaloOfficialAccountStats } from "@/services/zalo-oa/zalo-oa.api";
+import { useProductSalesSummary } from "@/services/order/order.queries";
+import { formatSoldCount } from "@/utils/order-sales";
 
 type ShopTab = "shop" | "products" | "categories" | "promotions";
 
@@ -205,15 +207,31 @@ export default function HomePage() {
   const discoveryBannerTouchStartX = useRef<number | null>(null);
 
   const { data: categories, isLoading: isLoadingCategories } = useCategories();
+  const { data: salesSummary } = useProductSalesSummary();
 
-  const [activeTab, setActiveTab] = useState<ShopTab>("shop");
+  const [searchParams] = useSearchParams();
+  const tabParam = searchParams.get("tab") as ShopTab;
+  const [activeTab, setActiveTab] = useState<ShopTab>(tabParam || "shop");
   const [activeBanner, setActiveBanner] = useState(0);
   const [activeDiscoveryBanner, setActiveDiscoveryBanner] = useState(0);
   const [shopSearchQuery, setShopSearchQuery] = useState("");
   const [isShopSearchFocused, setIsShopSearchFocused] = useState(false);
   const [termsVisible, setTermsVisible] = useState(false);
   const [voucherTermsVisible, setVoucherTermsVisible] = useState(false);
-  const [voucherCollected, setVoucherCollected] = useState(false);
+  const [voucherCollected, setVoucherCollected] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem("sunbeleaf_voucher_collected") === "true";
+    } catch {
+      return false;
+    }
+  });
+  const [promoModalVisible, setPromoModalVisible] = useState(false);
+  const [selectedPromo, setSelectedPromo] = useState<{
+    title: string;
+    rules: string[];
+    btnText: string;
+    action: () => void;
+  } | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const promoPopupVisible = useCartStore((state) => state.promoPopupVisible);
   const setPromoPopupVisible = useCartStore((state) => state.setPromoPopupVisible);
@@ -703,7 +721,9 @@ export default function HomePage() {
               <div className="mt-1 font-semibold text-[#ee4d2d]">
                 {formatCurrency(getDisplayPromotionalPrice(product))}
               </div>
-              <div className="text-[11px] text-gray-500">Đã bán 100+</div>
+              <div className="text-[11px] text-gray-500">
+                {formatSoldCount(salesSummary?.soldCounts[product.id] || 0)}
+              </div>
             </button>
           ))}
         </div>
@@ -831,7 +851,7 @@ export default function HomePage() {
                   TOP {index + 1}
                 </span>
                 <span className="absolute bottom-0 left-0 right-0 bg-[#ee4d2d]/90 py-1 text-center text-[10px] text-white">
-                  Đã bán 100+
+                  {formatSoldCount(salesSummary?.soldCounts[product.id] || 0)}
                 </span>
               </div>
               <div className="p-2">
@@ -899,6 +919,69 @@ export default function HomePage() {
     </div>
   );
 
+  const handlePromoClick = (promoId: string) => {
+    switch (promoId) {
+      case "point_discount":
+        setSelectedPromo({
+          title: "Giảm 20k từ điểm thưởng",
+          rules: [
+            "Mỗi đơn hàng đặt mua và nhận hàng thành công, người dùng sẽ được cộng 1.000 điểm thưởng.",
+            "Điểm thưởng đủ 20.000 sẽ được quy đổi thành mã giảm 20.000đ cho đơn hàng tiếp theo.",
+            "Có thể tích lũy thêm điểm thưởng thông qua việc tham gia đánh giá sản phẩm hoặc các trò chơi may mắn.",
+            "Khuyến mãi được áp dụng trực tiếp tại bước thanh toán khi đạt đủ số điểm quy đổi."
+          ],
+          btnText: "Dùng ngay",
+          action: () => setActiveTab("products"),
+        });
+        break;
+      case "review_points":
+        setSelectedPromo({
+          title: "Đánh giá nhận điểm thưởng",
+          rules: [
+            "Khách hàng thực hiện viết đánh giá cho các sản phẩm đã mua thành công tại cửa hàng.",
+            "Mỗi lượt đánh giá thành công (bình luận kèm hình ảnh/video thực tế) sẽ được nhận ngay 1.000 điểm thưởng.",
+            "Điểm thưởng được tự động cộng vào tài khoản tích lũy của bạn.",
+            "Điểm thưởng này được dùng để đổi quà tặng hoặc quy đổi chiết khấu đơn hàng."
+          ],
+          btnText: "Đánh giá ngay",
+          action: () => navigate("/order"),
+        });
+        break;
+      case "first_order":
+        setSelectedPromo({
+          title: "Giảm 10% đơn hàng đầu tiên",
+          rules: [
+            "Chương trình giảm giá 10% trên tổng giá trị đơn hàng áp dụng tự động cho lần đặt mua hàng đầu tiên.",
+            "Dành riêng cho khách hàng mới chưa từng phát sinh đơn hàng giao thành công trên hệ thống.",
+            "Không áp dụng đồng thời với các mã giảm giá khác.",
+            "Chiết khấu tối đa không vượt quá giá trị của đơn hàng hàng hóa."
+          ],
+          btnText: "Dùng ngay",
+          action: () => setActiveTab("products"),
+        });
+        break;
+      case "zalo_oa":
+        setSelectedPromo({
+          title: "Giảm 5% khi quan tâm Zalo OA",
+          rules: [
+            "Giảm 5% trên tổng giá trị đơn hàng khi người dùng bấm quan tâm trang Zalo OA của trà thảo mộc Delta D'Asia.",
+            "Vui lòng bấm nút 'Quan tâm ngay' trong bảng thông tin này để chuyển tiếp đến trang Zalo OA.",
+            "Sau khi bấm quan tâm thành công, hệ thống Zalo Mini App sẽ ghi nhận trạng thái và tự động giảm 5% cho đơn tiếp theo."
+          ],
+          btnText: "Quan tâm ngay",
+          action: () => {
+            openWebview({
+              url: "https://zalo.me/2373245714894928774",
+            });
+          },
+        });
+        break;
+      default:
+        break;
+    }
+    setPromoModalVisible(true);
+  };
+
   const renderPromotionsTab = () => (
     <div className="pb-8">
       {/* Title banner */}
@@ -917,18 +1000,33 @@ export default function HomePage() {
       {/* Auto-applied promos list (Image 2 style) */}
       <div className="mx-3.5 flex flex-col gap-3 mb-6">
         {/* Promo 1: Giảm 20k từ điểm thưởng */}
-        <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white p-4 shadow-sm flex items-center justify-between">
+        <div
+          onClick={() => handlePromoClick("point_discount")}
+          className="relative overflow-hidden rounded-xl border border-gray-200 bg-white p-4 shadow-sm flex items-center justify-between active:scale-[0.99] transition duration-150 cursor-pointer"
+        >
           <div className="absolute top-0 right-0 bg-[#2c714b] text-white px-3 py-0.5 rounded-bl-lg text-[9px] font-bold uppercase tracking-wider">
             Số lượng có hạn
           </div>
           
           <div className="flex items-center flex-1 min-w-0 mr-2">
-            {/* Gold coin bag SVG */}
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-yellow-50 text-yellow-500 shadow-inner">
-              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
+            {/* Money Bag SVG */}
+            <svg viewBox="0 0 64 64" className="w-14 h-14 shrink-0 overflow-visible">
+              {/* Coins at base */}
+              <circle cx="16" cy="48" r="8" fill="#FFC107" stroke="#FFA000" strokeWidth="1.2" />
+              <line x1="16" y1="42" x2="16" y2="52" stroke="#fff" strokeWidth="1.2" strokeLinecap="round" />
+              <circle cx="27" cy="51" r="8" fill="#FFD54F" stroke="#FFB300" strokeWidth="1.2" />
+              <line x1="27" y1="45" x2="27" y2="55" stroke="#fff" strokeWidth="1.2" strokeLinecap="round" />
+              {/* Bag Body */}
+              <path d="M42,22 C36,22 34,16 34,14 C34,12 36,10 42,10 C48,10 50,12 50,14 C50,16 48,22 42,22 Z" fill="#FFE082" />
+              <path d="M42,20 C32,20 24,28 24,44 C24,54 32,58 42,58 C52,58 60,54 60,44 C60,28 52,20 42,20 Z" fill="#FFB300" stroke="#FF8F00" strokeWidth="1.8" />
+              {/* Red tie rope */}
+              <path d="M29,22 Q42,26 55,22" fill="none" stroke="#D84315" strokeWidth="2.5" strokeLinecap="round" />
+              {/* Dollar sign label */}
+              <text x="42" y="45" textAnchor="middle" fill="#D84315" fontSize="16" fontWeight="bold" fontFamily="sans-serif">$</text>
+              {/* Star sparks */}
+              <path d="M12,18 L14,14 L18,12 L14,10 L12,6 L10,10 L6,12 L10,14 Z" fill="#FFF59D" />
+              <circle cx="55" cy="14" r="2.2" fill="#FFD54F" />
+            </svg>
             
             <div className="ml-3.5 min-w-0">
               <h3 className="text-sm font-bold text-gray-900 truncate">Giảm 20k từ điểm thưởng</h3>
@@ -941,7 +1039,10 @@ export default function HomePage() {
           <div className="w-20 shrink-0 flex justify-end">
             <button
               type="button"
-              onClick={() => setActiveTab("products")}
+              onClick={(e) => {
+                e.stopPropagation();
+                handlePromoClick("point_discount");
+              }}
               className="border border-[#2c714b] text-[#2c714b] text-[11px] font-bold py-1.5 px-3 rounded bg-white hover:bg-emerald-50 active:scale-95 transition"
             >
               Dùng ngay
@@ -950,18 +1051,29 @@ export default function HomePage() {
         </div>
 
         {/* Promo 2: Đánh giá nhận điểm thưởng */}
-        <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white p-4 shadow-sm flex items-center justify-between">
+        <div
+          onClick={() => handlePromoClick("review_points")}
+          className="relative overflow-hidden rounded-xl border border-gray-200 bg-white p-4 shadow-sm flex items-center justify-between active:scale-[0.99] transition duration-150 cursor-pointer"
+        >
           <div className="absolute top-0 right-0 bg-[#2c714b] text-white px-3 py-0.5 rounded-bl-lg text-[9px] font-bold uppercase tracking-wider">
             Số lượng có hạn
           </div>
           
           <div className="flex items-center flex-1 min-w-0 mr-2">
-            {/* Medal/Ribbon star SVG */}
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-amber-50 text-amber-500 shadow-inner">
-              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-            </div>
+            {/* Star Medal SVG */}
+            <svg viewBox="0 0 64 64" className="w-14 h-14 shrink-0 overflow-visible">
+              {/* Ribbon tails */}
+              <path d="M22,34 L16,56 L28,52 L36,40 Z" fill="#7C4DFF" />
+              <path d="M42,34 L48,56 L36,52 L28,40 Z" fill="#FF4081" />
+              {/* Gold border round seal */}
+              <circle cx="32" cy="28" r="18" fill="#FFB300" stroke="#FF8F00" strokeWidth="1.8" />
+              <circle cx="32" cy="28" r="14" fill="#FFD54F" />
+              {/* Yellow Star in center */}
+              <path d="M32,18 L35,24 L42,25 L37,29 L39,36 L32,32 L25,36 L27,29 L22,25 L29,24 Z" fill="#FFF59D" stroke="#FFC107" strokeWidth="0.8" />
+              {/* Colorful sparks */}
+              <circle cx="10" cy="16" r="2.2" fill="#FF4081" />
+              <circle cx="54" cy="40" r="2.2" fill="#7C4DFF" />
+            </svg>
             
             <div className="ml-3.5 min-w-0">
               <h3 className="text-sm font-bold text-gray-900 truncate">1.000 điểm khi đánh giá</h3>
@@ -974,7 +1086,10 @@ export default function HomePage() {
           <div className="w-20 shrink-0 flex justify-end">
             <button
               type="button"
-              onClick={() => navigate("/order")}
+              onClick={(e) => {
+                e.stopPropagation();
+                handlePromoClick("review_points");
+              }}
               className="border border-[#2c714b] text-[#2c714b] text-[11px] font-bold py-1.5 px-3 rounded bg-white hover:bg-emerald-50 active:scale-95 transition"
             >
               Đánh giá
@@ -983,18 +1098,23 @@ export default function HomePage() {
         </div>
 
         {/* Promo 3: Giảm 10% đơn hàng đầu tiên */}
-        <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white p-4 shadow-sm flex items-center justify-between">
+        <div
+          onClick={() => handlePromoClick("first_order")}
+          className="relative overflow-hidden rounded-xl border border-gray-200 bg-white p-4 shadow-sm flex items-center justify-between active:scale-[0.99] transition duration-150 cursor-pointer"
+        >
           <div className="absolute top-0 right-0 bg-[#2c714b] text-white px-3 py-0.5 rounded-bl-lg text-[9px] font-bold uppercase tracking-wider">
             Số lượng có hạn
           </div>
           
           <div className="flex items-center flex-1 min-w-0 mr-2">
             {/* Scalloped Red seal SVG */}
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-rose-50 text-rose-500 shadow-inner">
-              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
-            </div>
+            <svg viewBox="0 0 64 64" className="w-14 h-14 shrink-0 overflow-visible">
+              {/* Scalloped edge */}
+              <path d="M32,4 L36,8 L42,6 L44,11 L50,11 L50,17 L55,19 L53,25 L57,28 L53,32 L55,38 L50,40 L50,46 L44,46 L42,51 L36,49 L32,53 L28,49 L22,51 L20,46 L14,46 L14,40 L9,38 L11,32 L7,28 L11,25 L9,19 L14,17 L14,11 L20,11 L22,6 L28,8 Z" fill="#FF3D00" stroke="#D50000" strokeWidth="1.8" />
+              <circle cx="32" cy="28" r="16" fill="#FF1744" />
+              {/* Percent character inside badge */}
+              <text x="32" y="35" textAnchor="middle" fill="#FFFFFF" fontSize="20" fontWeight="bold" fontFamily="sans-serif">%</text>
+            </svg>
             
             <div className="ml-3.5 min-w-0">
               <h3 className="text-sm font-bold text-gray-900 truncate">Giảm 10% giá trị đơn hàng</h3>
@@ -1007,7 +1127,10 @@ export default function HomePage() {
           <div className="w-20 shrink-0 flex justify-end">
             <button
               type="button"
-              onClick={() => setActiveTab("products")}
+              onClick={(e) => {
+                e.stopPropagation();
+                handlePromoClick("first_order");
+              }}
               className="border border-[#2c714b] text-[#2c714b] text-[11px] font-bold py-1.5 px-3 rounded bg-white hover:bg-emerald-50 active:scale-95 transition"
             >
               Dùng ngay
@@ -1016,18 +1139,33 @@ export default function HomePage() {
         </div>
 
         {/* Promo 4: Giảm 5% khi quan tâm Zalo OA */}
-        <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white p-4 shadow-sm flex items-center justify-between">
+        <div
+          onClick={() => handlePromoClick("zalo_oa")}
+          className="relative overflow-hidden rounded-xl border border-gray-200 bg-white p-4 shadow-sm flex items-center justify-between active:scale-[0.99] transition duration-150 cursor-pointer"
+        >
           <div className="absolute top-0 right-0 bg-[#2c714b] text-white px-3 py-0.5 rounded-bl-lg text-[9px] font-bold uppercase tracking-wider">
             Số lượng có hạn
           </div>
           
           <div className="flex items-center flex-1 min-w-0 mr-2">
-            {/* Zalo OA box icon */}
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-500 shadow-inner">
-              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-              </svg>
-            </div>
+            {/* Scooter Shipper SVG */}
+            <svg viewBox="0 0 64 64" className="w-14 h-14 shrink-0 overflow-visible">
+              <circle cx="32" cy="32" r="28" fill="#E8F5E9" />
+              {/* Helmet */}
+              <circle cx="26" cy="22" r="8" fill="#2E7D32" />
+              <circle cx="26" cy="22" r="6" fill="#81C784" />
+              <rect x="22" y="22" width="8" height="3" fill="#37474F" />
+              {/* Rider Body */}
+              <path d="M22,30 L34,30 L38,40 L18,40 Z" fill="#2E7D32" />
+              {/* Wheels */}
+              <circle cx="20" cy="46" r="6" fill="#37474F" stroke="#ECEFF1" strokeWidth="2" />
+              <circle cx="44" cy="46" r="6" fill="#37474F" stroke="#ECEFF1" strokeWidth="2" />
+              {/* Bike elements */}
+              <path d="M20,40 L44,40 L44,46" fill="none" stroke="#2E7D32" strokeWidth="3" strokeLinecap="round" />
+              <path d="M30,30 L40,30 L42,40" fill="none" stroke="#81C784" strokeWidth="2" />
+              {/* Orange box on back */}
+              <rect x="10" y="26" width="10" height="10" rx="1.2" fill="#FF9800" />
+            </svg>
             
             <div className="ml-3.5 min-w-0">
               <h3 className="text-sm font-bold text-gray-900 truncate">Giảm 5% giá trị đơn hàng</h3>
@@ -1041,14 +1179,9 @@ export default function HomePage() {
           <div className="w-20 shrink-0 flex justify-end">
             <button
               type="button"
-              onClick={async () => {
-                try {
-                  await openWebview({
-                    url: "https://zalo.me/2373245714894928774",
-                  });
-                } catch (err) {
-                  console.error("Lỗi chuyển tiếp trang Zalo OA:", err);
-                }
+              onClick={(e) => {
+                e.stopPropagation();
+                handlePromoClick("zalo_oa");
               }}
               className="border border-[#2c714b] text-[#2c714b] text-[11px] font-bold py-1.5 px-3 rounded bg-white hover:bg-emerald-50 active:scale-95 transition"
             >
@@ -1133,6 +1266,12 @@ export default function HomePage() {
                 type="button"
                 onClick={() => {
                   setVoucherCollected(true);
+                  try {
+                    localStorage.setItem("sunbeleaf_voucher_collected", "true");
+                    window.dispatchEvent(new Event("storage"));
+                  } catch (e) {
+                    console.error(e);
+                  }
                   openSnackbar({
                     text: "Đã thu thập voucher thành công!",
                     type: "success",
@@ -1549,6 +1688,40 @@ export default function HomePage() {
             >
               Đã hiểu
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Promotion Detail Modal */}
+      {promoModalVisible && selectedPromo && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setPromoModalVisible(false)} />
+          <div className="relative w-full max-w-[320px] rounded-2xl bg-white p-5 shadow-2xl z-10 animate-fade-in">
+            <h3 className="text-base font-bold text-gray-900 mb-3 text-center">{selectedPromo.title}</h3>
+            <div className="text-xs text-gray-600 space-y-2 leading-5 max-h-60 overflow-y-auto pr-1">
+              {selectedPromo.rules.map((rule, idx) => (
+                <p key={idx}>• {rule}</p>
+              ))}
+            </div>
+            <div className="mt-5 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setPromoModalVisible(false)}
+                className="flex-1 rounded-xl border border-gray-300 py-2.5 text-center text-xs font-semibold text-gray-600 active:scale-95 transition"
+              >
+                Đóng
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setPromoModalVisible(false);
+                  selectedPromo.action();
+                }}
+                className="flex-1 rounded-xl bg-[#2c714b] py-2.5 text-center text-xs font-semibold text-white active:scale-95 transition"
+              >
+                {selectedPromo.btnText}
+              </button>
+            </div>
           </div>
         </div>
       )}
