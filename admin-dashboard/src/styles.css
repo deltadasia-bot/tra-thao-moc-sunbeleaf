@@ -78,6 +78,40 @@ button {
   gap: 10px;
 }
 
+.date-range-fields {
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.date-range-fields label {
+  min-width: 0;
+}
+
+.date-range-fields input[type="date"] {
+  min-width: 0;
+  height: 54px;
+  padding: 0 14px;
+  color: #102617;
+  font-size: 15px;
+  font-weight: 850;
+  letter-spacing: -0.01em;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(249, 253, 250, 0.88)),
+    #fff;
+}
+
+.date-range-fields input[type="date"]::-webkit-calendar-picker-indicator {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  opacity: 0.78;
+}
+
+.date-range-fields input[type="date"]:hover {
+  border-color: rgba(23, 178, 106, 0.34);
+  background: #fff;
+}
+
 input,
 select,
 textarea {

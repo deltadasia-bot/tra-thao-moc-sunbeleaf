@@ -1059,7 +1059,7 @@ export default function App() {
               placeholder="Mã đơn, tên khách, số điện thoại"
             />
           </label>
-          <div className="filter-two-columns">
+          <div className="filter-two-columns date-range-fields">
             <label>
               Từ ngày
               <input
