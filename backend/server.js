@@ -9,6 +9,7 @@ const sapoRouter    = require("./routes/sapo");
 const adminRouter   = require("./routes/admin");
 const newsRouter    = require("./routes/news");
 const avatarRouter  = require("./routes/avatar");
+const zaloOaRouter  = require("./routes/zalo-oa");
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -55,6 +56,7 @@ app.use("/api/sapo",    sapoRouter);
 app.use("/api/admin",   adminRouter);
 app.use("/api/news",    newsRouter);
 app.use("/api/avatar",  avatarRouter);
+app.use("/api/zalo-oa", zaloOaRouter);
 const adminDashboardPath = path.join(__dirname, "admin-dist");
 app.use("/admin", express.static(adminDashboardPath));
 app.get("/admin/*", (_req, res) => {

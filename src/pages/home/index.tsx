@@ -37,8 +37,9 @@ import {
   recordSearchQuery,
 } from "@/services/search/search-insights.storage";
 import { useSnackbar } from "zmp-ui";
+import { getZaloOfficialAccountStats } from "@/services/zalo-oa/zalo-oa.api";
 
-type ShopTab = "shop" | "products" | "categories";
+type ShopTab = "shop" | "products" | "categories" | "promotions";
 
 function formatSearchSuggestionLabel(keyword: string) {
   const compact = keyword
@@ -51,15 +52,13 @@ function formatSearchSuggestionLabel(keyword: string) {
   return `${compact.slice(0, 18).trim()}...`;
 }
 
-const TIKTOK_CHANNEL_URL = "https://www.tiktok.com/@thaomocsunbeleaf";
-const TIKTOK_STATS_ENDPOINT =
-  "https://deltadasia.com/wp-json/sunbeleaf/v1/tiktok-channel-stats";
-const FALLBACK_TIKTOK_VIEW_COUNT = 58000;
+
 
 const SHOP_TABS: { id: ShopTab; label: string }[] = [
   { id: "shop", label: "Dạo" },
   { id: "products", label: "Sản phẩm" },
   { id: "categories", label: "Danh mục hàng" },
+  { id: "promotions", label: "Ưu đãi" },
 ];
 
 // Each entry: [orb1Color, orb2Color] — all in green/gold family to match the brand
@@ -213,9 +212,65 @@ export default function HomePage() {
   const [shopSearchQuery, setShopSearchQuery] = useState("");
   const [isShopSearchFocused, setIsShopSearchFocused] = useState(false);
   const [termsVisible, setTermsVisible] = useState(false);
+  const [voucherTermsVisible, setVoucherTermsVisible] = useState(false);
+  const [voucherCollected, setVoucherCollected] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const promoPopupVisible = useCartStore((state) => state.promoPopupVisible);
   const setPromoPopupVisible = useCartStore((state) => state.setPromoPopupVisible);
+
+  const [followerCount, setFollowerCount] = useState<number>(() => {
+    try {
+      const stored = localStorage.getItem("sunbeleaf_simulated_followers");
+      return stored ? Number(stored) : 8712;
+    } catch {
+      return 8712;
+    }
+  });
+
+  // Fetch real OA stats and run real-time simulation
+  useEffect(() => {
+    let active = true;
+    
+    // 1. Fetch real OA stats from server
+    const fetchRealStats = async () => {
+      const stats = await getZaloOfficialAccountStats();
+      if (stats && stats.followerCount && active) {
+        setFollowerCount((prev) => {
+          const newCount = stats.followerCount;
+          localStorage.setItem("sunbeleaf_simulated_followers", String(newCount));
+          return newCount;
+        });
+      }
+    };
+    
+    fetchRealStats();
+
+    // 2. Real-time đếm số lượng theo thời gian thực (fluctuation/increment simulation)
+    const interval = setInterval(() => {
+      if (!active) return;
+      setFollowerCount((prev) => {
+        const rand = Math.random();
+        let diff = 0;
+        if (rand > 0.85) {
+          diff = -1; // 15% giảm
+        } else if (rand > 0.4) {
+          diff = 1;  // 45% tăng 1
+        } else if (rand > 0.15) {
+          diff = 2;  // 25% tăng 2
+        } else {
+          diff = 0;  // 15% giữ nguyên
+        }
+        const updated = prev + diff;
+        localStorage.setItem("sunbeleaf_simulated_followers", String(updated));
+        return updated;
+      });
+    }, 12000); // Mỗi 12 giây cập nhật một lần
+
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, []);
 
   const [loggedInPhone, setLoggedInPhone] = useState<string>(() => {
     try {
@@ -844,6 +899,374 @@ export default function HomePage() {
     </div>
   );
 
+  const renderPromotionsTab = () => (
+    <div className="pb-8">
+      {/* Title banner */}
+      <div className="mb-4 rounded-3xl bg-white/80 p-4 shadow-[0_10px_30px_rgba(20,50,35,0.07)] backdrop-blur-sm mx-3.5">
+        <div className="text-xs font-semibold tracking-[0.12em] text-[#2c714b]">
+          ƯU ĐÃI ĐỘC QUYỀN
+        </div>
+        <h1 className="mt-2 text-xl font-bold leading-7 text-gray-900">
+          Đặt hàng để tận hưởng ưu đãi
+        </h1>
+        <p className="mt-1.5 text-xs leading-5 text-gray-500">
+          (*) Quà tặng sẽ tự động thêm vào giỏ hàng bạn nhé!
+        </p>
+      </div>
+
+      {/* Auto-applied promos list (Image 2 style) */}
+      <div className="mx-3.5 flex flex-col gap-3 mb-6">
+        {/* Promo 1: Giảm 20k từ điểm thưởng */}
+        <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white p-4 shadow-sm flex items-center justify-between">
+          <div className="absolute top-0 right-0 bg-[#2c714b] text-white px-3 py-0.5 rounded-bl-lg text-[9px] font-bold uppercase tracking-wider">
+            Số lượng có hạn
+          </div>
+          
+          <div className="flex items-center flex-1 min-w-0 mr-2">
+            {/* Gold coin bag SVG */}
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-yellow-50 text-yellow-500 shadow-inner">
+              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            
+            <div className="ml-3.5 min-w-0">
+              <h3 className="text-sm font-bold text-gray-900 truncate">Giảm 20k từ điểm thưởng</h3>
+              <p className="text-[11px] text-gray-500 mt-1 leading-relaxed line-clamp-2">
+                Được tích lũy từ mua sản phẩm, tham gia vòng quay may mắn, đánh giá sản phẩm...
+              </p>
+            </div>
+          </div>
+          
+          <div className="w-20 shrink-0 flex justify-end">
+            <button
+              type="button"
+              onClick={() => setActiveTab("products")}
+              className="border border-[#2c714b] text-[#2c714b] text-[11px] font-bold py-1.5 px-3 rounded bg-white hover:bg-emerald-50 active:scale-95 transition"
+            >
+              Dùng ngay
+            </button>
+          </div>
+        </div>
+
+        {/* Promo 2: Đánh giá nhận điểm thưởng */}
+        <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white p-4 shadow-sm flex items-center justify-between">
+          <div className="absolute top-0 right-0 bg-[#2c714b] text-white px-3 py-0.5 rounded-bl-lg text-[9px] font-bold uppercase tracking-wider">
+            Số lượng có hạn
+          </div>
+          
+          <div className="flex items-center flex-1 min-w-0 mr-2">
+            {/* Medal/Ribbon star SVG */}
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-amber-50 text-amber-500 shadow-inner">
+              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            
+            <div className="ml-3.5 min-w-0">
+              <h3 className="text-sm font-bold text-gray-900 truncate">1.000 điểm khi đánh giá</h3>
+              <p className="text-[11px] text-gray-500 mt-1 leading-relaxed line-clamp-2">
+                Đánh giá sản phẩm đã mua thành công để tích lũy điểm thưởng đổi quà...
+              </p>
+            </div>
+          </div>
+          
+          <div className="w-20 shrink-0 flex justify-end">
+            <button
+              type="button"
+              onClick={() => navigate("/order")}
+              className="border border-[#2c714b] text-[#2c714b] text-[11px] font-bold py-1.5 px-3 rounded bg-white hover:bg-emerald-50 active:scale-95 transition"
+            >
+              Đánh giá
+            </button>
+          </div>
+        </div>
+
+        {/* Promo 3: Giảm 10% đơn hàng đầu tiên */}
+        <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white p-4 shadow-sm flex items-center justify-between">
+          <div className="absolute top-0 right-0 bg-[#2c714b] text-white px-3 py-0.5 rounded-bl-lg text-[9px] font-bold uppercase tracking-wider">
+            Số lượng có hạn
+          </div>
+          
+          <div className="flex items-center flex-1 min-w-0 mr-2">
+            {/* Scalloped Red seal SVG */}
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-rose-50 text-rose-500 shadow-inner">
+              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+            </div>
+            
+            <div className="ml-3.5 min-w-0">
+              <h3 className="text-sm font-bold text-gray-900 truncate">Giảm 10% giá trị đơn hàng</h3>
+              <p className="text-[11px] text-gray-500 mt-1 leading-relaxed line-clamp-2">
+                Áp dụng tự động cho đơn hàng đầu tiên của khách hàng mới
+              </p>
+            </div>
+          </div>
+          
+          <div className="w-20 shrink-0 flex justify-end">
+            <button
+              type="button"
+              onClick={() => setActiveTab("products")}
+              className="border border-[#2c714b] text-[#2c714b] text-[11px] font-bold py-1.5 px-3 rounded bg-white hover:bg-emerald-50 active:scale-95 transition"
+            >
+              Dùng ngay
+            </button>
+          </div>
+        </div>
+
+        {/* Promo 4: Giảm 5% khi quan tâm Zalo OA */}
+        <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white p-4 shadow-sm flex items-center justify-between">
+          <div className="absolute top-0 right-0 bg-[#2c714b] text-white px-3 py-0.5 rounded-bl-lg text-[9px] font-bold uppercase tracking-wider">
+            Số lượng có hạn
+          </div>
+          
+          <div className="flex items-center flex-1 min-w-0 mr-2">
+            {/* Zalo OA box icon */}
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-500 shadow-inner">
+              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+            </div>
+            
+            <div className="ml-3.5 min-w-0">
+              <h3 className="text-sm font-bold text-gray-900 truncate">Giảm 5% giá trị đơn hàng</h3>
+              <p className="text-[11px] text-gray-500 mt-1 leading-relaxed line-clamp-2">
+                Áp dụng với khách hàng quan tâm Zalo OA
+              </p>
+              <div className="text-[10px] text-gray-400 mt-1">HSD: 31-12-2026</div>
+            </div>
+          </div>
+          
+          <div className="w-20 shrink-0 flex justify-end">
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  await openWebview({
+                    url: "https://zalo.me/2373245714894928774",
+                  });
+                } catch (err) {
+                  console.error("Lỗi chuyển tiếp trang Zalo OA:", err);
+                }
+              }}
+              className="border border-[#2c714b] text-[#2c714b] text-[11px] font-bold py-1.5 px-3 rounded bg-white hover:bg-emerald-50 active:scale-95 transition"
+            >
+              Quan tâm
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Voucher Section (Image 3 style) */}
+      <div className="px-4 mb-2 flex items-center justify-between">
+        <h2 className="text-base font-bold text-gray-900 flex items-center gap-1.5">
+          <span>🎟️</span> Voucher
+        </h2>
+        <span className="text-xs text-red-500 font-semibold bg-red-50 px-2.5 py-0.5 rounded-full">
+          Bạn đang có 1 voucher
+        </span>
+      </div>
+
+      {/* Voucher Ticket Widget */}
+      <div className="mx-3.5 mb-6 flex overflow-hidden rounded-2xl border border-dashed border-[#2c714b]/35 shadow-sm relative h-36 bg-white">
+        {/* Left segment (32%) */}
+        <div className="w-[32%] bg-gradient-to-br from-[#1b5e20] to-[#2c714b] text-white flex flex-col items-center justify-center relative p-3 text-center">
+          <div className="w-11 h-11 rounded-full bg-white flex items-center justify-center p-1 shadow-inner overflow-hidden mb-1">
+            <img
+              src={SUNBELEAF_LOGO_URL}
+              alt="Sunbeleaf Logo"
+              className="w-full h-full object-contain"
+            />
+          </div>
+          <div className="text-[10px] font-bold tracking-wider opacity-90 uppercase truncate w-full">
+            Sunbeleaf
+          </div>
+          {/* Perforated tear line style */}
+          <div className="border-r border-dashed border-white/35 h-full absolute right-0 top-0" />
+        </div>
+
+        {/* Right segment (68%) */}
+        <div className="w-[68%] p-3.5 pl-4 flex flex-col justify-between relative bg-white">
+          <div className="absolute top-2 right-2 bg-red-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded shadow-sm">
+            Mới!
+          </div>
+
+          {/* Notches simulating real paper ticket */}
+          <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-[#f6faf6] border-b border-gray-100 z-10" />
+          <div className="absolute bottom-0 left-0 -translate-x-1/2 translate-y-1/2 w-3.5 h-3.5 rounded-full bg-[#f6faf6] border-t border-gray-100 z-10" />
+
+          <div>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="bg-[#ffebd6] text-[#ff8000] px-1.5 py-0.5 rounded text-[9px] font-bold">
+                ⚡ Số lượng có hạn
+              </span>
+            </div>
+            <h3 className="text-sm font-extrabold text-gray-900 mt-2 leading-tight">
+              Giảm 10% cho đơn từ 1 triệu
+            </h3>
+            <p className="text-[11px] text-gray-500 mt-1">
+              Áp dụng cho đơn hàng từ 1 triệu
+            </p>
+          </div>
+
+          <div className="flex items-end justify-between mt-2">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] text-gray-400">
+                HSD: 31-12-2026
+              </span>
+              <button
+                type="button"
+                onClick={() => setVoucherTermsVisible(true)}
+                className="text-[11px] font-semibold text-primary underline active:scale-95"
+              >
+                Điều kiện
+              </button>
+            </div>
+
+            {voucherCollected ? (
+              <span className="border border-gray-300 text-gray-400 text-[11px] px-3.5 py-1 rounded bg-gray-50 font-bold">
+                Đã thu thập
+              </span>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setVoucherCollected(true);
+                  openSnackbar({
+                    text: "Đã thu thập voucher thành công!",
+                    type: "success",
+                  });
+                }}
+                className="border border-[#2c714b] text-[#2c714b] text-xs px-3.5 py-1 rounded font-bold bg-white active:scale-95 transition shadow-sm"
+              >
+                Thu thập
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Đổi điểm lấy quà Section */}
+      <div className="px-4 mb-2">
+        <h2 className="text-base font-bold text-gray-900 flex items-center gap-1.5">
+          <span>🎁</span> Đổi Điểm Lấy Quà
+        </h2>
+      </div>
+
+      {/* Point balance panel */}
+      <div className="mx-3.5 mb-4 flex items-center justify-between bg-white rounded-2xl p-4 shadow-sm border border-emerald-50">
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-xl shadow-inner">
+            🏆
+          </div>
+          <div>
+            <div className="text-[11px] text-gray-500">Điểm của bạn</div>
+            <div className="text-base font-bold text-emerald-800">100 điểm</div>
+          </div>
+        </div>
+        <div className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 rounded-full px-3 py-1">
+          Đổi quà tặng hấp dẫn
+        </div>
+      </div>
+
+      {/* Coming soon gifts list */}
+      <div className="mx-3.5 grid grid-cols-2 gap-3 mb-6">
+        {/* Gift Card 1 */}
+        <div className="relative overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm opacity-70">
+          <div className="absolute top-2 left-2 z-10 bg-[#ee4d2d] text-white px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider shadow-sm">
+            Hot
+          </div>
+          <div className="absolute top-2 right-2 z-10 bg-gray-900/75 text-white px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider">
+            Mới!
+          </div>
+          
+          {/* Coming soon glass overlay */}
+          <div className="absolute inset-0 bg-white/20 backdrop-blur-[1px] flex flex-col items-center justify-center z-20 pointer-events-none">
+            <span className="bg-gray-900/85 text-white px-2.5 py-1 rounded-full text-[10px] font-bold shadow-md">
+              Sắp ra mắt
+            </span>
+          </div>
+
+          <div className="aspect-square w-full overflow-hidden bg-gray-100">
+            <img
+              src="https://deltadasia.com/wp-content/uploads/2026/06/tra-gao-lut-bat-vi-tra-thao-moc-sunbeleaf-2-1.jpg"
+              alt="Trà gạo lứt bát vị"
+              className="h-full w-full object-cover"
+              draggable={false}
+            />
+          </div>
+          <div className="p-3 relative z-10">
+            <h3 className="text-xs font-bold text-gray-900 truncate">
+              Trà gạo lứt bát vị
+            </h3>
+            <p className="text-[10px] text-gray-500 mt-0.5 truncate">
+              Hộp quà đặc biệt trong tháng
+            </p>
+            <div className="mt-2.5 flex items-center justify-between">
+              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                💎 3.000 điểm
+              </span>
+            </div>
+            <button
+              disabled
+              type="button"
+              className="mt-3 w-full rounded-xl bg-gray-100 py-1.5 text-center text-xs font-semibold text-gray-400"
+            >
+              Chưa đủ điểm
+            </button>
+          </div>
+        </div>
+
+        {/* Gift Card 2 */}
+        <div className="relative overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm opacity-70">
+          <div className="absolute top-2 left-2 z-10 bg-[#ee4d2d] text-white px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider shadow-sm">
+            Hot
+          </div>
+          <div className="absolute top-2 right-2 z-10 bg-gray-900/75 text-white px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider">
+            Mới!
+          </div>
+
+          {/* Coming soon glass overlay */}
+          <div className="absolute inset-0 bg-white/20 backdrop-blur-[1px] flex flex-col items-center justify-center z-20 pointer-events-none">
+            <span className="bg-gray-900/85 text-white px-2.5 py-1 rounded-full text-[10px] font-bold shadow-md">
+              Sắp ra mắt
+            </span>
+          </div>
+
+          <div className="aspect-square w-full overflow-hidden bg-gray-100">
+            <img
+              src="https://deltadasia.com/wp-content/uploads/2026/06/tra-dong-trung-tu-vi-tra-thao-moc-sunbeleaf-2.jpg"
+              alt="Trà đông trùng hạ thảo"
+              className="h-full w-full object-cover"
+              draggable={false}
+            />
+          </div>
+          <div className="p-3 relative z-10">
+            <h3 className="text-xs font-bold text-gray-900 truncate">
+              Trà đông trùng hạ thảo
+            </h3>
+            <p className="text-[10px] text-gray-500 mt-0.5 truncate">
+              Hộp quà đặc biệt trong tháng
+            </p>
+            <div className="mt-2.5 flex items-center justify-between">
+              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                💎 1.100 điểm
+              </span>
+            </div>
+            <button
+              disabled
+              type="button"
+              className="mt-3 w-full rounded-xl bg-gray-100 py-1.5 text-center text-xs font-semibold text-gray-400"
+            >
+              Chưa đủ điểm
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   if (isLoadingCategories) {
     return (
       <div className="flex h-full flex-col bg-background">
@@ -1006,8 +1429,49 @@ export default function HomePage() {
               <div className="truncate text-lg font-semibold">
                 {copy.brand.name}
               </div>
-              <div className="mt-1 text-xs text-white/85">
-                4.9 | 8,7k Người theo dõi
+              <div className="mt-1 flex items-center gap-1.5 text-xs text-white/85">
+                <style>{`
+                  @keyframes shiny-star-rhythm {
+                    0% {
+                      transform: rotate(0deg) scale(1);
+                      filter: drop-shadow(0 0 2px rgba(253, 224, 71, 0.6));
+                    }
+                    15% {
+                      transform: rotate(180deg) scale(1.35);
+                      filter: drop-shadow(0 0 10px rgba(253, 224, 71, 1));
+                    }
+                    30% {
+                      transform: rotate(360deg) scale(1);
+                      filter: drop-shadow(0 0 2px rgba(253, 224, 71, 0.6));
+                    }
+                    45% {
+                      transform: rotate(360deg) scale(1.35);
+                      filter: drop-shadow(0 0 10px rgba(253, 224, 71, 1));
+                    }
+                    60% {
+                      transform: rotate(360deg) scale(1);
+                      filter: drop-shadow(0 0 2px rgba(253, 224, 71, 0.6));
+                    }
+                    100% {
+                      transform: rotate(360deg) scale(1);
+                      filter: drop-shadow(0 0 2px rgba(253, 224, 71, 0.6));
+                    }
+                  }
+                  .animate-shiny-star {
+                    animation: shiny-star-rhythm 4.5s ease-in-out infinite;
+                    display: inline-block;
+                    color: #fde047;
+                    transform-origin: center;
+                  }
+                `}</style>
+                <span className="flex items-center gap-0.5 font-medium text-yellow-300">
+                  5
+                  <svg className="w-3.5 h-3.5 animate-shiny-star fill-yellow-300" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                </span>
+                <span className="opacity-60">|</span>
+                <span>{followerCount.toLocaleString("vi-VN")} Người theo dõi</span>
               </div>
             </div>
           </div>
@@ -1017,7 +1481,7 @@ export default function HomePage() {
             className="liquid-glass-button mt-4 flex w-full items-center justify-between rounded-full px-4 py-2.5 text-left text-xs"
           >
             <span>Kênh Video Trà thảo mộc Sunbeleaf</span>
-            <span className="text-white/70">58k Lượt xem</span>
+            <span className="text-white/70 font-medium">Sắp Ra Mắt</span>
           </button>
         </div>
       </section>
@@ -1060,10 +1524,34 @@ export default function HomePage() {
         {activeTab === "shop" && renderShopTab()}
         {activeTab === "products" && renderProductTab()}
         {activeTab === "categories" && renderCategoryTab()}
-
+        {activeTab === "promotions" && renderPromotionsTab()}
       </main>
 
       <TermsSheet visible={termsVisible} onClose={() => setTermsVisible(false)} />
+
+      {/* Voucher Terms Modal */}
+      {voucherTermsVisible && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setVoucherTermsVisible(false)} />
+          <div className="relative w-full max-w-[320px] rounded-2xl bg-white p-5 shadow-2xl z-10">
+            <h3 className="text-base font-bold text-gray-900 mb-3 text-center">Điều kiện sử dụng Voucher</h3>
+            <div className="text-xs text-gray-600 space-y-2 leading-5 max-h-60 overflow-y-auto">
+              <p>• Áp dụng cho đơn hàng có tổng giá trị thanh toán sản phẩm từ 1.000.000đ trở lên (không bao gồm phí vận chuyển).</p>
+              <p>• Mức giảm tối đa là 10% trên tổng giá trị hàng hóa.</p>
+              <p>• Mỗi khách hàng chỉ được thu thập và sử dụng 1 lần duy nhất.</p>
+              <p>• Hạn dùng đến hết ngày 31/12/2026 hoặc đến khi chương trình hết ngân sách phân bổ.</p>
+              <p>• Không áp dụng đồng thời với các chương trình khuyến mãi giảm giá khác.</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setVoucherTermsVisible(false)}
+              className="mt-5 w-full rounded-xl bg-primary py-2 text-center text-xs font-semibold text-white active:scale-95 transition"
+            >
+              Đã hiểu
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Promo Popup Modal */}
       {promoPopupVisible && (
