@@ -7,6 +7,7 @@ const ordersRouter  = require("./routes/orders");
 const paymentRouter = require("./routes/payment");
 const sapoRouter    = require("./routes/sapo");
 const adminRouter   = require("./routes/admin");
+const newsRouter    = require("./routes/news");
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -33,7 +34,8 @@ app.use(
   }),
 );
 
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
 // ── Request logging ──
 app.use((req, _res, next) => {
@@ -50,6 +52,7 @@ app.use("/api/orders",  ordersRouter);
 app.use("/api/payment", paymentRouter);
 app.use("/api/sapo",    sapoRouter);
 app.use("/api/admin",   adminRouter);
+app.use("/api/news",    newsRouter);
 const adminDashboardPath = path.join(__dirname, "admin-dist");
 app.use("/admin", express.static(adminDashboardPath));
 app.get("/admin/*", (_req, res) => {

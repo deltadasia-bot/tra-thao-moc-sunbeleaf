@@ -1,7 +1,7 @@
 const express  = require("express");
 const router   = express.Router();
 const db       = require("../db");
-const { pushOrderToSapo }  = require("../services/sapo");
+const { pushOrderToSapo, createSapoReturn }  = require("../services/sapo");
 const { notifyNewOrder }   = require("../services/notifier");
 const { createSPXOrder }   = require("../services/spx");
 
@@ -48,6 +48,30 @@ router.get("/", (req, res) => {
  * GET /api/orders/:id
  * Lấy thông tin chi tiết một đơn hàng.
  */
+router.get("/sales-summary", (req, res) => {
+  const soldCounts = {};
+  const completedStates = new Set(["delivered", "completed"]);
+
+  db.getAllOrders().forEach((order) => {
+    if (!completedStates.has(order.state)) return;
+    if (order.payment?.status === "refunded" || order.paymentStatus === "refunded") {
+      return;
+    }
+
+    (order.items || []).forEach((item) => {
+      if (!item.productId) return;
+      const productId = Number(item.productId);
+      if (!Number.isFinite(productId)) return;
+      soldCounts[productId] = (soldCounts[productId] || 0) + Number(item.quantity || 0);
+    });
+  });
+
+  return res.json({
+    soldCounts,
+    updatedAt: new Date().toISOString(),
+  });
+});
+
 router.get("/:id", (req, res) => {
   const order = db.getOrder(req.params.id);
   if (!order) {
@@ -62,16 +86,23 @@ router.get("/:id", (req, res) => {
  * Sau khi lưu DB: đồng bộ sang Sapo + gửi thông báo Zalo/Email.
  */
 router.post("/", async (req, res) => {
-  const { id, orderCode, amount, paymentMethod, items, deliveryAddress, deliveryType, shippingFee, note, customerPhone } =
+  const { id, orderCode, amount, paymentMethod, items, deliveryAddress, deliveryType, shippingFee, shippingCarrier, note, customerPhone } =
     req.body;
 
   if (!id || !orderCode || !amount) {
     return res.status(400).json({ error: "Thiếu thông tin đơn hàng" });
   }
 
+  if (deliveryType === "delivery" && shippingCarrier === "Giao hàng Hỏa tốc" && paymentMethod === "cash") {
+    return res.status(400).json({ error: "Giao hàng hỏa tốc không áp dụng với thanh toán khi nhận hàng" });
+  }
+
   // Tự động tạo đơn giao hàng trên SPX Express nếu chọn hình thức Giao hàng tận nơi
-  let trackingInfo = {};
-  if (deliveryType === "delivery") {
+  let trackingInfo = {
+    shippingCarrier: shippingCarrier || "SPX Express"
+  };
+
+  if (deliveryType === "delivery" && shippingCarrier !== "Giao hàng Hỏa tốc") {
     try {
       const spx = await createSPXOrder({
         id,
@@ -165,6 +196,35 @@ router.get("/:id/payment-status", (req, res) => {
     paymentStatus: order.paymentStatus,
     paidAt:        order.paidAt,
   });
+});
+
+/**
+ * POST /api/orders/:id/return
+ * Yêu cầu trả hàng/hoàn tiền. Cập nhật state thành "returned" và đồng bộ sang Sapo.
+ */
+router.post("/:id/return", async (req, res) => {
+  const order = db.getOrder(req.params.id);
+  if (!order) {
+    return res.status(404).json({ error: "Không tìm thấy đơn hàng" });
+  }
+
+  if (order.state === "returned") {
+    return res.status(400).json({ error: "Đơn hàng đã được yêu cầu trả hàng trước đó" });
+  }
+
+  // Cập nhật trạng thái đơn hàng thành returned
+  const updated = db.updateOrder(req.params.id, { state: "returned" });
+
+  // Gọi dịch vụ Sapo chạy nền
+  setImmediate(async () => {
+    try {
+      await createSapoReturn(updated);
+    } catch (err) {
+      console.error("[Sapo] Loi khi dong bo don doi tra hang:", err.message);
+    }
+  });
+
+  return res.json({ success: true, order: updated });
 });
 
 module.exports = router;

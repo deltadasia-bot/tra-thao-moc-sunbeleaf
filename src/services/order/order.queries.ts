@@ -1,7 +1,11 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Order, OrderListResponse } from "../../types/order.types";
-import { orderService } from "./order.api";
-import { GET_ORDER_BY_ID_KEY, GET_ORDER_LIST_KEY } from "../../constants/api";
+import { orderService, ProductSalesSummary } from "./order.api";
+import {
+  GET_ORDER_BY_ID_KEY,
+  GET_ORDER_LIST_KEY,
+  GET_PRODUCT_SALES_SUMMARY_KEY,
+} from "../../constants/api";
 
 export function useOrders(page: number = 1, pageSize: number = 10) {
   return useQuery<OrderListResponse>({
@@ -17,5 +21,14 @@ export function useOrderById(orderId: string, enabled: boolean = true) {
     queryFn: () => orderService.getOrderById(orderId),
     enabled: enabled && !!orderId,
     placeholderData: keepPreviousData,
+  });
+}
+
+export function useProductSalesSummary() {
+  return useQuery<ProductSalesSummary>({
+    queryKey: [GET_PRODUCT_SALES_SUMMARY_KEY],
+    queryFn: () => orderService.getSalesSummary(),
+    staleTime: 30 * 1000,
+    retry: 1,
   });
 }

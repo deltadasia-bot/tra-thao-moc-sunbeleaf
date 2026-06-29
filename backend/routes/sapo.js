@@ -554,14 +554,11 @@ router.post("/extension/success", (req, res) => {
 router.get("/extension/pending-tracking", (req, res) => {
   try {
     const allOrders = require("../db").getAllOrders();
-    // Lọc các đơn đã có sapoOrderId nhưng chưa có mã vận đơn thực tế của Sapo (mã trống hoặc mã giả lập sandbox)
+    // Lọc các đơn đã có sapoOrderId nhưng chưa giao thành công, hoàn thành hoặc bị hủy
     const pendingTracking = allOrders.filter((order) => {
       if (!order.sapoOrderId) return false;
-      if (order.state === "cancelled" || order.state === "completed") return false;
-      
-      // Nếu mã vận đơn trống hoặc là mã giả lập sandbox (bắt đầu bằng SPXVN0...) thì cần cập nhật
-      const hasMockOrEmpty = !order.trackingNumber || order.trackingNumber.startsWith("SPXVN0");
-      return hasMockOrEmpty;
+      if (order.state === "cancelled" || order.state === "completed" || order.state === "delivered") return false;
+      return true;
     });
     return res.json({ orders: pendingTracking });
   } catch (error) {
@@ -571,7 +568,7 @@ router.get("/extension/pending-tracking", (req, res) => {
 
 // Cập nhật mã vận đơn thực tế từ Sapo
 router.post("/extension/update-tracking", (req, res) => {
-  const { id, trackingNumber, shippingCarrier, trackingUrl } = req.body;
+  const { id, trackingNumber, shippingCarrier, trackingUrl, state } = req.body;
   if (!id || !trackingNumber) {
     return res.status(400).json({ error: "Thiếu id đơn hàng hoặc trackingNumber" });
   }
@@ -588,6 +585,10 @@ router.post("/extension/update-tracking", (req, res) => {
       trackingUrl: trackingUrl || `https://spx.vn/#/detail/${trackingNumber}`
     };
 
+    if (state) {
+      patch.state = state;
+    }
+
     // Nếu mã vận đơn mới thực sự khác mã cũ thì ghi nhận hành trình
     if (order.trackingNumber !== trackingNumber) {
       const trackingHistory = [...(order.trackingHistory || [])];
@@ -602,7 +603,7 @@ router.post("/extension/update-tracking", (req, res) => {
     }
 
     const updated = dbHelper.updateOrder(id, patch);
-    console.log(`[Sapo Extension] Đã cập nhật vận đơn cho đơn Zalo ${id} -> Mã SPX: ${trackingNumber}`);
+    console.log(`[Sapo Extension] Đã cập nhật vận đơn cho đơn Zalo ${id} -> Mã SPX: ${trackingNumber}, Trạng thái: ${state || 'không đổi'}`);
     return res.json({ success: true, order: updated });
   } catch (error) {
     return res.status(500).json({ error: error.message });

@@ -217,3 +217,196 @@
     animation: none;
   }
 }
+
+@keyframes shimmerSweep {
+  0% {
+    left: -150%;
+  }
+  50% {
+    left: 150%;
+  }
+  100% {
+    left: 150%;
+  }
+}
+
+.shimmer-sweep {
+  overflow: hidden;
+  
+  &:not(.absolute):not(.fixed):not(.relative) {
+    position: relative;
+  }
+  
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 60px;
+    background: linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.7) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    transform: skewX(-25deg);
+    animation: shimmerSweep 3s infinite linear;
+    pointer-events: none;
+  }
+}
+
+/* Ngôi sao lấp lánh */
+@keyframes starSparkle {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+    filter: drop-shadow(0 0 2px rgba(253, 224, 71, 0.6)) brightness(1);
+  }
+  50% {
+    transform: scale(1.25) rotate(35deg);
+    filter: drop-shadow(0 0 10px rgba(253, 224, 71, 1)) brightness(1.4);
+  }
+}
+
+.animate-star-sparkle {
+  display: inline-block;
+  animation: starSparkle 2s infinite ease-in-out;
+  transform-origin: center;
+  color: #FAC000; /* Matching yellow500 base color */
+}
+
+/* Button làm mới mượt mà (Liquid Glass Refresh Button) */
+.liquid-refresh-button {
+  position: relative;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.22);
+  color: #047857; /* text-emerald-700 */
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.05);
+
+  &:hover {
+    background: rgba(16, 185, 129, 0.14);
+    border-color: rgba(16, 185, 129, 0.32);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.08);
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+
+  &.liquid-refresh-button-running {
+    background: rgba(16, 185, 129, 0.04);
+    color: #059669;
+    border-color: rgba(16, 185, 129, 0.15);
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+}
+
+.liquid-refresh-button-text {
+  font-weight: 600;
+}
+
+/* Hoạt ảnh bóng đá khi làm mới tin tức (Football Refresh Animation) */
+.football-refresh {
+  position: relative;
+  height: 48px;
+  width: 140px;
+  overflow: hidden;
+  border-radius: 9999px;
+}
+
+/* Chạy ngang màn hình từ trái qua phải vô tận */
+@keyframes footballRun {
+  0% {
+    left: -40px;
+  }
+  100% {
+    left: calc(100% + 10px);
+  }
+}
+
+.football-runner-wrapper {
+  animation: footballRun 2.2s linear infinite;
+  will-change: left;
+}
+
+/* Chân tay chạy bộ */
+@keyframes armSwingBack {
+  0%, 100% { transform: rotate(-22deg); }
+  50% { transform: rotate(25deg); }
+}
+
+@keyframes armSwingFront {
+  0%, 100% { transform: rotate(25deg); }
+  50% { transform: rotate(-22deg); }
+}
+
+.football-arm-back {
+  transform-origin: 11px 9px;
+  animation: armSwingBack 0.45s ease-in-out infinite;
+}
+
+.football-arm-front {
+  transform-origin: 11px 9px;
+  animation: armSwingFront 0.45s ease-in-out infinite;
+}
+
+@keyframes legRunBack {
+  0%, 100% { transform: rotate(-35deg); }
+  50% { transform: rotate(35deg); }
+}
+
+@keyframes legRunFront {
+  0%, 100% { transform: rotate(35deg); }
+  50% { transform: rotate(-35deg); }
+}
+
+.football-leg-back {
+  transform-origin: 9px 15px;
+  animation: legRunBack 0.45s ease-in-out infinite;
+}
+
+.football-leg-front {
+  transform-origin: 9px 15px;
+  animation: legRunFront 0.45s ease-in-out infinite;
+}
+
+/* Quả bóng vừa lăn vừa nảy nhẹ */
+@keyframes ballRollBounce {
+  0% {
+    transform: rotate(0deg) translateY(0);
+  }
+  50% {
+    transform: rotate(180deg) translateY(-5px);
+  }
+  100% {
+    transform: rotate(360deg) translateY(0);
+  }
+}
+
+.football-ball-svg {
+  animation: ballRollBounce 0.45s linear infinite;
+  transform-origin: center;
+}
+
+/* Các vệt khói/tốc độ chạy phía sau cầu thủ */
+@keyframes trailFade {
+  0%, 100% { opacity: 0.25; transform: scaleX(0.8); }
+  50% { opacity: 0.85; transform: scaleX(1.2); }
+}
+
+.football-trail-1 {
+  animation: trailFade 0.3s infinite;
+  transform-origin: left center;
+}
+
+.football-trail-2 {
+  animation: trailFade 0.3s infinite 0.08s;
+  transform-origin: left center;
+}
+
+.football-trail-3 {
+  animation: trailFade 0.3s infinite 0.15s;
+  transform-origin: left center;
+}

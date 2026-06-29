@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Tabs, Tab } from "@/components/common/tabs";
 import NoteInput from "@/components/common/note-input";
@@ -15,15 +15,17 @@ import { Button, Text, useSnackbar } from "zmp-ui";
 import { copy } from "@/constants/copy";
 import { formatCurrency } from "@/utils/format";
 import { calculateCartItemPrice, calculateCartTotal } from "@/utils/cart";
-import { getShippingFee } from "@/utils/shipping";
+import { getShippingFee, getInstantShippingFee } from "@/utils/shipping";
 import { processZaloPayment } from "@/services/payment/checkout.service";
 import TermsSheet from "@/components/common/terms-sheet";
+import { getProductThumbnailById } from "@/utils/product-image";
 
 type DeliveryMethod = "delivery" | "pickup";
 
 type SelectedAddress = {
   name: string;
   address: string;
+  phone?: string;
   lat?: number;
   lon?: number;
 };
@@ -81,13 +83,28 @@ export default function CheckoutPage() {
   const { items: cartItems, updateQuantity, clearCart } = useCartStore();
   const { mutate: createOrder, isPending } = useCreateOrder();
 
+  const [shippingCarrier, setShippingCarrier] = useState<"SPX Express" | "Giao hàng Hỏa tốc">("SPX Express");
+
   const totalItems = calculateCartTotal(cartItems);
   const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-  const shippingFee = getShippingFee(
-    totalQuantity,
-    "inner_city",
-    cartItems.map((item) => item.productId),
-  );
+
+  const instantShipping = useMemo(() => {
+    if (activeTab !== "delivery") return { fee: 0, distance: 0, supported: true };
+    return getInstantShippingFee(selectedAddress.lat, selectedAddress.lon);
+  }, [activeTab, selectedAddress.lat, selectedAddress.lon]);
+
+  const shippingFee = useMemo(() => {
+    if (activeTab !== "delivery") return 0;
+    if (shippingCarrier === "Giao hàng Hỏa tốc") {
+      return instantShipping.fee;
+    }
+    return getShippingFee(
+      totalQuantity,
+      "inner_city",
+      cartItems.map((item) => item.productId),
+    );
+  }, [activeTab, shippingCarrier, instantShipping.fee, totalQuantity, cartItems]);
+
   const totalWithDelivery = totalItems + shippingFee;
   const totalWithoutDelivery = totalItems;
   const finalTotal =
@@ -120,6 +137,24 @@ export default function CheckoutPage() {
     }
   }, [location.state]);
 
+  useEffect(() => {
+    if (
+      activeTab === "delivery" &&
+      shippingCarrier === "Giao hàng Hỏa tốc" &&
+      selectedPaymentMethod.method === "cash"
+    ) {
+      setSelectedPaymentMethod({
+        method: "bank_transfer",
+        displayName: "Chuyển khoản ngân hàng",
+        logo: undefined,
+      });
+      openSnackbar({
+        text: "Hỏa tốc không áp dụng Thanh toán khi nhận hàng. Đã chuyển sang Chuyển khoản.",
+        type: "warning",
+      });
+    }
+  }, [activeTab, shippingCarrier, selectedPaymentMethod.method, openSnackbar]);
+
   const handleSelectPaymentOption = (option: PaymentMethodOption) => {
     setPaymentSheetVisible(false);
     setSelectedPaymentMethod({
@@ -136,7 +171,7 @@ export default function CheckoutPage() {
       name: item.productName,
       quantity: item.quantity,
       price: calculateCartItemPrice(item),
-      image: item.productImage,
+      image: getProductThumbnailById(item.productId, item.productImage),
       note: item.note,
       options: item.selectedVariants.map((variant) => ({
         name: variant.groupTitle,
@@ -148,7 +183,7 @@ export default function CheckoutPage() {
       activeTab === "delivery"
         ? {
             recipientName: selectedAddress.name,
-            phoneNumber: copy.checkout.samplePhoneNumber,
+            phoneNumber: selectedAddress.phone || localStorage.getItem("sunbeleaf_logged_in_phone") || copy.checkout.samplePhoneNumber,
             address: selectedAddress.address,
             lat: selectedAddress.lat,
             lon: selectedAddress.lon,
@@ -165,6 +200,7 @@ export default function CheckoutPage() {
       | "momo"
       | "credit_card"
       | "bank_transfer",
+    shippingCarrier: activeTab === "delivery" ? shippingCarrier : undefined,
     note,
   });
 
@@ -199,6 +235,16 @@ export default function CheckoutPage() {
   const handleCheckout = () => {
     if (cartItems.length === 0) {
       openSnackbar({ text: copy.cart.empty, type: "warning" });
+      return;
+    }
+
+    if (activeTab === "delivery" && shippingCarrier === "Giao hàng Hỏa tốc" && !instantShipping.supported) {
+      openSnackbar({ text: "Không hỗ trợ giao hỏa tốc đến địa chỉ này (khoảng cách > 15km)", type: "error" });
+      return;
+    }
+
+    if (activeTab === "delivery" && shippingCarrier === "Giao hàng Hỏa tốc" && selectedPaymentMethod.method === "cash") {
+      openSnackbar({ text: "Giao hàng hỏa tốc không áp dụng với thanh toán khi nhận hàng", type: "error" });
       return;
     }
 
@@ -262,7 +308,7 @@ export default function CheckoutPage() {
               </div>
               <div className="flex flex-1 flex-col gap-2">
                 <div className="text-xxsmall text-text-secondary">
-                  {selectedAddress.name}
+                  {selectedAddress.name} {selectedAddress.phone ? `(${selectedAddress.phone})` : ""}
                 </div>
                 <div className="text-small-m">{selectedAddress.address}</div>
               </div>
@@ -280,9 +326,93 @@ export default function CheckoutPage() {
           </div>
         )}
 
+        {activeTab === "delivery" && (
+          <div className="mx-3.5 mt-3 flex flex-col gap-3 rounded-xl bg-white p-4">
+            <div className="text-large-m font-semibold text-gray-900">Phương thức vận chuyển</div>
+            <div className="flex flex-col gap-3">
+              {/* Tiêu chuẩn */}
+              <label className="flex items-start gap-3 cursor-pointer rounded-lg border border-gray-100 p-3 active:bg-gray-50">
+                <input
+                  type="radio"
+                  name="shippingCarrier"
+                  checked={shippingCarrier === "SPX Express"}
+                  onChange={() => setShippingCarrier("SPX Express")}
+                  className="mt-1 accent-primary"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-small-m font-medium text-gray-900">Nhanh (SPX Express)</span>
+                    <span className="text-small-m font-semibold text-gray-900">
+                      {formatCurrency(getShippingFee(
+                        totalQuantity,
+                        "inner_city",
+                        cartItems.map((item) => item.productId)
+                      ))}
+                    </span>
+                  </div>
+                  <div className="text-xxsmall text-text-secondary mt-1">Giao hàng tiêu chuẩn 1-3 ngày</div>
+                </div>
+              </label>
+
+              {/* Hỏa tốc */}
+              <label className={`flex items-start gap-3 cursor-pointer rounded-lg border p-3 active:bg-gray-50 ${
+                instantShipping.supported ? "border-gray-100" : "border-red-100 bg-red-50/10 cursor-not-allowed opacity-60"
+              }`}>
+                <input
+                  type="radio"
+                  name="shippingCarrier"
+                  disabled={!instantShipping.supported}
+                  checked={shippingCarrier === "Giao hàng Hỏa tốc"}
+                  onChange={() => {
+                    if (instantShipping.supported) {
+                      setShippingCarrier("Giao hàng Hỏa tốc");
+                      if (selectedPaymentMethod.method === "cash") {
+                        setSelectedPaymentMethod({
+                          method: "bank_transfer",
+                          displayName: "Chuyển khoản ngân hàng",
+                          logo: undefined,
+                        });
+                        openSnackbar({
+                          text: "Hỏa tốc không áp dụng Thanh toán khi nhận hàng. Đã chuyển sang Chuyển khoản.",
+                          type: "warning",
+                        });
+                      }
+                    }
+                  }}
+                  className="mt-1 accent-primary"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-small-m font-medium text-gray-900">Hỏa tốc (Giao 2H)</span>
+                    <span className="text-small-m font-semibold text-gray-900">
+                      {instantShipping.supported 
+                        ? formatCurrency(instantShipping.fee) 
+                        : "Không hỗ trợ"}
+                    </span>
+                  </div>
+                  <div className="text-xxsmall text-text-secondary mt-1 flex flex-wrap items-center gap-1.5">
+                    <span>Giao ngay trong 2 giờ</span>
+                    {hasSelectedAddress && (
+                      <>
+                        <span className="text-gray-300">•</span>
+                        <span className="text-[#2f6fed] font-medium">Khoảng cách: {instantShipping.distance.toFixed(1)} km</span>
+                      </>
+                    )}
+                  </div>
+                  {!instantShipping.supported && (
+                    <div className="text-xxsmall text-red-600 mt-1 font-medium">
+                      Chỉ hỗ trợ giao hàng hỏa tốc trong bán kính 15km
+                    </div>
+                  )}
+                </div>
+              </label>
+            </div>
+          </div>
+        )}
+
         {activeTab === "pickup" && (
           <div className="mx-3.5 mt-4 flex flex-col gap-4 rounded-xl bg-white p-4">
-            <button className="flex w-full items-start gap-3 text-left">
+            <div className="flex w-full items-start gap-3 text-left">
               <div className="flex h-8 w-8 items-center justify-center rounded-full text-text-secondary">
                 <MapPinIcon className="size-6" color="black" />
               </div>
@@ -290,10 +420,14 @@ export default function CheckoutPage() {
                 <div className="text-xxsmall text-text-secondary">
                   {copy.checkout.pickupLocation}
                 </div>
-                <div className="text-small-m">{copy.checkout.chooseStore}</div>
+                <div className="text-small-m font-semibold text-gray-900">
+                  Cửa hàng Trà thảo mộc Sunbeleaf
+                </div>
+                <div className="text-xs text-gray-500 leading-relaxed">
+                  45/2 Trịnh Hoài Đức, Phường Tăng Nhơn Phú, Thành phố Hồ Chí Minh, Việt Nam
+                </div>
               </div>
-              <ChevronRightIcon className="h-5 w-5 text-text-secondary" />
-            </button>
+            </div>
           </div>
         )}
 
@@ -448,7 +582,7 @@ export default function CheckoutPage() {
             {activeTab === "delivery" && (
               <div className="flex justify-between text-small">
                 <div className="text-text-secondary">
-                  {copy.common.shippingFee}
+                  {copy.common.shippingFee} ({shippingCarrier === "Giao hàng Hỏa tốc" ? "Hỏa tốc" : "Nhanh"})
                 </div>
                 <div>{formatCurrency(shippingFee)}</div>
               </div>
@@ -495,6 +629,7 @@ export default function CheckoutPage() {
         onClose={() => setPaymentSheetVisible(false)}
         selectedMethod={selectedPaymentMethod.method}
         onSelect={handleSelectPaymentOption}
+        disableCash={activeTab === "delivery" && shippingCarrier === "Giao hàng Hỏa tốc"}
       />
 
       {/* Bank transfer info + polling sheet */}

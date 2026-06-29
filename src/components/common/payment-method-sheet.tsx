@@ -117,6 +117,7 @@ interface PaymentMethodSheetProps {
   onClose: () => void;
   selectedMethod: string;
   onSelect: (option: PaymentMethodOption) => void;
+  disableCash?: boolean;
 }
 
 export default function PaymentMethodSheet({
@@ -124,6 +125,7 @@ export default function PaymentMethodSheet({
   onClose,
   selectedMethod,
   onSelect,
+  disableCash = false,
 }: PaymentMethodSheetProps) {
   return (
     <Sheet autoHeight visible={visible} onClose={onClose}>
@@ -135,21 +137,34 @@ export default function PaymentMethodSheet({
         </div>
 
         <div className="flex flex-col py-2">
-          {PAYMENT_METHOD_OPTIONS.map((option) => (
-            <button
-              key={option.method}
-              onClick={() => onSelect(option)}
-              className="flex items-center gap-3 px-4 py-3.5 text-left active:bg-neutral100"
-            >
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-elevation-01 text-text-secondary">
-                {methodIcon(option.method)}
-              </div>
-              <span className="flex-1 text-sm font-medium text-text-primary">
-                {option.displayName}
-              </span>
-              {selectedMethod === option.method && <CheckIcon />}
-            </button>
-          ))}
+          {PAYMENT_METHOD_OPTIONS.map((option) => {
+            const isDisabled = option.method === "cash" && disableCash;
+            return (
+              <button
+                key={option.method}
+                disabled={isDisabled}
+                onClick={() => onSelect(option)}
+                className={`flex items-center gap-3 px-4 py-3.5 text-left active:bg-neutral100 ${
+                  isDisabled ? "opacity-40 cursor-not-allowed" : ""
+                }`}
+              >
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-elevation-01 text-text-secondary">
+                  {methodIcon(option.method)}
+                </div>
+                <div className="flex-1 flex flex-col">
+                  <span className="text-sm font-medium text-text-primary">
+                    {option.displayName}
+                  </span>
+                  {isDisabled && (
+                    <span className="text-[10px] text-red-500 font-normal mt-0.5">
+                      Không áp dụng cho giao hàng Hỏa tốc
+                    </span>
+                  )}
+                </div>
+                {selectedMethod === option.method && <CheckIcon />}
+              </button>
+            );
+          })}
         </div>
       </div>
     </Sheet>

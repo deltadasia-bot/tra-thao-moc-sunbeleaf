@@ -1,9 +1,9 @@
 import { Product } from "@/types/product.types";
 
-const PRICE_INCREASE_RATE = 1.5;
-const DISCOUNT_RATE = 0.5;
+const PRICE_INCREASE_RATE = 1.0;
+const DISCOUNT_RATE = 0.4;
 
-export const PROMOTION_DISCOUNT_PERCENT = 50;
+export const PROMOTION_DISCOUNT_PERCENT = 60;
 export const TEMP_TEST_PRODUCT_ID = 999001;
 
 export const isPromotionDisabledForProduct = (

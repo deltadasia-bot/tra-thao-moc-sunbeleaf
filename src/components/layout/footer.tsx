@@ -31,6 +31,29 @@ function NewsIcon({ active }: { active: boolean }) {
   );
 }
 
+function UserIcon({ active }: { active: boolean }) {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+        stroke={active ? "var(--zmp-theme-color-primary)" : "currentColor"}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle
+        cx="12"
+        cy="7"
+        r="4"
+        stroke={active ? "var(--zmp-theme-color-primary)" : "currentColor"}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 const NAV_ITEMS = [
   {
     name: "Trang chủ",
@@ -52,6 +75,11 @@ const NAV_ITEMS = [
     path: "/news",
     icon: NewsIcon,
   },
+  {
+    name: "Tôi",
+    path: "/profile",
+    icon: UserIcon,
+  },
 ];
 
 export default function Footer() {
@@ -64,7 +92,7 @@ export default function Footer() {
     )?.path ?? "/";
 
   return (
-    <nav className="liquid-glass-nav grid grid-cols-4 rounded-t-3xl border-t border-white/70 px-2 pb-4 pt-2">
+    <nav className="liquid-glass-nav grid grid-cols-5 rounded-t-3xl border-t border-white/70 px-2 pb-4 pt-2">
       {NAV_ITEMS.map((item) => (
         <button
           type="button"

@@ -10,7 +10,8 @@ export type OrderState =
   | "delivering"
   | "delivered"
   | "completed"
-  | "cancelled";
+  | "cancelled"
+  | "returned";
 
 export interface OrderItem {
   id: string;
@@ -102,6 +103,7 @@ export interface CreateOrderRequest {
   deliveryAddress?: Omit<OrderAddress, "id">;
   pickupStoreId?: string;
   paymentMethod: "cash" | "zalopay" | "momo" | "credit_card" | "bank_transfer";
+  shippingCarrier?: string;
   note?: string;
 }
 

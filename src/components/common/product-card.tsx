@@ -7,6 +7,7 @@ import {
   getDisplayListPrice,
   getDisplayPromotionalPrice,
   isPromotionDisabledForProduct,
+  PROMOTION_DISCOUNT_PERCENT,
 } from "@/utils/promotion";
 
 interface ProductCardProps {
@@ -86,8 +87,8 @@ export default function ProductCard({
                   {formatCurrency(promotionalPrice)}
                 </span>
                 {!isPromotionDisabledForProduct(product) && (
-                  <span className="rounded-sm bg-[#fff1ee] px-1 text-[10px] font-semibold text-[#ee4d2d]">
-                    -50%
+                  <span className="rounded-sm bg-[#fff1ee] px-1 text-[10px] font-semibold text-[#ee4d2d] shimmer-sweep">
+                    -{PROMOTION_DISCOUNT_PERCENT}%
                   </span>
                 )}
               </div>

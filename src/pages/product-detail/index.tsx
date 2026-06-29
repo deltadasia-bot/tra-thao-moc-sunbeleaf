@@ -67,6 +67,7 @@ export default function ProductDetailPage() {
   const [isFavorite, setIsFavorite] = useState(false);
   const [isPurchaseProtectionOpen, setIsPurchaseProtectionOpen] =
     useState(false);
+  const [selectedRatingFilter, setSelectedRatingFilter] = useState<"all" | number>("all");
   const videoRef = useRef<HTMLVideoElement>(null);
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
@@ -78,12 +79,33 @@ export default function ProductDetailPage() {
   const { data: product, isLoading, isError } = useProduct(id || "");
   const { addToCart, updateCartItem, items, totalItems } = useCartStore();
   const displayedReviews = useMemo(
-    () =>
-      product
-        ? [...getProductReviews(product.id), ...(product.reviews || [])]
-        : [],
+    () => (product ? getProductReviews(product.id) : []),
     [product],
   );
+
+  const ratingCounts = useMemo(() => {
+    const counts = { all: 0, 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+    counts.all = displayedReviews.length;
+    displayedReviews.forEach((review) => {
+      const r = review.rating;
+      if (r >= 1 && r <= 5) {
+        counts[r as 5 | 4 | 3 | 2 | 1]++;
+      }
+    });
+    return counts;
+  }, [displayedReviews]);
+
+  const filteredReviews = useMemo(() => {
+    if (selectedRatingFilter === "all") return displayedReviews;
+    return displayedReviews.filter((r) => r.rating === selectedRatingFilter);
+  }, [displayedReviews, selectedRatingFilter]);
+
+  const averageRating = useMemo(() => {
+    if (displayedReviews.length === 0) return 0;
+    const total = displayedReviews.reduce((sum, r) => sum + r.rating, 0);
+    return total / displayedReviews.length;
+  }, [displayedReviews]);
+
 
   const productImages = useMemo(() => {
     if (!product) return [];
@@ -875,7 +897,12 @@ export default function ProductDetailPage() {
                 Đánh giá sản phẩm
               </h2>
               <div className="mt-1 text-sm text-[#ee4d2d]">
-                5.0/5 <span aria-label="5 sao">★★★★★</span>
+                {displayedReviews.length > 0
+                  ? `${averageRating.toFixed(1)}/5`
+                  : "Chưa có đánh giá"}
+                {displayedReviews.length > 0 && (
+                  <span aria-label="số sao"> ★★★★★</span>
+                )}
               </div>
             </div>
             <span className="rounded-full bg-[#fff1ee] px-3 py-1 text-xs text-[#ee4d2d]">
@@ -883,45 +910,82 @@ export default function ProductDetailPage() {
             </span>
           </div>
 
-          <div className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-800">
-            Dữ liệu đánh giá minh họa cho giao diện, không phải đánh giá từ
-            khách hàng đã xác minh.
-          </div>
+          {/* Bộ lọc phân loại đánh giá */}
+          {displayedReviews.length > 0 && (
+            <div className="no-scrollbar mt-4 flex gap-2 overflow-x-auto pb-2">
+              <button
+                type="button"
+                onClick={() => setSelectedRatingFilter("all")}
+                className={`flex shrink-0 items-center justify-center rounded-full px-3 py-1.5 text-xs font-medium transition ${
+                  selectedRatingFilter === "all"
+                    ? "bg-[#ee4d2d] text-white"
+                    : "bg-[#f5f5f5] text-gray-600 hover:bg-gray-100"
+                }`}
+              >
+                Tất cả ({ratingCounts.all})
+              </button>
+              {[5, 4, 3, 2, 1].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  onClick={() => setSelectedRatingFilter(star)}
+                  className={`flex shrink-0 items-center justify-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium transition ${
+                    selectedRatingFilter === star
+                      ? "bg-[#ee4d2d] text-white"
+                      : "bg-[#f5f5f5] text-gray-600 hover:bg-gray-100"
+                  }`}
+                >
+                  <span>{star} ★</span>
+                  <span>({ratingCounts[star as 5 | 4 | 3 | 2 | 1]})</span>
+                </button>
+              ))}
+            </div>
+          )}
 
           <div className="mt-2 divide-y divide-gray-100">
-            {displayedReviews.map((review) => (
-              <article key={review.id} className="py-4">
-                <div className="flex gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#eaf5ee] text-sm font-semibold text-[#246239]">
-                    {review.author.charAt(0).toUpperCase()}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-sm font-medium text-gray-800">
-                        {review.author}
-                      </span>
-                      <time className="text-xs text-gray-400">
-                        {review.date}
-                      </time>
+            {displayedReviews.length === 0 ? (
+              <div className="py-4 text-sm text-gray-500">
+                Sản phẩm chưa có đánh giá từ khách hàng đã mua.
+              </div>
+            ) : filteredReviews.length === 0 ? (
+              <div className="py-4 text-sm text-gray-500">
+                Không có đánh giá nào cho mức sao này.
+              </div>
+            ) : (
+              filteredReviews.map((review) => (
+                <article key={review.id} className="py-4">
+                  <div className="flex gap-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#eaf5ee] text-sm font-semibold text-[#246239]">
+                      {review.author.charAt(0).toUpperCase()}
                     </div>
-                    <div
-                      className="mt-1 text-sm tracking-wide text-[#ee4d2d]"
-                      aria-label={`${review.rating} sao`}
-                    >
-                      {"★".repeat(review.rating)}
-                    </div>
-                    {review.verifiedPurchase && (
-                      <div className="mt-1 text-xs font-medium text-[#26aa99]">
-                        Đã mua hàng
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-sm font-medium text-gray-800">
+                          {review.author}
+                        </span>
+                        <time className="text-xs text-gray-400">
+                          {review.date}
+                        </time>
                       </div>
-                    )}
-                    <p className="mt-2 text-sm leading-6 text-gray-600">
-                      {review.content}
-                    </p>
+                      <div
+                        className="mt-1 text-sm tracking-wide text-[#ee4d2d]"
+                        aria-label={`${review.rating} sao`}
+                      >
+                        {"★".repeat(review.rating)}
+                      </div>
+                      {review.verifiedPurchase && (
+                        <div className="mt-1 text-xs font-medium text-[#26aa99]">
+                          Đã mua hàng
+                        </div>
+                      )}
+                      <p className="mt-2 text-sm leading-6 text-gray-600">
+                        {review.content}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </article>
-            ))}
+                </article>
+              ))
+            )}
           </div>
         </section>
       </div>

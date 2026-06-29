@@ -29,6 +29,12 @@ interface PersistedEntry {
 }
 
 function restoreCache(client: QueryClient): void {
+  if (import.meta.env.DEV) {
+    try {
+      localStorage.removeItem(CACHE_KEY);
+    } catch {}
+    return;
+  }
   try {
     const raw = localStorage.getItem(CACHE_KEY);
     if (!raw) return;
@@ -45,6 +51,7 @@ function restoreCache(client: QueryClient): void {
 }
 
 function subscribeAndPersist(client: QueryClient): void {
+  if (import.meta.env.DEV) return;
   client.getQueryCache().subscribe(() => {
     try {
       const entries: PersistedEntry[] = client

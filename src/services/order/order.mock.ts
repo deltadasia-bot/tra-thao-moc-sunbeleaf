@@ -1,7 +1,7 @@
 import { Order } from "../../types/order.types";
 import { getShippingFee } from "../../utils/shipping";
 
-export const mockOrders: Order[] = [
+const legacyMockOrders: Order[] = [
   {
     id: "order-sunbeleaf-completed",
     orderCode: "DH-20260610-108",
@@ -145,8 +145,8 @@ export const mockOrders: Order[] = [
     },
     pickupStore: {
       id: "store-001",
-      name: "Chi nhánh Quận 1",
-      address: "456 Đường Nguyễn Huệ, Quận 1, TP.HCM",
+      name: "Cửa hàng Trà thảo mộc Sunbeleaf",
+      address: "45/2 Trịnh Hoài Đức, Phường Tăng Nhơn Phú, Thành phố Hồ Chí Minh, Việt Nam",
     },
     pickupCode: "PK-8572",
     canReorder: true,
@@ -155,6 +155,9 @@ export const mockOrders: Order[] = [
     note: "Lấy sau 15h",
   },
 ];
+
+export const mockOrders: Order[] = [];
+void legacyMockOrders;
 
 // Helper để tạo order mới từ cart
 export function createMockOrder(
@@ -213,8 +216,8 @@ export function createMockOrder(
       deliveryType === "pickup"
         ? {
             id: pickupStoreId || "store-001",
-            name: "Chi nhánh Quận 1",
-            address: "456 Đường Nguyễn Huệ, Quận 1, TP.HCM",
+            name: "Cửa hàng Trà thảo mộc Sunbeleaf",
+            address: "45/2 Trịnh Hoài Đức, Phường Tăng Nhơn Phú, Thành phố Hồ Chí Minh, Việt Nam",
           }
         : undefined,
     pickupCode:

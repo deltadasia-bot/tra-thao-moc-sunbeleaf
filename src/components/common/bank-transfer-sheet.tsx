@@ -102,18 +102,18 @@ export default function BankTransferSheet({
       const base64 = canvas.toDataURL("image/png").split(",")[1];
       await saveImageToGallery({ imageBase64Data: base64 });
       setSaveStatus("saved");
-      showToast({ message: "Đã lưu QR vào thư viện ảnh", type: "success", duration: 2000 });
+      showToast({ message: "Đã lưu QR vào thư viện ảnh", type: "success", duration: 2000 } as any);
       setTimeout(() => setSaveStatus("idle"), 2500);
     } catch {
       // Fallback: truyền URL trực tiếp
       try {
         await saveImageToGallery({ imageUrl: qrUrl });
         setSaveStatus("saved");
-        showToast({ message: "Đã lưu QR vào thư viện ảnh", type: "success", duration: 2000 });
+        showToast({ message: "Đã lưu QR vào thư viện ảnh", type: "success", duration: 2000 } as any);
         setTimeout(() => setSaveStatus("idle"), 2500);
       } catch {
         setSaveStatus("error");
-        showToast({ message: "Không lưu được, hãy chụp màn hình để lưu QR", type: "error", duration: 3000 });
+        showToast({ message: "Không lưu được, hãy chụp màn hình để lưu QR", type: "error", duration: 3000 } as any);
         setTimeout(() => setSaveStatus("idle"), 2500);
       }
     }

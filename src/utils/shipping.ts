@@ -76,3 +76,75 @@ export function getShippingFee(
   const weight = estimateWeightGrams(totalQuantity);
   return calculateSpxFee(weight, zone);
 }
+
+const SHOP_COORDS = { lat: 10.8443, lon: 106.7770 };
+
+export function calculateHaversineDistance(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number,
+): number {
+  const R = 6371; // Earth radius in km
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+export function getInstantShippingFee(
+  lat?: number,
+  lon?: number,
+): {
+  fee: number;
+  distance: number;
+  supported: boolean;
+  error?: string;
+} {
+  if (lat === undefined || lon === undefined) {
+    return {
+      fee: 35_000, // Fallback fee if coordinates are missing
+      distance: 0,
+      supported: true,
+      error: "Không có định vị, sử dụng phí mặc định",
+    };
+  }
+
+  const distance = calculateHaversineDistance(
+    SHOP_COORDS.lat,
+    SHOP_COORDS.lon,
+    lat,
+    lon,
+  );
+
+  // Limit distance to 15km
+  if (distance > 15) {
+    return {
+      fee: 0,
+      distance,
+      supported: false,
+      error: "Khoảng cách vượt quá 15km",
+    };
+  }
+
+  let fee = 22_000;
+  if (distance > 2) {
+    // 22,000 VND for first 2km, 5,500 VND per additional km
+    const extraDistance = distance - 2;
+    fee += extraDistance * 5_500;
+    // Round to nearest 1,000 VND
+    fee = Math.round(fee / 1000) * 1000;
+  }
+
+  return {
+    fee,
+    distance,
+    supported: true,
+  };
+}

@@ -52,11 +52,9 @@ const router = createBrowserRouter(
           path: "/profile",
           element: <ProfilePage />,
           handle: {
-            title: copy.header.profile,
-            back: false,
-            whiteBackground: true,
-            headerPosition: "sticky",
+            hideHeader: true,
             hideCart: true,
+            whiteBackground: true,
           },
         },
         { path: "/menu/search", element: <SearchPage /> },
@@ -89,7 +87,6 @@ const router = createBrowserRouter(
             hideFooter: true,
             headerPosition: "sticky",
             whiteBackground: true,
-            hideHeader: true,
           },
         },
         {

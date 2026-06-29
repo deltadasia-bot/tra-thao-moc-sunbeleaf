@@ -22,6 +22,8 @@ export const GET_ORDER_LIST_KEY = "getOrderList";
 
 export const GET_ORDER_BY_ID_KEY = "getOrderById";
 
+export const GET_PRODUCT_SALES_SUMMARY_KEY = "getProductSalesSummary";
+
 export const CANCEL_ORDER_KEY = "cancelOrder";
 
 export const REORDER_KEY = "reorder";

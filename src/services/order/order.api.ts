@@ -4,10 +4,27 @@ import {
   OrderListResponse,
 } from "../../types/order.types";
 import { mockOrders, createMockOrder } from "./order.mock";
+import { TEMP_TEST_ORDERS } from "./temp-test-orders";
 import { BACKEND_URL } from "@/constants/api";
+import { getOrderItemThumbnail } from "@/utils/product-image";
+
+export type ProductSalesSummary = {
+  soldCounts: Record<number, number>;
+  updatedAt: string | null;
+};
 
 // Simulated in-memory storage (sẽ thay bằng API thật sau)
 let orders: Order[] = [...mockOrders];
+
+function normalizeOrderImages(order: Order): Order {
+  return {
+    ...order,
+    items: (order.items || []).map((item) => ({
+      ...item,
+      image: getOrderItemThumbnail(item),
+    })),
+  };
+}
 
 export const orderService = {
   /**
@@ -27,7 +44,7 @@ export const orderService = {
       request.note,
     );
 
-    let finalOrder = newOrder;
+    let finalOrder = normalizeOrderImages(newOrder);
 
     try {
       const loggedPhone = localStorage.getItem("sunbeleaf_logged_in_phone") || "";
@@ -43,19 +60,24 @@ export const orderService = {
           shippingFee:     newOrder.payment?.shippingFee ?? 0,
           deliveryAddress: request.deliveryAddress ?? null,
           items:           newOrder.items.map((item) => ({
+            productId: item.productId,
             name:     item.name,
             quantity: item.quantity,
             price:    item.price,
+            image:    item.image,
+            note:     item.note,
+            options:  item.options,
           })),
           note: request.note ?? "",
           customerPhone: loggedPhone,
+          shippingCarrier: request.shippingCarrier,
         }),
       });
 
       if (res.ok) {
         const data = await res.json() as { success: boolean; order: Order };
         if (data.success && data.order) {
-          finalOrder = data.order;
+          finalOrder = normalizeOrderImages(data.order);
         }
       }
     } catch (err) {
@@ -94,14 +116,41 @@ export const orderService = {
       console.error("Lỗi đọc localStorage:", e);
     }
 
+    if (loggedPhone === "0523283676") {
+      const testOrders = TEMP_TEST_ORDERS.map(normalizeOrderImages);
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/orders?phone=${encodeURIComponent(loggedPhone)}`);
+        if (res.ok) {
+          const data = await res.json() as { orders: Order[]; total: number };
+          const fetchedOrders = data.orders.map(normalizeOrderImages);
+          orders = [
+            ...testOrders,
+            ...fetchedOrders.filter(
+              (o) => o.id !== "order-test-all-1" && o.id !== "order-test-all-2"
+            ),
+          ];
+        } else {
+          orders = testOrders;
+        }
+      } catch (err) {
+        orders = testOrders;
+      }
+      return {
+        orders: orders.slice((page - 1) * pageSize, page * pageSize),
+        total: orders.length,
+        page,
+        pageSize,
+      };
+    }
+
     if (loggedPhone) {
       try {
         const res = await fetch(`${BACKEND_URL}/api/orders?phone=${encodeURIComponent(loggedPhone)}`);
         if (res.ok) {
           const data = await res.json() as { orders: Order[]; total: number };
-          orders = data.orders;
+          orders = data.orders.map(normalizeOrderImages);
           return {
-            orders: data.orders,
+            orders,
             total: data.total,
             page,
             pageSize,
@@ -126,9 +175,9 @@ export const orderService = {
           const res = await fetch(`${BACKEND_URL}/api/orders?ids=${placedIds.join(",")}`);
           if (res.ok) {
             const data = await res.json() as { orders: Order[]; total: number };
-            orders = data.orders;
+            orders = data.orders.map(normalizeOrderImages);
             return {
-              orders: data.orders,
+              orders,
               total: data.total,
               page,
               pageSize,
@@ -156,11 +205,23 @@ export const orderService = {
    * Lấy chi tiết 1 order
    * Thay bằng GET /api/orders/:orderId
    */
+  getSalesSummary: async (): Promise<ProductSalesSummary> => {
+    const res = await fetch(`${BACKEND_URL}/api/orders/sales-summary`);
+    if (!res.ok) {
+      throw new Error("Cannot load product sales summary");
+    }
+    return res.json() as Promise<ProductSalesSummary>;
+  },
+
   getOrderById: async (orderId: string): Promise<Order> => {
+    if (orderId === "order-test-all-1" || orderId === "order-test-all-2") {
+      const testOrder = TEMP_TEST_ORDERS.find((o) => o.id === orderId);
+      if (testOrder) return normalizeOrderImages(testOrder);
+    }
     try {
       const res = await fetch(`${BACKEND_URL}/api/orders/${orderId}`);
       if (res.ok) {
-        const orderData = await res.json() as Order;
+        const orderData = normalizeOrderImages(await res.json() as Order);
         const idx = orders.findIndex(o => o.id === orderId);
         if (idx !== -1) {
           orders[idx] = orderData;
@@ -320,5 +381,50 @@ export const orderService = {
     orders[orderIndex] = updatedOrder;
 
     return updatedOrder;
+  },
+
+  /**
+   * Yêu cầu trả hàng/hoàn tiền và tự động đồng bộ sang Sapo
+   */
+  requestReturn: async (orderId: string): Promise<Order> => {
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/orders/${orderId}/return`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      if (res.ok) {
+        const data = await res.json() as { success: boolean; order: Order };
+        if (data.success && data.order) {
+          const idx = orders.findIndex(o => o.id === orderId);
+          if (idx !== -1) {
+            orders[idx] = data.order;
+          }
+          return data.order;
+        }
+      }
+    } catch (err) {
+      console.warn("Không kết nối được backend khi đổi trả, dùng mock.");
+    }
+
+    const idx = orders.findIndex(o => o.id === orderId);
+    if (idx === -1) {
+      throw new Error(`Order with ID ${orderId} not found`);
+    }
+    const order = orders[idx];
+    const updated: Order = {
+      ...order,
+      state: "returned",
+      stateLabel: "Trả hàng/Hoàn tiền",
+      updatedAt: new Date(),
+    };
+    orders[idx] = updated;
+
+    const testIdx = TEMP_TEST_ORDERS.findIndex(o => o.id === orderId);
+    if (testIdx !== -1) {
+      TEMP_TEST_ORDERS[testIdx].state = "returned";
+      TEMP_TEST_ORDERS[testIdx].stateLabel = "Trả hàng/Hoàn tiền";
+    }
+
+    return updated;
   },
 };

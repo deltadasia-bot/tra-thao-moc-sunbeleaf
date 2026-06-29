@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Tabs, Tab } from "@/components/common/tabs";
 import { OrderItemCard } from "@/components/common/order-item-card";
 import CartImg from "@/static/cart.png";
@@ -10,7 +10,14 @@ import { copy } from "@/constants/copy";
 
 export default function OrderPage() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<OrderStatus>("all");
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState<OrderStatus>(() => {
+    const tabParam = searchParams.get("tab") as OrderStatus;
+    if (tabParam === "ongoing" || tabParam === "completed") {
+      return tabParam;
+    }
+    return "all";
+  });
   const [page] = useState(1);
 
   const tabs: Tab<OrderStatus>[] = [
@@ -27,11 +34,11 @@ export default function OrderPage() {
       if (activeTab === "all") return true;
 
       if (activeTab === "ongoing") {
-        return !["completed", "delivered", "cancelled"].includes(order.state);
+        return !["completed", "delivered", "cancelled", "returned"].includes(order.state);
       }
 
       if (activeTab === "completed") {
-        return ["completed", "delivered", "cancelled"].includes(order.state);
+        return ["completed", "delivered", "cancelled", "returned"].includes(order.state);
       }
 
       return true;

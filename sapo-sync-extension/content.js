@@ -167,7 +167,21 @@ async function handleQueryTracking(zaloOrderId, sapoOrderId, backendUrl) {
     const shippingCarrier = activeFulfillment.tracking_company || "SPX Express";
     const trackingUrl = activeFulfillment.tracking_url || `https://spx.vn/#/detail/${trackingNumber}`;
     
-    // Cập nhật lại mã vận đơn về Zalo Backend
+    // Trích xuất trạng thái giao vận thực tế từ Sapo để ánh xạ về trạng thái Việt hóa Zalo
+    const shipmentStatus = activeFulfillment.shipment_status || "";
+    let mappedState = null;
+    
+    if (shipmentStatus === "ready_for_pickup" || shipmentStatus === "picked" || shipmentStatus === "picking") {
+      mappedState = "ready";
+    } else if (shipmentStatus === "shipping" || shipmentStatus === "in_transit" || shipmentStatus === "delivery_attempt" || shipmentStatus === "delivering") {
+      mappedState = "delivering";
+    } else if (shipmentStatus === "delivered" || shipmentStatus === "success") {
+      mappedState = "delivered";
+    } else if (shipmentStatus === "cancel" || shipmentStatus === "cancelled") {
+      mappedState = "cancelled";
+    }
+    
+    // Cập nhật lại mã vận đơn và trạng thái về Zalo Backend
     const updateRes = await fetch(`${backendUrl}/api/sapo/extension/update-tracking`, {
       method: "POST",
       headers: {
@@ -177,14 +191,15 @@ async function handleQueryTracking(zaloOrderId, sapoOrderId, backendUrl) {
         id: zaloOrderId,
         trackingNumber,
         shippingCarrier,
-        trackingUrl
+        trackingUrl,
+        ...(mappedState && { state: mappedState })
       })
     });
     
     if (updateRes.ok) {
-      console.log(`[Sapo Assistant] Cập nhật thành công vận đơn ${trackingNumber} từ Sapo về Zalo.`);
-      addLogToStorage(`Đồng bộ mã vận đơn: ${trackingNumber} cho đơn Zalo ID ${zaloOrderId}`);
-      showToastNotification(`Đã cập nhật mã vận đơn ${trackingNumber} (SPX) từ Sapo về Zalo!`);
+      console.log(`[Sapo Assistant] Cập nhật thành công vận đơn ${trackingNumber} (Trạng thái: ${mappedState || 'không đổi'}) từ Sapo về Zalo.`);
+      addLogToStorage(`Đồng bộ vận đơn: ${trackingNumber} (${mappedState || 'giữ nguyên'}) cho đơn Zalo ID ${zaloOrderId}`);
+      showToastNotification(`Đã cập nhật mã vận đơn ${trackingNumber} (${mappedState ? (mappedState === 'ready' ? 'Sẵn sàng giao' : mappedState === 'delivering' ? 'Đang giao' : 'Đã giao') : 'SPX'}) từ Sapo về Zalo!`);
     }
   } catch (error) {
     console.error("[Sapo Assistant] Lỗi khi đồng bộ ngược mã vận đơn:", error.message);

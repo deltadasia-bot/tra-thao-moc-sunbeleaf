@@ -53,7 +53,7 @@ const rawMockListOfProduct: Product[] = [
       "https://deltadasia.com/wp-content/uploads/2026/06/zma-xa-den-shopee-09.webp",
     ],
     // Giá cơ bản của quy cách 25 gói.
-    price: 99000,
+    price: 167900,
     variantGroups: [
       {
         id: "package-size",
@@ -74,7 +74,7 @@ const rawMockListOfProduct: Product[] = [
             id: "package-50",
             name: "Túi 50 gói",
             // Tổng giá = price + extraPrice.
-            extraPrice: 80000,
+            extraPrice: 122000,
             // Thay bằng ảnh thật của túi 50 gói.
             image:
               "https://deltadasia.com/wp-content/uploads/2026/06/zma-xa-den-shopee-50-goi.webp",
@@ -111,7 +111,7 @@ const rawMockListOfProduct: Product[] = [
       "https://deltadasia.com/wp-content/uploads/2026/06/zma-p02-shopee-09.webp",
     ],
     // Giá cơ bản của quy cách 25 gói.
-    price: 99000,
+    price: 167900,
     variantGroups: [
       {
         id: "package-size",
@@ -132,7 +132,7 @@ const rawMockListOfProduct: Product[] = [
             id: "package-50",
             name: "Túi 50 gói",
             // Tổng giá = price + extraPrice.
-            extraPrice: 80000,
+            extraPrice: 122000,
             // Thay bằng ảnh thật của túi 50 gói.
             image:
               "https://deltadasia.com/wp-content/uploads/2026/06/zma-p02-shopee-variant-01-02.webp",
@@ -169,7 +169,7 @@ const rawMockListOfProduct: Product[] = [
       "https://deltadasia.com/wp-content/uploads/2026/06/zma-p03-shopee-09.webp",
     ],
     // Giá cơ bản của quy cách 25 gói.
-    price: 99000,
+    price: 167900,
     variantGroups: [
       {
         id: "package-size",
@@ -190,7 +190,7 @@ const rawMockListOfProduct: Product[] = [
             id: "package-50",
             name: "Túi 50 gói",
             // Tổng giá = price + extraPrice.
-            extraPrice: 80000,
+            extraPrice: 122000,
             // Thay bằng ảnh thật của túi 50 gói.
             image:
               "https://deltadasia.com/wp-content/uploads/2026/06/zma-p03-shopee-variant-01-02.webp",
@@ -227,7 +227,7 @@ const rawMockListOfProduct: Product[] = [
       "https://deltadasia.com/wp-content/uploads/2026/06/zma-p04-shopee-09.webp",
     ],
     // Giá cơ bản của quy cách 25 gói.
-    price: 99000,
+    price: 167900,
     variantGroups: [
       {
         id: "package-size",
@@ -248,7 +248,7 @@ const rawMockListOfProduct: Product[] = [
             id: "package-50",
             name: "Túi 50 gói",
             // Tổng giá = price + extraPrice.
-            extraPrice: 80000,
+            extraPrice: 122000,
             // Thay bằng ảnh thật của túi 50 gói.
             image:
               "https://deltadasia.com/wp-content/uploads/2026/06/zma-p04-shopee-variant-01-02.webp",
@@ -285,7 +285,7 @@ const rawMockListOfProduct: Product[] = [
       "https://deltadasia.com/wp-content/uploads/2026/06/zma-p05-shopee-09.webp",
     ],
     // Giá cơ bản của quy cách 25 gói.
-    price: 99000,
+    price: 167900,
     variantGroups: [
       {
         id: "package-size",
@@ -306,7 +306,7 @@ const rawMockListOfProduct: Product[] = [
             id: "package-50",
             name: "Túi 50 gói",
             // Tổng giá = price + extraPrice.
-            extraPrice: 80000,
+            extraPrice: 122000,
             // Thay bằng ảnh thật của túi 50 gói.
             image:
               "https://deltadasia.com/wp-content/uploads/2026/06/zma-p05-shopee-variant-01-02.webp",
@@ -343,7 +343,7 @@ const rawMockListOfProduct: Product[] = [
       "https://deltadasia.com/wp-content/uploads/2026/06/zma-p06-shopee-09.webp",
     ],
     // Giá cơ bản của quy cách 25 gói.
-    price: 99000,
+    price: 167900,
     variantGroups: [
       {
         id: "package-size",
@@ -364,7 +364,7 @@ const rawMockListOfProduct: Product[] = [
             id: "package-50",
             name: "Túi 50 gói",
             // Tổng giá = price + extraPrice.
-            extraPrice: 80000,
+            extraPrice: 122000,
             // Thay bằng ảnh thật của túi 50 gói.
             image:
               "https://deltadasia.com/wp-content/uploads/2026/06/zma-p06-shopee-variant-01-02.webp",
@@ -402,7 +402,7 @@ const rawMockListOfProduct: Product[] = [
       "https://deltadasia.com/wp-content/uploads/2026/06/zma-p07-shopee-09.webp",
     ],
     // Giá cơ bản của quy cách 25 gói.
-    price: 99000,
+    price: 213600,
     variantGroups: [],
     features: ["cancer-prevention", "bestseller"],
     sales: {
@@ -436,7 +436,7 @@ const rawMockListOfProduct: Product[] = [
       "https://deltadasia.com/wp-content/uploads/2026/06/zma-p08-shopee-09.webp",
     ],
     // Giá cơ bản của quy cách 25 gói.
-    price: 99000,
+    price: 213600,
     variantGroups: [],
     features: ["liver-support"],
   },
@@ -467,7 +467,7 @@ const rawMockListOfProduct: Product[] = [
       "https://deltadasia.com/wp-content/uploads/2026/06/zma-p09-shopee-09.webp",
     ],
     // Giá cơ bản của quy cách 25 gói.
-    price: 99000,
+    price: 213600,
     variantGroups: [],
     features: ["hangover-relief"],
   },
@@ -498,7 +498,7 @@ const rawMockListOfProduct: Product[] = [
       "https://deltadasia.com/wp-content/uploads/2026/06/zma-p10-shopee-09.webp",
     ],
     // Giá cơ bản của quy cách 25 gói.
-    price: 99000,
+    price: 213600,
     variantGroups: [],
     features: ["ice"],
   },
@@ -529,7 +529,7 @@ const rawMockListOfProduct: Product[] = [
       "https://deltadasia.com/wp-content/uploads/2026/06/zma-p11-shopee-09.webp",
     ],
     // Giá cơ bản của quy cách 25 gói.
-    price: 99000,
+    price: 213600,
     variantGroups: [],
     features: ["ice"],
   },
@@ -560,7 +560,7 @@ const rawMockListOfProduct: Product[] = [
       "https://deltadasia.com/wp-content/uploads/2026/06/zma-p12-shopee-09.webp",
     ],
     // Giá cơ bản của quy cách 25 gói.
-    price: 99000,
+    price: 213600,
     variantGroups: [],
     features: ["ice"],
   },
@@ -592,7 +592,7 @@ const rawMockListOfProduct: Product[] = [
       "https://deltadasia.com/wp-content/uploads/2026/06/zma-p13-shopee-09.webp",
     ],
     // Giá cơ bản của quy cách hộp 20 gói.
-    price: 99000,
+    price: 189600,
     variantGroups: [],
     features: ["cancer-prevention"],
   },
@@ -623,7 +623,7 @@ const rawMockListOfProduct: Product[] = [
       "https://deltadasia.com/wp-content/uploads/2026/06/zma-p14-shopee-09.webp",
     ],
     // Giá cơ bản của quy cách hộp 20 gói.
-    price: 99000,
+    price: 189600,
     variantGroups: [],
     features: ["ice"],
   },
@@ -654,7 +654,7 @@ const rawMockListOfProduct: Product[] = [
       "https://deltadasia.com/wp-content/uploads/2026/06/zma-p15-shopee-09.webp",
     ],
     // Giá cơ bản của quy cách 20 gói.
-    price: 99000,
+    price: 189600,
     variantGroups: [],
     features: ["sleep-support"],
   },
@@ -685,7 +685,7 @@ const rawMockListOfProduct: Product[] = [
       "https://deltadasia.com/wp-content/uploads/2026/06/zma-p16-shopee-09.webp",
     ],
     // Giá cơ bản của quy cách 20 gói.
-    price: 99000,
+    price: 189600,
     variantGroups: [],
     features: ["sleep-support", "bestseller"],
   },
@@ -716,7 +716,7 @@ const rawMockListOfProduct: Product[] = [
       "https://deltadasia.com/wp-content/uploads/2026/06/zma-p17-shopee-09.webp",
     ],
     // Giá cơ bản của quy cách 20 gói.
-    price: 99000,
+    price: 189600,
     variantGroups: [],
     features: ["ice"],
   },
@@ -747,7 +747,7 @@ const rawMockListOfProduct: Product[] = [
       "https://deltadasia.com/wp-content/uploads/2026/06/zma-p18-shopee-09.webp",
     ],
     // Giá cơ bản của quy cách 20 gói.
-    price: 99000,
+    price: 189600,
     variantGroups: [],
     features: ["ice"],
   },
@@ -778,7 +778,7 @@ const rawMockListOfProduct: Product[] = [
       "https://deltadasia.com/wp-content/uploads/2026/06/zma-p19-shopee-09.webp",
     ],
     // Giá cơ bản của quy cách 20 gói.
-    price: 99000,
+    price: 189600,
     variantGroups: [],
     features: ["ice"],
   },
@@ -809,7 +809,7 @@ const rawMockListOfProduct: Product[] = [
       "https://deltadasia.com/wp-content/uploads/2026/06/zma-p20-shopee-09.webp",
     ],
     // Giá cơ bản của quy cách 20 gói.
-    price: 99000,
+    price: 189600,
     variantGroups: [],
     features: ["ice"],
   },
@@ -841,7 +841,7 @@ const rawMockListOfProduct: Product[] = [
       "https://deltadasia.com/wp-content/uploads/2026/06/zma-p21-shopee-09.webp",
     ],
     // Giá cơ bản của quy cách 20 gói.
-    price: 99000,
+    price: 190350,
     variantGroups: [
       {
         id: "package-size",
@@ -862,7 +862,7 @@ const rawMockListOfProduct: Product[] = [
             id: "package-20",
             name: "Túi 20 gói",
             // Tổng giá = price + extraPrice.
-            extraPrice: 80000,
+            extraPrice: -41850,
             // Thay bằng ảnh thật của túi 20 gói.
             image:
               "https://deltadasia.com/wp-content/uploads/2026/06/zma-p21-shopee-variant-01-02.webp",
@@ -957,7 +957,7 @@ const rawMockListOfProduct: Product[] = [
       "https://deltadasia.com/wp-content/uploads/2026/06/zma-p23-shopee-09.webp",
     ],
     // Giá cơ bản của quy cách 20 gói.
-    price: 99000,
+    price: 211500,
     variantGroups: [
       {
         id: "package-size",
@@ -978,7 +978,7 @@ const rawMockListOfProduct: Product[] = [
             id: "package-20",
             name: "Túi 20 gói",
             // Tổng giá = price + extraPrice.
-            extraPrice: 80000,
+            extraPrice: 96500,
             // Thay bằng ảnh thật của túi 20 gói.
             image:
               "https://deltadasia.com/wp-content/uploads/2026/06/zma-p23-shopee-variant-01-02.webp",
@@ -1015,7 +1015,7 @@ const rawMockListOfProduct: Product[] = [
       "https://deltadasia.com/wp-content/uploads/2026/06/zma-p24-shopee-09.webp",
     ],
     // Giá cơ bản của quy cách 20 gói.
-    price: 99000,
+    price: 197400,
     variantGroups: [
       {
         id: "package-size",
@@ -1028,16 +1028,13 @@ const rawMockListOfProduct: Product[] = [
             id: "package-10",
             name: "Túi 10 gói",
             extraPrice: 0,
-            // Thay bằng ảnh thật của túi 10 gói.
             image:
               "https://deltadasia.com/wp-content/uploads/2026/06/zma-p24-shopee-variant-01-01.webp",
           },
           {
             id: "package-20",
             name: "Túi 20 gói",
-            // Tổng giá = price + extraPrice.
-            extraPrice: 80000,
-            // Thay bằng ảnh thật của túi 20 gói.
+            extraPrice: 132600,
             image:
               "https://deltadasia.com/wp-content/uploads/2026/06/zma-p24-shopee-variant-01-02.webp",
           },
@@ -1054,7 +1051,7 @@ const rawMockListOfProduct: Product[] = [
     image:
       "https://deltadasia.com/wp-content/uploads/2026/06/zma-p25-shopee-01.webp",
     video:
-      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p25-shopee-video.mp4",
+      "https://deltadasia.com/wp-content/uploads/2026/06/tra-hoa-atiso-do-tra-thao-moc-sunbeleaf-video-quang-ba.mp4",
     videoPoster:
       "https://deltadasia.com/wp-content/uploads/2026/06/zma-p25-shopee-video-poster.webp",
     images: [
@@ -1073,7 +1070,7 @@ const rawMockListOfProduct: Product[] = [
       "Trà hoa atiso đỏ được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày.",
     // Thay bằng ảnh đại diện thật của sản phẩm.
     // Giá cơ bản của quy cách túi 100g.
-    price: 89000,
+    price: 144000,
     variantGroups: [],
     features: ["liver-support"],
   },
@@ -1103,7 +1100,7 @@ const rawMockListOfProduct: Product[] = [
       "Trà hoa cúc được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày.",
     // Thay bằng ảnh đại diện thật của sản phẩm.
     // Giá cơ bản của quy cách túi 100g.
-    price: 89000,
+    price: 210000,
     variantGroups: [],
     features: ["sleep-support", "bestseller"],
   },
@@ -1133,7 +1130,7 @@ const rawMockListOfProduct: Product[] = [
       "Trà hoa nhài được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày.",
     // Thay bằng ảnh đại diện thật của sản phẩm.
     // Giá cơ bản của quy cách túi 100g.
-    price: 89000,
+    price: 213400,
     variantGroups: [],
     features: ["sleep-support"],
   },
@@ -1163,7 +1160,7 @@ const rawMockListOfProduct: Product[] = [
       "Trà hoa hồng được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày.",
     // Thay bằng ảnh đại diện thật của sản phẩm.
     // Giá cơ bản của quy cách túi 100g.
-    price: 89000,
+    price: 172800,
     variantGroups: [],
     features: ["ice"],
   },
@@ -1193,7 +1190,7 @@ const rawMockListOfProduct: Product[] = [
       "Trà hoa mẫu đơn được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày.",
     // Thay bằng ảnh đại diện thật của sản phẩm.
     // Giá cơ bản của quy cách túi 100g.
-    price: 89000,
+    price: 144000,
     variantGroups: [],
     features: ["ice"],
   },
@@ -1223,7 +1220,7 @@ const rawMockListOfProduct: Product[] = [
       "Trà hoa đậu biếc được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày.",
     // Thay bằng ảnh đại diện thật của sản phẩm.
     // Giá cơ bản của quy cách túi 100g.
-    price: 89000,
+    price: 180400,
     variantGroups: [],
     features: ["ice"],
   },
@@ -1240,7 +1237,7 @@ const rawMockListOfProduct: Product[] = [
       "https://deltadasia.com/wp-content/uploads/2026/06/tra-thao-moc-sunbeleaf-dai-chuom-dau-goi-thao-duoc-300x300.jpg?v=20260619-1",
     ],
     name: "Cặp Đai chườm đầu gối thảo dược - Giảm Đau Nhức, Hỗ Trợ Lưu Thông Khí Huyết",
-    price: 280000,
+    price: 420000,
     variantGroups: [],
     features: ["hot"],
   },
@@ -1268,7 +1265,7 @@ const rawMockListOfProduct: Product[] = [
       "https://deltadasia.com/wp-content/uploads/2026/06/zma-p32-shopee-09.webp",
     ],
     name: "Túi chườm mắt thảo dược - Giảm Nhức Mỏi Mắt, Hỗ Trợ Lưu Thông Khí Huyết",
-    price: 150000,
+    price: 220000,
     variantGroups: [],
     features: ["sleep-support"],
   },
@@ -1293,7 +1290,7 @@ const rawMockListOfProduct: Product[] = [
       "https://deltadasia.com/wp-content/uploads/2026/06/zma-p33-shopee-06.webp",
     ],
     name: "Gối chườm thảo dược - Giảm Đau Nhức Vai Gáy, Lưu Thông Khí Huyết",
-    price: 300000,
+    price: 600000,
     variantGroups: [],
     features: ["hot"],
   },
@@ -1336,6 +1333,53 @@ const rawMockListOfProduct: Product[] = [
     comingSoon: true,
     variantGroups: [],
     features: ["vegetarian", "hot"],
+  },
+  {
+    id: 36,
+    categoryId: "vietnamese",
+    subCategoryId: "vietnamese-snack",
+    name: "Lá Xông Giải Cảm Sunbeleaf - Thảo Dược Xông Hơi, Tắm Hoặc Xông Đều Được",
+    description:
+      "Lá xông giải cảm Sunbeleaf dạng túi zip 25g, phù hợp để xông hơi, tắm hoặc sử dụng theo hướng dẫn trên bao bì.",
+    image:
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-la-xong-shopee-01.jpg",
+    video:
+      "https://deltadasia.com/wp-content/uploads/2026/06/tra-thao-moc-sunbeleaf-la-xong-giai-cam-video-quang-ba.mp4",
+    images: [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-la-xong-shopee-01.jpg",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-la-xong-shopee-02.jpg",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-la-xong-shopee-03.jpg",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-la-xong-shopee-04.jpg",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-la-xong-shopee-05.jpg",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-la-xong-shopee-06.jpg",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-la-xong-shopee-07.jpg",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-la-xong-shopee-08.jpg",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-la-xong-shopee-09.jpg",
+    ],
+    price: 57500,
+    variantGroups: [
+      {
+        id: "package-size",
+        title: "Quy cách sản phẩm",
+        description: "Chọn quy cách lá xông",
+        type: "SINGLE",
+        isRequired: true,
+        options: [
+          {
+            id: "package-25g",
+            name: "Túi Zip 25g",
+            extraPrice: 0,
+            image:
+              "https://deltadasia.com/wp-content/uploads/2026/06/zma-la-xong-shopee-01.jpg",
+          },
+        ],
+      },
+    ],
+    features: ["bestseller"],
+    sales: {
+      discount: 60,
+      specialPrice: 23000,
+    },
   },
   {
     // TEMP TEST PRODUCT: remove after checkout verification is finished.
@@ -1461,7 +1505,6 @@ export const mockListOfProduct: Product[] = rawMockListOfProduct.map(
       ),
     ),
     descriptionSections: createDescriptionSections(product),
-    reviews: createProductReviews(product.id),
   }),
 );
 

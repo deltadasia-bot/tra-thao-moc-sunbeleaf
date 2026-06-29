@@ -21,6 +21,7 @@ export default function Layout() {
     }
   });
   const [loginPhoneInput, setLoginPhoneInput] = useState("");
+  const [loginNameInput, setLoginNameInput] = useState("");
 
   // Sync state if localStorage changes in other components (e.g. logout)
   useEffect(() => {
@@ -42,20 +43,30 @@ export default function Layout() {
   }, [loggedInPhone]);
 
   const handleLogin = () => {
-    const trimmed = loginPhoneInput.trim();
-    if (!trimmed) {
+    const trimmedPhone = loginPhoneInput.trim();
+    const trimmedName = loginNameInput.trim();
+    if (!trimmedPhone) {
       openSnackbar({ text: "Vui lòng nhập số điện thoại!", type: "warning" });
       return;
     }
     const phoneRegex = /^(0[3|5|7|8|9])[0-9]{8}$/;
-    if (!phoneRegex.test(trimmed)) {
+    if (!phoneRegex.test(trimmedPhone)) {
       openSnackbar({ text: "Số điện thoại không hợp lệ! Vui lòng nhập số điện thoại 10 chữ số.", type: "error" });
+      return;
+    }
+    if (!trimmedName) {
+      openSnackbar({ text: "Vui lòng nhập họ và tên!", type: "warning" });
+      return;
+    }
+    if (trimmedName.length < 2) {
+      openSnackbar({ text: "Họ và tên tối thiểu phải có 2 ký tự.", type: "error" });
       return;
     }
 
     try {
-      localStorage.setItem("sunbeleaf_logged_in_phone", trimmed);
-      setLoggedInPhone(trimmed);
+      localStorage.setItem("sunbeleaf_logged_in_phone", trimmedPhone);
+      localStorage.setItem("sunbeleaf_logged_in_name", trimmedName);
+      setLoggedInPhone(trimmedPhone);
       openSnackbar({ text: "Đăng nhập thành công!", type: "success" });
     } catch (e) {
       console.error(e);
@@ -91,7 +102,7 @@ export default function Layout() {
           <div className="text-center text-white flex flex-col gap-1.5">
             <h1 className="text-2xl font-bold tracking-tight">Sunbeleaf</h1>
             <p className="text-xxsmall text-white/80 max-w-[280px] leading-normal">
-              Chào mừng bạn đến với Trà thảo mộc Sunbeleaf. Vui lòng nhập số điện thoại để tiếp tục trải nghiệm và quản lý đơn hàng.
+              Chào mừng bạn đến với Trà thảo mộc Sunbeleaf. Vui lòng nhập thông tin để tiếp tục trải nghiệm và quản lý đơn hàng.
             </p>
           </div>
 
@@ -104,6 +115,18 @@ export default function Layout() {
                 value={loginPhoneInput}
                 onChange={(e) => setLoginPhoneInput(e.target.value.replace(/\D/g, ""))}
                 placeholder="Nhập số điện thoại của bạn..."
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:border-primary text-gray-900 bg-gray-50/50 placeholder:text-gray-400"
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="text-xxsmall font-bold text-gray-500 uppercase tracking-wider ml-1">Họ và tên</label>
+              <input
+                type="text"
+                maxLength={50}
+                value={loginNameInput}
+                onChange={(e) => setLoginNameInput(e.target.value)}
+                placeholder="Nhập họ và tên của bạn..."
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:border-primary text-gray-900 bg-gray-50/50 placeholder:text-gray-400"
               />
             </div>

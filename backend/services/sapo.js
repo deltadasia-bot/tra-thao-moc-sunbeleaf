@@ -101,9 +101,9 @@ async function pushOrderToSapo(order) {
         },
         shipping_lines: [
           {
-            title: "SPX Express",
+            title: order.shippingCarrier || "SPX Express",
             price: String(order.shippingFee || 0),
-            code: "spx_express",
+            code:  order.shippingCarrier === "Giao hàng Hỏa tốc" ? "instant_delivery" : "spx_express",
           },
         ],
       }),
@@ -184,8 +184,50 @@ async function checkSapoConnection() {
   };
 }
 
+async function createSapoReturn(order) {
+  if (!isConfigured()) {
+    console.log("[Sapo] Chua cau hinh, bo qua tao don doi tra cho:", order.orderCode);
+    return null;
+  }
+  if (!order.sapoOrderId) {
+    console.log("[Sapo] Don hang chua duoc dong bo sang Sapo, khong the tao doi tra");
+    return null;
+  }
+  try {
+    // Trong Sapo, tao don tra hang (refund) cho don hang goc
+    const payload = {
+      refund: {
+        note: `Khach hang yeu cau doi tra tu Zalo Mini App. Ma don: ${order.orderCode}`,
+        refund_line_items: (order.items || []).map((item) => ({
+          quantity: item.quantity,
+          restock_type: "no_restock",
+        })),
+      }
+    };
+    
+    const res = await fetch(sapoUrl(`/orders/${order.sapoOrderId}/refunds.json`), {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify(payload),
+    });
+    
+    const json = await parseJsonSafe(res);
+    if (!res.ok) {
+      console.warn(`[Sapo] Loi khi tao don doi tra: ${JSON.stringify(json.errors || json)}`);
+      return null;
+    }
+    
+    console.log(`[Sapo] Da tao don doi tra thanh cong tren Sapo cho don #${order.sapoOrderId}`);
+    return json.refund;
+  } catch (err) {
+    console.error("[Sapo] Loi ket noi khi tao don doi tra:", err.message);
+    return null;
+  }
+}
+
 module.exports = {
   checkSapoConnection,
   markSapoOrderPaid,
   pushOrderToSapo,
+  createSapoReturn,
 };

@@ -89,7 +89,6 @@ function getBaselineScore(product: Product) {
   return (
     (product.features.includes("bestseller") ? 18 : 0) +
     (product.sales?.freeShipping ? 6 : 0) +
-    Math.min(product.reviews?.length || 0, 10) * 1.25 +
     (product.comingSoon ? -50 : 0)
   );
 }

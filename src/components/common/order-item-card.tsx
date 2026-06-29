@@ -5,6 +5,7 @@ import { Text } from "zmp-ui";
 import { copy } from "@/constants/copy";
 import { formatCurrency } from "@/utils/format";
 import { cn } from "@/utils/cn";
+import { getOrderItemThumbnail } from "@/utils/product-image";
 
 interface OrderItemCardProps {
   order: Order;
@@ -22,6 +23,11 @@ export function OrderItemCard({
     (sum, item) => sum + item.quantity,
     0,
   );
+  const leadItem = order.items[0];
+  const leadImage = leadItem ? getOrderItemThumbnail(leadItem) : "";
+  const canReview =
+    (order.state === "delivered" || order.state === "completed") &&
+    order.items.some((item) => item.productId);
 
   return (
     <div
@@ -51,7 +57,7 @@ export function OrderItemCard({
       <div className="mb-3">
         <div className="flex items-center gap-3">
           <img
-            src={order.items[0].image}
+            src={leadImage}
             alt={copy.order.title}
             className="h-15 w-15 rounded-lg object-cover"
           />
@@ -60,11 +66,23 @@ export function OrderItemCard({
               {totalQuantity} {copy.common.items}
             </div>
             {order.items.map((item) => (
-              <div className="flex justify-between">
-                <div key={item.id} className="text-xxsmall text-text-primary">
-                  {item.name}
+              <div key={item.id} className="flex justify-between gap-2">
+                <div className="min-w-0 flex-1">
+                  <div className="text-xxsmall text-text-primary">
+                    {item.name}
+                  </div>
+                  {item.options && item.options.length > 0 && (
+                    <div className="mt-0.5 text-[11px] leading-4 text-text-disabled">
+                      Quy cách:{" "}
+                      {item.options
+                        .map((opt) =>
+                          opt.name ? `${opt.name}: ${opt.value}` : opt.value,
+                        )
+                        .join(copy.common.listSeparator)}
+                    </div>
+                  )}
                 </div>
-                <div key={item.id} className="text-xxsmall text-text-disabled">
+                <div className="text-xxsmall text-text-disabled">
                   {copy.common.quantityPrefix}
                   {item.quantity}
                 </div>
@@ -91,6 +109,17 @@ export function OrderItemCard({
       </div>
 
       <div className="mt-3 flex justify-end gap-2">
+        {canReview && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/order/${order.id}`);
+            }}
+            className="rounded-lg !border !border-[#ee4d2d] !bg-transparent px-3 py-1.5 text-xs text-[#ee4d2d] active:!bg-transparent"
+          >
+            Đánh giá
+          </button>
+        )}
         {order.canReorder && (
           <button
             onClick={(e) => {
