@@ -238,51 +238,32 @@ export default function HomePage() {
 
   const [followerCount, setFollowerCount] = useState<number>(() => {
     try {
-      const stored = localStorage.getItem("sunbeleaf_simulated_followers");
-      return stored ? Number(stored) : 8712;
+      const stored = localStorage.getItem("sunbeleaf_real_followers");
+      return stored ? Number(stored) : 240;
     } catch {
-      return 8712;
+      return 240;
     }
   });
 
-  // Fetch real OA stats and run real-time simulation
+  // Fetch real OA stats and keep it synced every 30s
   useEffect(() => {
     let active = true;
     
-    // 1. Fetch real OA stats from server
     const fetchRealStats = async () => {
       const stats = await getZaloOfficialAccountStats();
-      if (stats && stats.followerCount && active) {
-        setFollowerCount((prev) => {
-          const newCount = stats.followerCount;
-          localStorage.setItem("sunbeleaf_simulated_followers", String(newCount));
-          return newCount;
-        });
+      if (stats && typeof stats.followerCount === "number" && active) {
+        setFollowerCount(stats.followerCount);
+        localStorage.setItem("sunbeleaf_real_followers", String(stats.followerCount));
       }
     };
     
+    // Initial fetch
     fetchRealStats();
 
-    // 2. Real-time đếm số lượng theo thời gian thực (fluctuation/increment simulation)
+    // Sync periodically with the server (real-time Zalo OA API synchronization)
     const interval = setInterval(() => {
-      if (!active) return;
-      setFollowerCount((prev) => {
-        const rand = Math.random();
-        let diff = 0;
-        if (rand > 0.85) {
-          diff = -1; // 15% giảm
-        } else if (rand > 0.4) {
-          diff = 1;  // 45% tăng 1
-        } else if (rand > 0.15) {
-          diff = 2;  // 25% tăng 2
-        } else {
-          diff = 0;  // 15% giữ nguyên
-        }
-        const updated = prev + diff;
-        localStorage.setItem("sunbeleaf_simulated_followers", String(updated));
-        return updated;
-      });
-    }, 12000); // Mỗi 12 giây cập nhật một lần
+      fetchRealStats();
+    }, 30000); // 30s sync
 
     return () => {
       active = false;
