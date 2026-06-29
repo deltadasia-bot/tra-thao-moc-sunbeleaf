@@ -7,6 +7,8 @@ const DATA_DIR = process.env.DATA_DIR
   ? path.resolve(process.env.DATA_DIR)
   : path.join(__dirname, "data");
 const ORDERS_FILE = path.join(DATA_DIR, "orders.json");
+const VIEWS_FILE = path.join(DATA_DIR, "article_views.json");
+const ADMIN_AUTH_FILE = path.join(DATA_DIR, "admin_auth.json");
 
 console.log(`[DB] Thư mục lưu đơn hàng: ${DATA_DIR}`);
 
@@ -19,6 +21,7 @@ const STATE_LABELS = {
   delivered: "Đã giao hàng",
   completed: "Hoàn thành",
   cancelled: "Đã hủy",
+  returned: "Trả hàng/Hoàn tiền",
 };
 
 const DELIVERY_TYPE_LABELS = {
@@ -52,6 +55,47 @@ function writeOrders(orders) {
   fs.writeFileSync(ORDERS_FILE, JSON.stringify(orders, null, 2), "utf8");
 }
 
+function readViews() {
+  ensureStore();
+  if (!fs.existsSync(VIEWS_FILE)) {
+    fs.writeFileSync(VIEWS_FILE, "[]", "utf8");
+  }
+  try {
+    const raw = fs.readFileSync(VIEWS_FILE, "utf8");
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (err) {
+    console.error("[DB] Khong doc duoc article_views.json:", err.message);
+    return [];
+  }
+}
+
+function writeViews(views) {
+  ensureStore();
+  fs.writeFileSync(VIEWS_FILE, JSON.stringify(views, null, 2), "utf8");
+}
+
+function readAdminAuth() {
+  ensureStore();
+  if (!fs.existsSync(ADMIN_AUTH_FILE)) {
+    return null;
+  }
+  try {
+    const raw = fs.readFileSync(ADMIN_AUTH_FILE, "utf8");
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : null;
+  } catch (err) {
+    console.error("[DB] Khong doc duoc admin_auth.json:", err.message);
+    return null;
+  }
+}
+
+function writeAdminAuth(auth) {
+  ensureStore();
+  fs.writeFileSync(ADMIN_AUTH_FILE, JSON.stringify(auth, null, 2), "utf8");
+}
+
+
 const STATE_MILESTONE_LABELS = {
   pending: "Đơn hàng đang chờ cửa hàng xác nhận từ hệ thống",
   confirmed: "Đơn hàng đã được cửa hàng xác nhận thành công",
@@ -61,6 +105,7 @@ const STATE_MILESTONE_LABELS = {
   delivered: "Giao hàng thành công. Người nhận đã ký xác nhận",
   completed: "Đơn hàng đã hoàn thành. Cảm ơn bạn đã mua sắm tại Sunbeleaf",
   cancelled: "Đơn hàng đã bị hủy bởi người dùng hoặc hệ thống",
+  returned: "Đơn hàng đã được trả hàng và hoàn tiền thành công",
 };
 
 function normalizeOrder(order) {
@@ -200,7 +245,9 @@ module.exports = {
 
     const nextState = patch.state || order.state;
     const nextPaymentStatus = patch.paymentStatus || order.paymentStatus;
-    const trackingHistory = [...(order.trackingHistory || [])];
+    const trackingHistory = Array.isArray(patch.trackingHistory)
+      ? [...patch.trackingHistory]
+      : [...(order.trackingHistory || [])];
 
     // Nếu thay đổi trạng thái đơn hàng, tự động thêm mốc hành trình vận chuyển
     if (patch.state && patch.state !== order.state) {
@@ -235,5 +282,59 @@ module.exports = {
 
   getAllOrders() {
     return readOrders().map(normalizeOrder);
+  },
+
+  trackArticleView(articleId) {
+    const views = readViews();
+    views.push({
+      articleId: Number(articleId),
+      viewedAt: new Date().toISOString(),
+    });
+    writeViews(views);
+    return true;
+  },
+
+  getFeaturedArticleId() {
+    const views = readViews();
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    const oneWeekAgoStr = oneWeekAgo.toISOString();
+
+    // Lọc lượt xem trong 1 tuần qua
+    const recentViews = views.filter((v) => v.viewedAt >= oneWeekAgoStr);
+
+    if (recentViews.length === 0) return null;
+
+    // Đếm số lượt xem cho từng ID bài viết
+    const counts = {};
+    recentViews.forEach((v) => {
+      counts[v.articleId] = (counts[v.articleId] || 0) + 1;
+    });
+
+    // Tìm ID bài viết có lượt xem lớn nhất
+    let maxId = null;
+    let maxCount = -1;
+    Object.keys(counts).forEach((idStr) => {
+      const id = Number(idStr);
+      const count = counts[idStr];
+      if (count > maxCount) {
+        maxCount = count;
+        maxId = id;
+      }
+    });
+
+    return maxId;
+  },
+
+  getAdminAuth() {
+    return readAdminAuth();
+  },
+
+  setAdminAuth(auth) {
+    writeAdminAuth({
+      ...auth,
+      updatedAt: new Date().toISOString(),
+    });
+    return this.getAdminAuth();
   },
 };

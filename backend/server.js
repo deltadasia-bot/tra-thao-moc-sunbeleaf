@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors    = require("cors");
+const path    = require("path");
 
 const ordersRouter  = require("./routes/orders");
 const paymentRouter = require("./routes/payment");
@@ -49,6 +50,11 @@ app.use("/api/orders",  ordersRouter);
 app.use("/api/payment", paymentRouter);
 app.use("/api/sapo",    sapoRouter);
 app.use("/api/admin",   adminRouter);
+const adminDashboardPath = path.join(__dirname, "admin-dist");
+app.use("/admin", express.static(adminDashboardPath));
+app.get("/admin/*", (_req, res) => {
+  res.sendFile(path.join(adminDashboardPath, "index.html"));
+});
 
 // ── Error handler ──
 app.use((err, _req, res, _next) => {
