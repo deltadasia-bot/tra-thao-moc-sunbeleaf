@@ -167,7 +167,7 @@ button:disabled {
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 14px;
 }
 
@@ -203,6 +203,19 @@ button:disabled {
   border-color: rgba(46, 113, 69, 0.55);
   background: linear-gradient(135deg, rgba(236, 249, 240, 0.96), rgba(255, 255, 255, 0.92));
   box-shadow: 0 22px 54px rgba(27, 64, 39, 0.14);
+}
+
+.return-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.danger-soft {
+  color: #9f2f24;
+  border-color: rgba(197, 67, 50, 0.22);
+  background: rgba(255, 242, 239, 0.88);
 }
 
 .stat-label {

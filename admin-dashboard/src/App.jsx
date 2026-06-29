@@ -13,6 +13,7 @@ const STATE_OPTIONS = [
   { value: "delivered", label: "Đã giao hàng" },
   { value: "completed", label: "Hoàn thành" },
   { value: "cancelled", label: "Đã hủy" },
+  { value: "returned", label: "Đã trả hàng" },
 ];
 
 const PAYMENT_OPTIONS = [
@@ -252,6 +253,15 @@ function StatCard({ label, value, active = false, onClick }) {
       <div className="stat-value">{value}</div>
     </button>
   );
+}
+
+function paymentStatusLabel(status) {
+  const labels = {
+    pending: "Chưa thanh toán",
+    paid: "Đã thanh toán",
+    refunded: "Đã hoàn tiền",
+  };
+  return labels[status] || status || "-";
 }
 
 export default function App() {
@@ -572,6 +582,12 @@ export default function App() {
             active={filters.stateGroup === "completed" && !filters.paymentStatus}
             onClick={() => applyStatFilter({ stateGroup: "completed" })}
           />
+          <StatCard
+            label="Trả hàng"
+            value={stats?.returnOrders ?? "-"}
+            active={filters.stateGroup === "returns" && !filters.paymentStatus}
+            onClick={() => applyStatFilter({ stateGroup: "returns" })}
+          />
         </section>
 
         <section className="orders-panel">
@@ -596,7 +612,7 @@ export default function App() {
                   <div className="order-row-top">
                     <strong>{order.orderCode || order.id}</strong>
                     <span className={`badge ${order.paymentStatus}`}>
-                      {order.paymentStatus === "paid" ? "Đã thanh toán" : "Chưa thanh toán"}
+                      {paymentStatusLabel(order.paymentStatus)}
                     </span>
                   </div>
                   <div className="order-row-mid">
@@ -635,7 +651,7 @@ export default function App() {
                     <div className="detail-card">
                       <h3>Thanh toán</h3>
                       <p>Phương thức: {paymentLabel(selectedOrder.paymentMethod)}</p>
-                      <p>Trạng thái: {selectedOrder.paymentStatus}</p>
+                      <p>Trạng thái: {paymentStatusLabel(selectedOrder.paymentStatus)}</p>
                       <p>Tổng tiền: {formatCurrency(selectedOrder.totalAmount)}đ</p>
                     </div>
                     {selectedOrder.deliveryType === "delivery" && (
@@ -734,6 +750,43 @@ export default function App() {
                           </option>
                         ))}
                       </select>
+                    </div>
+
+                    <div className="return-actions">
+                      <button
+                        type="button"
+                        className="secondary-button"
+                        onClick={() =>
+                          updateSelectedOrder({
+                            state: "returned",
+                            paymentStatus: selectedOrder.paymentStatus,
+                            adminNote: selectedOrder.adminNote || "",
+                            trackingNumber: selectedOrder.trackingNumber || "",
+                            shippingCarrier: selectedOrder.shippingCarrier || "",
+                            trackingUrl: selectedOrder.trackingUrl || "",
+                          })
+                        }
+                        disabled={savingOrder || selectedOrder.state === "returned"}
+                      >
+                        Xác nhận đã trả hàng
+                      </button>
+                      <button
+                        type="button"
+                        className="secondary-button danger-soft"
+                        onClick={() =>
+                          updateSelectedOrder({
+                            state: selectedOrder.state === "returned" ? "returned" : selectedOrder.state,
+                            paymentStatus: "refunded",
+                            adminNote: selectedOrder.adminNote || "",
+                            trackingNumber: selectedOrder.trackingNumber || "",
+                            shippingCarrier: selectedOrder.shippingCarrier || "",
+                            trackingUrl: selectedOrder.trackingUrl || "",
+                          })
+                        }
+                        disabled={savingOrder || selectedOrder.paymentStatus === "refunded"}
+                      >
+                        Xác nhận đã hoàn tiền
+                      </button>
                     </div>
 
                     {selectedOrder.deliveryType === "delivery" ? (

@@ -306,6 +306,9 @@ router.get("/stats", (_req, res) => {
     completedOrders: orders.filter((order) =>
       ["delivered", "completed"].includes(order.state),
     ).length,
+    returnOrders: orders.filter((order) =>
+      order.state === "returned" || order.paymentStatus === "refunded",
+    ).length,
   };
 
   return res.json(stats);
@@ -319,6 +322,11 @@ router.get("/orders", (req, res) => {
   if (state) {
     orders = orders.filter((order) => order.state === state);
   } else if (stateGroup) {
+    if (stateGroup === "returns") {
+      orders = orders.filter(
+        (order) => order.state === "returned" || order.paymentStatus === "refunded",
+      );
+    } else {
     const stateGroups = {
       processing: ["pending", "confirmed", "preparing", "ready", "delivering"],
       completed: ["delivered", "completed"],
@@ -326,6 +334,7 @@ router.get("/orders", (req, res) => {
     const allowedStates = stateGroups[stateGroup] || [];
     if (allowedStates.length) {
       orders = orders.filter((order) => allowedStates.includes(order.state));
+    }
     }
   }
 
@@ -376,6 +385,7 @@ router.patch("/orders/:id", (req, res) => {
     "delivered",
     "completed",
     "cancelled",
+    "returned",
   ];
   const allowedPaymentStatuses = ["pending", "paid", "refunded"];
   const patch = {};
