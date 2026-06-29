@@ -212,6 +212,26 @@ button:disabled {
   margin-top: 12px;
 }
 
+.return-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 10px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(46, 113, 69, 0.18);
+  background: rgba(245, 250, 246, 0.92);
+  color: #163020;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.return-check input {
+  width: 18px;
+  height: 18px;
+  accent-color: #2e7145;
+}
+
 .danger-soft {
   color: #9f2f24;
   border-color: rgba(197, 67, 50, 0.22);

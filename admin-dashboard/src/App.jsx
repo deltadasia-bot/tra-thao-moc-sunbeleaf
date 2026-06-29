@@ -752,42 +752,38 @@ export default function App() {
                       </select>
                     </div>
 
-                    <div className="return-actions">
-                      <button
-                        type="button"
-                        className="secondary-button"
-                        onClick={() =>
-                          updateSelectedOrder({
-                            state: "returned",
-                            paymentStatus: selectedOrder.paymentStatus,
-                            adminNote: selectedOrder.adminNote || "",
-                            trackingNumber: selectedOrder.trackingNumber || "",
-                            shippingCarrier: selectedOrder.shippingCarrier || "",
-                            trackingUrl: selectedOrder.trackingUrl || "",
-                          })
-                        }
-                        disabled={savingOrder || selectedOrder.state === "returned"}
-                      >
-                        Xác nhận đã trả hàng
-                      </button>
-                      <button
-                        type="button"
-                        className="secondary-button danger-soft"
-                        onClick={() =>
-                          updateSelectedOrder({
-                            state: selectedOrder.state === "returned" ? "returned" : selectedOrder.state,
-                            paymentStatus: "refunded",
-                            adminNote: selectedOrder.adminNote || "",
-                            trackingNumber: selectedOrder.trackingNumber || "",
-                            shippingCarrier: selectedOrder.shippingCarrier || "",
-                            trackingUrl: selectedOrder.trackingUrl || "",
-                          })
-                        }
-                        disabled={savingOrder || selectedOrder.paymentStatus === "refunded"}
-                      >
-                        Xác nhận đã hoàn tiền
-                      </button>
-                    </div>
+                    {selectedOrder.paymentStatus === "refunded" ? (
+                      <div className="return-actions">
+                        <label className="return-check">
+                          <input
+                            type="checkbox"
+                            checked={selectedOrder.state === "returned"}
+                            onChange={(event) => {
+                              if (!event.target.checked) return;
+                              setSelectedOrder((current) => ({
+                                ...current,
+                                state: "returned",
+                              }));
+                            }}
+                          />
+                          <span>Xác nhận đã trả hàng</span>
+                        </label>
+                        <label className="return-check">
+                          <input
+                            type="checkbox"
+                            checked={selectedOrder.paymentStatus === "refunded"}
+                            onChange={(event) => {
+                              if (!event.target.checked) return;
+                              setSelectedOrder((current) => ({
+                                ...current,
+                                paymentStatus: "refunded",
+                              }));
+                            }}
+                          />
+                          <span>Xác nhận đã hoàn tiền</span>
+                        </label>
+                      </div>
+                    ) : null}
 
                     {selectedOrder.deliveryType === "delivery" ? (
                       <div className="shipping-fields">
