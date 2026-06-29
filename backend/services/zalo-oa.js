@@ -114,11 +114,16 @@ async function callZaloOfficialAccountApi(url, retried = false) {
     throw new Error("Chua cau hinh ZALO_OA_ACCESS_TOKEN");
   }
 
-  const response = await fetch(url, {
-    headers: {
-      access_token: accessToken.trim(),
-    },
-  });
+  const headers = {
+    access_token: accessToken.trim(),
+  };
+
+  const proof = buildZaloAppSecretProof(accessToken);
+  if (proof) {
+    headers.appsecret_proof = proof;
+  }
+
+  const response = await fetch(url, { headers });
 
   const json = await response.json();
   const tokenExpired =
@@ -149,14 +154,8 @@ async function getOfficialAccountStats(options = {}) {
     return { ...cachedStats, cached: true };
   }
 
-  const currentTokens = loadTokens();
-  const proof = buildZaloAppSecretProof(currentTokens.accessToken);
-  const url = new URL("https://openapi.zalo.me/v2.0/oa/getoa");
-  if (proof) {
-    url.searchParams.set("appsecret_proof", proof);
-  }
-
-  const json = await callZaloOfficialAccountApi(url.toString());
+  const url = "https://openapi.zalo.me/v2.0/oa/getoa";
+  const json = await callZaloOfficialAccountApi(url);
   const data = json?.data || {};
   const followerCount = Number(data.num_follower);
 
