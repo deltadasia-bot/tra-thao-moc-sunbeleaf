@@ -389,26 +389,4 @@ async function notifyPaymentConfirmed(order) {
   ]);
 }
 
-async function notifyAdminOtp(code, expiresMinutes) {
-  const subject = `Ma OTP quan tri Sunbeleaf - ${code}`;
-  const text =
-    `MA OTP QUAN TRI SUNBELEAF\n` +
-    `Ma xac thuc: ${code}\n` +
-    `Hieu luc: ${expiresMinutes} phut\n` +
-    `Neu khong phai ban yeu cau, hay doi mat khau admin ngay.`;
-
-  const html = `
-    <div style="font-family:Arial,sans-serif;max-width:480px;margin:auto;padding:24px;border:1px solid #dfe8df;border-radius:16px">
-      <h2 style="margin:0 0 12px;color:#1b5e20">Sunbeleaf Admin OTP</h2>
-      <p>Ma xac thuc de dat lai mat khau quan tri:</p>
-      <div style="font-size:32px;font-weight:800;letter-spacing:8px;color:#1b5e20;background:#f1f8f1;border-radius:12px;padding:16px;text-align:center">${code}</div>
-      <p style="color:#666">Ma co hieu luc trong ${expiresMinutes} phut. Neu khong phai ban yeu cau, vui long bo qua email nay va doi mat khau admin.</p>
-    </div>`;
-
-  await Promise.allSettled([
-    sendZaloMessage(text),
-    sendEmail(subject, html),
-  ]);
-}
-
-module.exports = { notifyNewOrder, notifyPaymentConfirmed, notifyAdminOtp };
+module.exports = { notifyNewOrder, notifyPaymentConfirmed };

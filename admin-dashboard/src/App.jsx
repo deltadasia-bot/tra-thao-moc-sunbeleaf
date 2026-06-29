@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
-const API_BASE = import.meta.env.VITE_ADMIN_API_BASE ?? "";
-const STORAGE_KEY = "sunbeleaf-admin-session";
+const API_BASE = import.meta.env.VITE_ADMIN_API_BASE ?? "http://localhost:3000";
+const STORAGE_KEY = "sunbeleaf-admin-auth";
 
 const STATE_OPTIONS = [
   { value: "", label: "Tất cả trạng thái đơn" },
@@ -21,6 +21,10 @@ const PAYMENT_OPTIONS = [
   { value: "paid", label: "Đã thanh toán" },
   { value: "refunded", label: "Đã hoàn tiền" },
 ];
+
+function getAuthHeader(credentials) {
+  return `Basic ${btoa(`${credentials.username}:${credentials.password}`)}`;
+}
 
 function formatCurrency(value) {
   return new Intl.NumberFormat("vi-VN").format(Number(value || 0));
@@ -48,194 +52,54 @@ function paymentLabel(method) {
   return labels[method] || method || "-";
 }
 
-function readSession() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-}
-
-function LoginForm({
-  onLogin,
-  onRequestOtp,
-  onResetPassword,
-  error,
-  message,
-  loading,
-  apiBase,
-}) {
-  const [mode, setMode] = useState("login");
+function LoginForm({ onLogin, error, loading, apiBase }) {
   const [form, setForm] = useState({
     username: "",
     password: "",
-    phone: "0903349318",
-    otp: "",
-    newPassword: "",
   });
-
-  const setField = (field, value) => {
-    setForm((current) => ({ ...current, [field]: value }));
-  };
 
   return (
     <div className="login-shell">
       <div className="login-card">
         <p className="eyebrow">Sunbeleaf Admin</p>
-        <h1>Quản trị đơn hàng Mini App</h1>
+        <h1>Đăng nhập quản trị đơn hàng</h1>
         <p className="subtle">
-          Chỉ người có tài khoản quản trị mới xem được dữ liệu đơn hàng. API hiện
-          trỏ tới <code>{apiBase || "cùng domain backend"}</code>.
+          App React riêng để quản lý đơn Mini App. Backend hiện đang trỏ tới{" "}
+          <code>{apiBase}</code>.
         </p>
-
-        {mode === "login" ? (
-          <form
-            className="login-form"
-            onSubmit={(event) => {
-              event.preventDefault();
-              onLogin({
-                username: form.username.trim(),
-                password: form.password,
-              });
-            }}
-          >
-            <label>
-              Tài khoản
-              <input
-                value={form.username}
-                onChange={(event) => setField("username", event.target.value)}
-                autoComplete="username"
-                placeholder="admin"
-              />
-            </label>
-            <label>
-              Mật khẩu
-              <input
-                type="password"
-                value={form.password}
-                onChange={(event) => setField("password", event.target.value)}
-                autoComplete="current-password"
-                placeholder="Nhập mật khẩu quản trị"
-              />
-            </label>
-            {error ? <div className="error-box">{error}</div> : null}
-            {message ? <div className="success-box">{message}</div> : null}
-            <button type="submit" disabled={loading}>
-              {loading ? "Đang đăng nhập..." : "Đăng nhập"}
-            </button>
-            <button
-              type="button"
-              className="link-button"
-              onClick={() => setMode("forgot")}
-            >
-              Quên mật khẩu?
-            </button>
-          </form>
-        ) : null}
-
-        {mode === "forgot" ? (
-          <form
-            className="login-form"
-            onSubmit={(event) => {
-              event.preventDefault();
-              onRequestOtp({
-                username: form.username.trim(),
-                phone: form.phone,
-              }).then((ok) => {
-                if (ok) setMode("reset");
-              });
-            }}
-          >
-            <label>
-              Tài khoản
-              <input
-                value={form.username}
-                onChange={(event) => setField("username", event.target.value)}
-                autoComplete="username"
-                placeholder="admin"
-              />
-            </label>
-            <label>
-              Số điện thoại khôi phục
-              <input
-                value={form.phone}
-                onChange={(event) => setField("phone", event.target.value)}
-                inputMode="tel"
-                placeholder="0903349318"
-              />
-            </label>
-            <p className="subtle">
-              Mã OTP sẽ được gửi qua kênh bảo mật đã cấu hình cho số
-              0903349318: Zalo OA owner và email thông báo.
-            </p>
-            {error ? <div className="error-box">{error}</div> : null}
-            {message ? <div className="success-box">{message}</div> : null}
-            <button type="submit" disabled={loading}>
-              {loading ? "Đang gửi OTP..." : "Gửi mã OTP"}
-            </button>
-            <button
-              type="button"
-              className="link-button"
-              onClick={() => setMode("login")}
-            >
-              Quay lại đăng nhập
-            </button>
-          </form>
-        ) : null}
-
-        {mode === "reset" ? (
-          <form
-            className="login-form"
-            onSubmit={(event) => {
-              event.preventDefault();
-              onResetPassword({
-                username: form.username.trim(),
-                phone: form.phone,
-                otp: form.otp,
-                newPassword: form.newPassword,
-              }).then((ok) => {
-                if (ok) {
-                  setField("password", "");
-                  setMode("login");
-                }
-              });
-            }}
-          >
-            <label>
-              Mã OTP
-              <input
-                value={form.otp}
-                onChange={(event) => setField("otp", event.target.value)}
-                inputMode="numeric"
-                maxLength={6}
-                placeholder="6 chữ số"
-              />
-            </label>
-            <label>
-              Mật khẩu mới
-              <input
-                type="password"
-                value={form.newPassword}
-                onChange={(event) => setField("newPassword", event.target.value)}
-                autoComplete="new-password"
-                placeholder="Tối thiểu 10 ký tự"
-              />
-            </label>
-            {error ? <div className="error-box">{error}</div> : null}
-            {message ? <div className="success-box">{message}</div> : null}
-            <button type="submit" disabled={loading}>
-              {loading ? "Đang đặt lại..." : "Đặt lại mật khẩu"}
-            </button>
-            <button
-              type="button"
-              className="link-button"
-              onClick={() => setMode("forgot")}
-            >
-              Gửi lại OTP
-            </button>
-          </form>
-        ) : null}
+        <form
+          className="login-form"
+          onSubmit={(event) => {
+            event.preventDefault();
+            onLogin(form);
+          }}
+        >
+          <label>
+            Tài khoản
+            <input
+              value={form.username}
+              onChange={(event) =>
+                setForm((current) => ({ ...current, username: event.target.value }))
+              }
+              placeholder="admin"
+            />
+          </label>
+          <label>
+            Mật khẩu
+            <input
+              type="password"
+              value={form.password}
+              onChange={(event) =>
+                setForm((current) => ({ ...current, password: event.target.value }))
+              }
+              placeholder="Nhập mật khẩu"
+            />
+          </label>
+          {error ? <div className="error-box">{error}</div> : null}
+          <button type="submit" disabled={loading}>
+            {loading ? "Đang đăng nhập..." : "Đăng nhập"}
+          </button>
+        </form>
       </div>
     </div>
   );
@@ -251,9 +115,11 @@ function StatCard({ label, value }) {
 }
 
 export default function App() {
-  const [session, setSession] = useState(readSession);
+  const [credentials, setCredentials] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    return saved ? JSON.parse(saved) : null;
+  });
   const [authError, setAuthError] = useState("");
-  const [authMessage, setAuthMessage] = useState("");
   const [loadingAuth, setLoadingAuth] = useState(false);
   const [loading, setLoading] = useState(false);
   const [orders, setOrders] = useState([]);
@@ -267,9 +133,9 @@ export default function App() {
   const [savingOrder, setSavingOrder] = useState(false);
 
   const authHeaders = useMemo(() => {
-    if (!session?.token) return {};
-    return { Authorization: `Bearer ${session.token}` };
-  }, [session]);
+    if (!credentials) return {};
+    return { Authorization: getAuthHeader(credentials) };
+  }, [credentials]);
 
   async function apiFetch(path, options = {}) {
     const response = await fetch(`${API_BASE}${path}`, {
@@ -282,10 +148,6 @@ export default function App() {
     });
 
     const data = await response.json().catch(() => ({}));
-    if (response.status === 401) {
-      localStorage.removeItem(STORAGE_KEY);
-      setSession(null);
-    }
     if (!response.ok) {
       throw new Error(data.error || data.message || "Yêu cầu thất bại");
     }
@@ -293,7 +155,7 @@ export default function App() {
   }
 
   async function loadDashboard() {
-    if (!session?.token) return;
+    if (!credentials) return;
     setLoading(true);
     try {
       const query = new URLSearchParams();
@@ -322,10 +184,10 @@ export default function App() {
 
   useEffect(() => {
     void loadDashboard();
-  }, [session, filters.state, filters.paymentStatus]);
+  }, [credentials, filters.state, filters.paymentStatus]);
 
   useEffect(() => {
-    if (!session?.token) return;
+    if (!credentials) return;
     const timer = setTimeout(() => {
       void loadDashboard();
     }, 250);
@@ -335,12 +197,15 @@ export default function App() {
   async function handleLogin(form) {
     setLoadingAuth(true);
     setAuthError("");
-    setAuthMessage("");
     try {
-      const response = await fetch(`${API_BASE}/api/admin/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+      const nextCredentials = {
+        username: form.username.trim(),
+        password: form.password,
+      };
+
+      const token = getAuthHeader(nextCredentials);
+      const response = await fetch(`${API_BASE}/api/admin/me`, {
+        headers: { Authorization: token },
       });
       const data = await response.json().catch(() => ({}));
 
@@ -348,79 +213,13 @@ export default function App() {
         throw new Error(data.error || "Không đăng nhập được");
       }
 
-      const nextSession = {
-        token: data.token,
-        username: data.username,
-        expiresAt: data.expiresAt,
-      };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(nextSession));
-      setSession(nextSession);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(nextCredentials));
+      setCredentials(nextCredentials);
     } catch (error) {
       setAuthError(error.message);
     } finally {
       setLoadingAuth(false);
     }
-  }
-
-  async function requestOtp(form) {
-    setLoadingAuth(true);
-    setAuthError("");
-    setAuthMessage("");
-    try {
-      const response = await fetch(`${API_BASE}/api/admin/auth/forgot-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-      const data = await response.json().catch(() => ({}));
-
-      if (!response.ok) {
-        throw new Error(data.error || "Không gửi được OTP");
-      }
-      setAuthMessage(data.message || "Đã gửi OTP.");
-      return true;
-    } catch (error) {
-      setAuthError(error.message);
-      return false;
-    } finally {
-      setLoadingAuth(false);
-    }
-  }
-
-  async function resetPassword(form) {
-    setLoadingAuth(true);
-    setAuthError("");
-    setAuthMessage("");
-    try {
-      const response = await fetch(`${API_BASE}/api/admin/auth/reset-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-      const data = await response.json().catch(() => ({}));
-
-      if (!response.ok) {
-        throw new Error(data.error || "Không đặt lại được mật khẩu");
-      }
-      setAuthMessage(data.message || "Đã đặt lại mật khẩu.");
-      return true;
-    } catch (error) {
-      setAuthError(error.message);
-      return false;
-    } finally {
-      setLoadingAuth(false);
-    }
-  }
-
-  async function handleLogout() {
-    try {
-      await apiFetch("/api/admin/auth/logout", { method: "POST" });
-    } catch {
-      // Session local vẫn cần được xóa kể cả khi backend không phản hồi.
-    }
-    localStorage.removeItem(STORAGE_KEY);
-    setSession(null);
-    setSelectedOrder(null);
   }
 
   async function updateSelectedOrder(patch) {
@@ -440,14 +239,11 @@ export default function App() {
     }
   }
 
-  if (!session?.token) {
+  if (!credentials) {
     return (
       <LoginForm
         onLogin={handleLogin}
-        onRequestOtp={requestOtp}
-        onResetPassword={resetPassword}
         error={authError}
-        message={authMessage}
         loading={loadingAuth}
         apiBase={API_BASE}
       />
@@ -460,12 +256,7 @@ export default function App() {
         <div>
           <p className="eyebrow">Sunbeleaf</p>
           <h1>Admin đơn hàng</h1>
-          <p className="subtle">
-            Đang đăng nhập: <strong>{session.username}</strong>
-          </p>
-          <p className="subtle">
-            Theo dõi đơn tạo từ Mini App, trạng thái thanh toán và vận chuyển.
-          </p>
+          <p className="subtle">Theo dõi đơn tạo từ Mini App mà không phụ thuộc Sapo.</p>
         </div>
 
         <div className="filters">
@@ -514,7 +305,14 @@ export default function App() {
           </label>
         </div>
 
-        <button className="secondary-button" onClick={handleLogout}>
+        <button
+          className="secondary-button"
+          onClick={() => {
+            localStorage.removeItem(STORAGE_KEY);
+            setCredentials(null);
+            setSelectedOrder(null);
+          }}
+        >
           Đăng xuất
         </button>
       </aside>
@@ -583,7 +381,7 @@ export default function App() {
                     <div className="detail-card">
                       <h3>Khách hàng</h3>
                       <p>{selectedOrder.deliveryAddress?.recipientName || "Khách hàng"}</p>
-                      <p>{selectedOrder.deliveryAddress?.phoneNumber || selectedOrder.customerPhone || "-"}</p>
+                      <p>{selectedOrder.deliveryAddress?.phoneNumber || "-"}</p>
                       <p>{selectedOrder.deliveryAddress?.address || "-"}</p>
                     </div>
                     <div className="detail-card">
@@ -593,69 +391,46 @@ export default function App() {
                       <p>Tổng tiền: {formatCurrency(selectedOrder.totalAmount)}đ</p>
                     </div>
                     {selectedOrder.deliveryType === "delivery" && (
-                      <div className="detail-card wide-card">
-                        <h3>Vận chuyển</h3>
-                        <p>Đơn vị: {selectedOrder.shippingCarrier || "SPX Express"}</p>
+                      <div className="detail-card" style={{ gridColumn: "span 2" }}>
+                        <h3>Vận chuyển (SPX Express)</h3>
+                        <p>Nhà vận chuyển: {selectedOrder.shippingCarrier || "SPX Express"}</p>
                         <p>
-                          Mã vận đơn: <strong>{selectedOrder.trackingNumber || "Chưa tạo"}</strong>
-                          {selectedOrder.trackingUrl ? (
+                          Mã vận đơn:{" "}
+                          <strong>{selectedOrder.trackingNumber || "Chưa tạo"}</strong>
+                          {selectedOrder.trackingUrl && (
                             <a
                               href={selectedOrder.trackingUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-link"
+                              style={{ marginLeft: "10px", color: "#0084FF", textDecoration: "underline" }}
                             >
-                              Tra cứu vận đơn
+                              Tra cứu vận đơn →
                             </a>
-                          ) : null}
+                          )}
                         </p>
-                        {selectedOrder.trackingHistory?.length > 0 ? (
-                          <div className="tracking-box">
-                            <strong>Hành trình giao hàng</strong>
-                            <ul>
-                              {[...selectedOrder.trackingHistory].reverse().map((milestone, index) => (
-                                <li key={`${milestone.time}-${index}`}>
-                                  <span className={index === 0 ? "highlight" : ""}>
+                        {selectedOrder.trackingHistory && selectedOrder.trackingHistory.length > 0 && (
+                          <div style={{ marginTop: "10px", maxHeight: "150px", overflowY: "auto", fontSize: "12px", border: "1px solid #eee", padding: "8px", borderRadius: "4px" }}>
+                            <strong>Hành trình giao hàng SPX:</strong>
+                            <ul style={{ margin: "5px 0 0 0", paddingLeft: "15px" }}>
+                              {[...selectedOrder.trackingHistory].reverse().map((milestone, idx) => (
+                                <li key={idx} style={{ marginBottom: "6px" }}>
+                                  <span style={{ color: idx === 0 ? "#EE4D2D" : "#888", fontWeight: idx === 0 ? "bold" : "normal" }}>
                                     {milestone.statusLabel}
                                   </span>{" "}
-                                  - {milestone.location || "Hệ thống"} ({formatDate(milestone.time)})
+                                  - {milestone.location || "Hệ thống SPX"} (
+                                  {new Date(milestone.time).toLocaleTimeString("vi-VN")} {new Date(milestone.time).toLocaleDateString("vi-VN")}
+                                  )
                                 </li>
                               ))}
                             </ul>
                           </div>
-                        ) : null}
+                        )}
                       </div>
                     )}
                   </div>
 
                   <div className="detail-card">
-                    <h3>Sản phẩm</h3>
-                    <div className="line-items">
-                      {(selectedOrder.items || []).map((item) => (
-                        <div className="line-item" key={item.id || `${item.name}-${item.productId}`}>
-                          <div>
-                            <strong>{item.name}</strong>
-                            {item.options?.length ? (
-                              <p className="subtle">
-                                Quy cách:{" "}
-                                {item.options
-                                  .map((option) =>
-                                    option.name ? `${option.name}: ${option.value}` : option.value,
-                                  )
-                                  .join(", ")}
-                              </p>
-                            ) : null}
-                          </div>
-                          <div>
-                            x{item.quantity} · {formatCurrency(item.price)}đ
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="detail-card">
-                    <h3>Cập nhật trạng thái</h3>
+                    <h3>Cập nhật trạng thái & Vận đơn</h3>
                     <div className="inline-controls">
                       <select
                         value={selectedOrder.state}
@@ -690,40 +465,47 @@ export default function App() {
                       </select>
                     </div>
 
-                    {selectedOrder.deliveryType === "delivery" ? (
-                      <div className="shipping-fields">
-                        <label>
-                          Mã vận đơn
+                    {selectedOrder.deliveryType === "delivery" && (
+                      <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                        <div style={{ display: "flex", gap: "10px" }}>
+                          <label style={{ flex: 1, fontSize: "12px", fontWeight: "bold", color: "#555" }}>
+                            Mã vận đơn SPX
+                            <input
+                              type="text"
+                              value={selectedOrder.trackingNumber || ""}
+                              onChange={(event) =>
+                                setSelectedOrder((current) => ({
+                                  ...current,
+                                  trackingNumber: event.target.value,
+                                  trackingUrl: event.target.value 
+                                    ? `https://spx.vn/detail?t=${event.target.value}`
+                                    : "",
+                                }))
+                              }
+                              placeholder="SPXVN..."
+                              style={{ width: "100%", padding: "6px", marginTop: "4px", boxSizing: "border-box", border: "1px solid #ccc", borderRadius: "4px" }}
+                            />
+                          </label>
+                          <label style={{ flex: 1, fontSize: "12px", fontWeight: "bold", color: "#555" }}>
+                            Đơn vị vận chuyển
+                            <input
+                              type="text"
+                              value={selectedOrder.shippingCarrier || ""}
+                              onChange={(event) =>
+                                setSelectedOrder((current) => ({
+                                  ...current,
+                                  shippingCarrier: event.target.value,
+                                }))
+                              }
+                              placeholder="SPX Express"
+                              style={{ width: "100%", padding: "6px", marginTop: "4px", boxSizing: "border-box", border: "1px solid #ccc", borderRadius: "4px" }}
+                            />
+                          </label>
+                        </div>
+                        <label style={{ fontSize: "12px", fontWeight: "bold", color: "#555" }}>
+                          Đường dẫn tra cứu
                           <input
-                            value={selectedOrder.trackingNumber || ""}
-                            onChange={(event) =>
-                              setSelectedOrder((current) => ({
-                                ...current,
-                                trackingNumber: event.target.value,
-                                trackingUrl: event.target.value
-                                  ? `https://spx.vn/detail?t=${event.target.value}`
-                                  : "",
-                              }))
-                            }
-                            placeholder="SPXVN..."
-                          />
-                        </label>
-                        <label>
-                          Đơn vị vận chuyển
-                          <input
-                            value={selectedOrder.shippingCarrier || ""}
-                            onChange={(event) =>
-                              setSelectedOrder((current) => ({
-                                ...current,
-                                shippingCarrier: event.target.value,
-                              }))
-                            }
-                            placeholder="SPX Express"
-                          />
-                        </label>
-                        <label className="wide-card">
-                          Link tra cứu
-                          <input
+                            type="text"
                             value={selectedOrder.trackingUrl || ""}
                             onChange={(event) =>
                               setSelectedOrder((current) => ({
@@ -732,10 +514,11 @@ export default function App() {
                               }))
                             }
                             placeholder="https://spx.vn/..."
+                            style={{ width: "100%", padding: "6px", marginTop: "4px", boxSizing: "border-box", border: "1px solid #ccc", borderRadius: "4px" }}
                           />
                         </label>
                       </div>
-                    ) : null}
+                    )}
 
                     <textarea
                       rows="3"
@@ -747,6 +530,7 @@ export default function App() {
                         }))
                       }
                       placeholder="Ghi chú nội bộ cho đơn hàng"
+                      style={{ marginTop: "10px" }}
                     />
 
                     <button
