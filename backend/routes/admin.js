@@ -8,6 +8,8 @@ const router = express.Router();
 const SESSION_TTL_MS = Number(process.env.ADMIN_SESSION_TTL_MS || 8 * 60 * 60 * 1000);
 const OTP_TTL_MS = Number(process.env.ADMIN_OTP_TTL_MS || 10 * 60 * 1000);
 const ADMIN_RECOVERY_PHONE = String(process.env.ADMIN_RECOVERY_PHONE || "0903349318").replace(/\D/g, "");
+const REPORT_TIME_ZONE = "Asia/Ho_Chi_Minh";
+const VIETNAM_TIME_OFFSET_MS = 7 * 60 * 60 * 1000;
 const SESSION_SECRET =
   process.env.ADMIN_SESSION_SECRET ||
   process.env.ZALO_APP_SECRET ||
@@ -165,6 +167,105 @@ function sortOrders(orders) {
   );
 }
 
+function toValidDate(value) {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function getVietnamDateParts(date) {
+  const shifted = new Date(date.getTime() + VIETNAM_TIME_OFFSET_MS);
+  return {
+    year: shifted.getUTCFullYear(),
+    month: shifted.getUTCMonth(),
+    date: shifted.getUTCDate(),
+    day: shifted.getUTCDay(),
+  };
+}
+
+function makeVietnamBoundary(year, month, day, hour = 0, minute = 0, second = 0, ms = 0) {
+  return new Date(Date.UTC(year, month, day, hour, minute, second, ms) - VIETNAM_TIME_OFFSET_MS);
+}
+
+function startOfDay(date) {
+  const parts = getVietnamDateParts(date);
+  return makeVietnamBoundary(parts.year, parts.month, parts.date);
+}
+
+function endOfDay(date) {
+  const start = startOfDay(date);
+  return new Date(start.getTime() + 24 * 60 * 60 * 1000 - 1);
+}
+
+function startOfWeek(date) {
+  const parts = getVietnamDateParts(date);
+  const day = parts.day;
+  const diffToMonday = day === 0 ? -6 : 1 - day;
+  return makeVietnamBoundary(parts.year, parts.month, parts.date + diffToMonday);
+}
+
+function endOfWeek(date) {
+  const result = startOfWeek(date);
+  return new Date(result.getTime() + 7 * 24 * 60 * 60 * 1000 - 1);
+}
+
+function startOfMonth(date) {
+  const parts = getVietnamDateParts(date);
+  return makeVietnamBoundary(parts.year, parts.month, 1);
+}
+
+function endOfMonth(date) {
+  const parts = getVietnamDateParts(date);
+  const nextMonth = makeVietnamBoundary(parts.year, parts.month + 1, 1);
+  return new Date(nextMonth.getTime() - 1);
+}
+
+function getOrderAmount(order) {
+  return Number(order.totalAmount || order.payment?.total || 0);
+}
+
+function isRevenueOrder(order) {
+  return (
+    order.paymentStatus === "paid" &&
+    !["cancelled", "returned"].includes(order.state) &&
+    Number.isFinite(getOrderAmount(order))
+  );
+}
+
+function sumRevenueBetween(orders, start, end) {
+  const startTime = start.getTime();
+  const endTime = end.getTime();
+  return orders.reduce((sum, order) => {
+    if (!isRevenueOrder(order)) return sum;
+    const createdAt = toValidDate(order.createdAt);
+    if (!createdAt) return sum;
+    const time = createdAt.getTime();
+    if (time < startTime || time > endTime) return sum;
+    return sum + getOrderAmount(order);
+  }, 0);
+}
+
+function countRevenueOrdersBetween(orders, start, end) {
+  const startTime = start.getTime();
+  const endTime = end.getTime();
+  return orders.filter((order) => {
+    if (!isRevenueOrder(order)) return false;
+    const createdAt = toValidDate(order.createdAt);
+    if (!createdAt) return false;
+    const time = createdAt.getTime();
+    return time >= startTime && time <= endTime;
+  }).length;
+}
+
+function growthPercent(current, previous) {
+  if (!previous) return current > 0 ? 100 : 0;
+  return Math.round(((current - previous) / previous) * 1000) / 10;
+}
+
+function sameElapsedWindow(previousStart, currentStart, now) {
+  const elapsed = now.getTime() - currentStart.getTime();
+  return new Date(previousStart.getTime() + Math.max(elapsed, 0));
+}
+
 function hasOtpDeliveryConfig() {
   const hasEmail = Boolean(process.env.NOTIFY_EMAIL_FROM && process.env.NOTIFY_EMAIL_PASS);
   const hasZalo = Boolean(process.env.ZALO_OWNER_USER_ID && process.env.ZALO_OA_ACCESS_TOKEN);
@@ -312,6 +413,95 @@ router.get("/stats", (_req, res) => {
   };
 
   return res.json(stats);
+});
+
+router.get("/reports/sales", (_req, res) => {
+  const orders = db.getAllOrders();
+  const now = new Date();
+
+  const todayStart = startOfDay(now);
+  const todayEnd = endOfDay(now);
+  const yesterdayStart = new Date(todayStart);
+  yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+  const yesterdayEnd = endOfDay(yesterdayStart);
+
+  const weekStart = startOfWeek(now);
+  const weekEnd = endOfWeek(now);
+  const previousWeekStart = new Date(weekStart);
+  previousWeekStart.setDate(previousWeekStart.getDate() - 7);
+  const previousWeekProgressEnd = sameElapsedWindow(previousWeekStart, weekStart, now);
+
+  const monthStart = startOfMonth(now);
+  const monthEnd = endOfMonth(now);
+  const currentVietnamParts = getVietnamDateParts(now);
+  const previousMonthStart = makeVietnamBoundary(
+    currentVietnamParts.year,
+    currentVietnamParts.month - 1,
+    1,
+  );
+  const previousMonthProgressEnd = sameElapsedWindow(previousMonthStart, monthStart, now);
+
+  const dailyRevenue = sumRevenueBetween(orders, todayStart, todayEnd);
+  const yesterdayRevenue = sumRevenueBetween(orders, yesterdayStart, yesterdayEnd);
+  const weeklyRevenue = sumRevenueBetween(orders, weekStart, weekEnd);
+  const weeklyProgressRevenue = sumRevenueBetween(orders, weekStart, now);
+  const previousWeekProgressRevenue = sumRevenueBetween(
+    orders,
+    previousWeekStart,
+    previousWeekProgressEnd,
+  );
+  const monthlyRevenue = sumRevenueBetween(orders, monthStart, monthEnd);
+  const monthlyProgressRevenue = sumRevenueBetween(orders, monthStart, now);
+  const previousMonthProgressRevenue = sumRevenueBetween(
+    orders,
+    previousMonthStart,
+    previousMonthProgressEnd,
+  );
+
+  const returnOrders = orders.filter(
+    (order) => order.state === "returned" || order.paymentStatus === "refunded",
+  ).length;
+  const returnShippingCost = returnOrders * 20000;
+
+  const chart = Array.from({ length: 14 }, (_, index) => {
+    const day = new Date(todayStart);
+    day.setUTCDate(day.getUTCDate() - (13 - index));
+    return {
+      date: day.toISOString().slice(0, 10),
+      label: new Intl.DateTimeFormat("vi-VN", {
+        timeZone: REPORT_TIME_ZONE,
+        day: "2-digit",
+        month: "2-digit",
+      }).format(day),
+      revenue: sumRevenueBetween(orders, startOfDay(day), endOfDay(day)),
+      orders: countRevenueOrdersBetween(orders, startOfDay(day), endOfDay(day)),
+    };
+  });
+
+  return res.json({
+    generatedAt: now.toISOString(),
+    revenue: {
+      day: dailyRevenue,
+      week: weeklyRevenue,
+      month: monthlyRevenue,
+    },
+    costs: {
+      returnOrders,
+      returnShippingFeePerOrder: 20000,
+      returnShippingCost,
+    },
+    growth: {
+      day: growthPercent(dailyRevenue, yesterdayRevenue),
+      week: growthPercent(weeklyProgressRevenue, previousWeekProgressRevenue),
+      month: growthPercent(monthlyProgressRevenue, previousMonthProgressRevenue),
+    },
+    ranges: {
+      day: { from: todayStart.toISOString(), to: todayEnd.toISOString() },
+      week: { from: weekStart.toISOString(), to: weekEnd.toISOString() },
+      month: { from: monthStart.toISOString(), to: monthEnd.toISOString() },
+    },
+    chart,
+  });
 });
 
 router.get("/orders", (req, res) => {

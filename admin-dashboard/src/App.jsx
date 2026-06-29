@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 
 const API_BASE = import.meta.env.VITE_ADMIN_API_BASE ?? "";
 const STORAGE_KEY = "sunbeleaf-admin-session";
+const AD_COST_KEY = "sunbeleaf-admin-ad-cost";
 
 const STATE_OPTIONS = [
   { value: "", label: "Tất cả trạng thái đơn" },
@@ -34,6 +35,20 @@ const PAYMENT_METHOD_OPTIONS = [
 
 function formatCurrency(value) {
   return new Intl.NumberFormat("vi-VN").format(Number(value || 0));
+}
+
+function formatShortCurrency(value) {
+  const amount = Number(value || 0);
+  if (Math.abs(amount) >= 1000000000) return `${(amount / 1000000000).toFixed(1)} tỷ`;
+  if (Math.abs(amount) >= 1000000) return `${(amount / 1000000).toFixed(1)} tr`;
+  if (Math.abs(amount) >= 1000) return `${Math.round(amount / 1000)}k`;
+  return formatCurrency(amount);
+}
+
+function formatPercent(value) {
+  const percent = Number(value || 0);
+  const sign = percent > 0 ? "+" : "";
+  return `${sign}${percent.toFixed(1)}%`;
 }
 
 function formatDate(value) {
@@ -264,6 +279,97 @@ function StatCard({ label, value, active = false, onClick }) {
   );
 }
 
+function TrendPill({ value }) {
+  const trend = Number(value || 0);
+  const className = trend >= 0 ? "trend-pill positive" : "trend-pill negative";
+  return <span className={className}>{formatPercent(trend)}</span>;
+}
+
+function SalesDashboard({ report, adCost, onAdCostChange }) {
+  const chart = report?.chart || [];
+  const maxRevenue = Math.max(...chart.map((item) => Number(item.revenue || 0)), 1);
+  const returnCost = Number(report?.costs?.returnShippingCost || 0);
+  const advertisingCost = Number(adCost || 0);
+  const totalCost = returnCost + advertisingCost;
+
+  return (
+    <section className="sales-dashboard">
+      <div className="dashboard-hero">
+        <div>
+          <p className="eyebrow">Báo cáo doanh số</p>
+          <h2>Hiệu suất bán hàng Sunbeleaf</h2>
+          <p>
+            Doanh thu chỉ tính các đơn đã thanh toán, không tính đơn hủy, trả hàng hoặc đã hoàn
+            tiền.
+          </p>
+        </div>
+        <div className="hero-glow-card">
+          <span>Hôm nay</span>
+          <strong>{formatCurrency(report?.revenue?.day)}đ</strong>
+          <TrendPill value={report?.growth?.day} />
+        </div>
+      </div>
+
+      <div className="report-grid">
+        <div className="report-card accent">
+          <span>Doanh thu hôm nay</span>
+          <strong>{formatCurrency(report?.revenue?.day)}đ</strong>
+          <small>So với hôm qua <TrendPill value={report?.growth?.day} /></small>
+        </div>
+        <div className="report-card">
+          <span>Doanh thu tuần này</span>
+          <strong>{formatCurrency(report?.revenue?.week)}đ</strong>
+          <small>Tính từ thứ 2 đến chủ nhật <TrendPill value={report?.growth?.week} /></small>
+        </div>
+        <div className="report-card">
+          <span>Doanh thu tháng này</span>
+          <strong>{formatCurrency(report?.revenue?.month)}đ</strong>
+          <small>Tính từ đầu tháng đến cuối tháng <TrendPill value={report?.growth?.month} /></small>
+        </div>
+        <div className="report-card cost-card">
+          <span>Tổng chi phí</span>
+          <strong>{formatCurrency(totalCost)}đ</strong>
+          <small>Trả hàng: {formatCurrency(returnCost)}đ</small>
+          <label className="ad-cost-input">
+            Chi phí quảng cáo
+            <input
+              type="number"
+              min="0"
+              value={adCost}
+              onChange={(event) => onAdCostChange(event.target.value)}
+              placeholder="Nhập chi phí"
+            />
+          </label>
+        </div>
+      </div>
+
+      <div className="analytics-panel">
+        <div className="chart-header">
+          <div>
+            <h3>Doanh thu 14 ngày gần nhất</h3>
+            <p>Cột cao hơn thể hiện ngày có doanh thu tốt hơn.</p>
+          </div>
+          <strong>{formatShortCurrency(maxRevenue)}đ cao nhất</strong>
+        </div>
+        <div className="revenue-chart">
+          {chart.map((item) => (
+            <div className="chart-bar-item" key={item.date}>
+              <div className="chart-bar-track">
+                <span
+                  className="chart-bar-fill"
+                  style={{ height: `${Math.max((Number(item.revenue || 0) / maxRevenue) * 100, 4)}%` }}
+                  title={`${item.label}: ${formatCurrency(item.revenue)}đ`}
+                />
+              </div>
+              <span>{item.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function paymentStatusLabel(status) {
   const labels = {
     pending: "Chưa thanh toán",
@@ -281,6 +387,8 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [orders, setOrders] = useState([]);
   const [stats, setStats] = useState(null);
+  const [salesReport, setSalesReport] = useState(null);
+  const [adCost, setAdCost] = useState(() => localStorage.getItem(AD_COST_KEY) || "");
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [filters, setFilters] = useState({
     q: "",
@@ -334,12 +442,14 @@ export default function App() {
       if (filters.shippingCarrier) query.set("shippingCarrier", filters.shippingCarrier);
       if (filters.paymentMethod) query.set("paymentMethod", filters.paymentMethod);
 
-      const [statsData, ordersData] = await Promise.all([
+      const [statsData, ordersData, salesData] = await Promise.all([
         apiFetch("/api/admin/stats"),
         apiFetch(`/api/admin/orders${query.toString() ? `?${query.toString()}` : ""}`),
+        apiFetch("/api/admin/reports/sales"),
       ]);
 
       setStats(statsData);
+      setSalesReport(salesData);
       setOrders(ordersData.orders || []);
 
       if (selectedOrder) {
@@ -463,6 +573,12 @@ export default function App() {
     localStorage.removeItem(STORAGE_KEY);
     setSession(null);
     setSelectedOrder(null);
+  }
+
+  function handleAdCostChange(value) {
+    const cleanValue = String(value || "").replace(/[^\d]/g, "");
+    setAdCost(cleanValue);
+    localStorage.setItem(AD_COST_KEY, cleanValue);
   }
 
   async function updateSelectedOrder(patch) {
@@ -641,6 +757,12 @@ export default function App() {
       </aside>
 
       <main className="content">
+        <SalesDashboard
+          report={salesReport}
+          adCost={adCost}
+          onAdCostChange={handleAdCostChange}
+        />
+
         <section className="stats-grid">
           <StatCard
             label="Tổng đơn"
@@ -693,6 +815,11 @@ export default function App() {
 
           <div className="orders-layout">
             <div className="order-list">
+              <div className="order-list-heading">
+                <span>Mã đơn</span>
+                <span>Khách hàng</span>
+                <span>Giá trị</span>
+              </div>
               {orders.map((order) => (
                 <button
                   key={order.id}
