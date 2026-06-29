@@ -279,6 +279,30 @@ function StatCard({ label, value, active = false, onClick }) {
   );
 }
 
+function DashboardTopbar({ session, onRefresh, loading }) {
+  return (
+    <div className="dashboard-topbar">
+      <div>
+        <p className="eyebrow">Sunbeleaf Control Center</p>
+        <h2>Dashboard</h2>
+        <span>Quản lý doanh thu, đơn hàng và trạng thái vận hành trong một màn hình.</span>
+      </div>
+      <div className="topbar-actions">
+        <button type="button" className="icon-button" onClick={onRefresh} disabled={loading} title="Làm mới">
+          ↻
+        </button>
+        <div className="admin-chip">
+          <span className="admin-avatar">{String(session?.username || "A").slice(0, 1).toUpperCase()}</span>
+          <div>
+            <strong>{session?.username}</strong>
+            <small>Admin</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function TrendPill({ value }) {
   const trend = Number(value || 0);
   const className = trend >= 0 ? "trend-pill positive" : "trend-pill negative";
@@ -312,21 +336,25 @@ function SalesDashboard({ report, adCost, onAdCostChange }) {
 
       <div className="report-grid">
         <div className="report-card accent">
+          <span className="report-icon">₫</span>
           <span>Doanh thu hôm nay</span>
           <strong>{formatCurrency(report?.revenue?.day)}đ</strong>
           <small>So với hôm qua <TrendPill value={report?.growth?.day} /></small>
         </div>
-        <div className="report-card">
+        <div className="report-card weekly-card">
+          <span className="report-icon">W</span>
           <span>Doanh thu tuần này</span>
           <strong>{formatCurrency(report?.revenue?.week)}đ</strong>
           <small>Tính từ thứ 2 đến chủ nhật <TrendPill value={report?.growth?.week} /></small>
         </div>
-        <div className="report-card">
+        <div className="report-card monthly-card">
+          <span className="report-icon">M</span>
           <span>Doanh thu tháng này</span>
           <strong>{formatCurrency(report?.revenue?.month)}đ</strong>
           <small>Tính từ đầu tháng đến cuối tháng <TrendPill value={report?.growth?.month} /></small>
         </div>
         <div className="report-card cost-card">
+          <span className="report-icon">C</span>
           <span>Tổng chi phí</span>
           <strong>{formatCurrency(totalCost)}đ</strong>
           <small>Trả hàng: {formatCurrency(returnCost)}đ</small>
@@ -630,9 +658,12 @@ export default function App() {
   return (
     <div className="page-shell">
       <aside className="sidebar">
-        <div>
-          <p className="eyebrow">Sunbeleaf</p>
-          <h1>Admin đơn hàng</h1>
+        <div className="sidebar-brand">
+          <div className="brand-mark">S</div>
+          <div>
+            <p className="eyebrow">Sunbeleaf</p>
+            <h1>Admin đơn hàng</h1>
+          </div>
           <p className="subtle">
             Đang đăng nhập: <strong>{session.username}</strong>
           </p>
@@ -641,7 +672,18 @@ export default function App() {
           </p>
         </div>
 
+        <nav className="side-nav" aria-label="Admin">
+          <button className="side-nav-item active" type="button">Dashboard</button>
+          <button className="side-nav-item" type="button" onClick={() => applyStatFilter({})}>Tất cả đơn</button>
+          <button className="side-nav-item" type="button" onClick={() => applyStatFilter({ paymentStatus: "pending" })}>Chưa thanh toán</button>
+          <button className="side-nav-item" type="button" onClick={() => applyStatFilter({ stateGroup: "returns" })}>Trả hàng</button>
+        </nav>
+
         <div className="filters">
+          <div className="filter-heading">
+            <strong>Bộ lọc đơn hàng</strong>
+            <span>Lọc nhanh theo thời gian, thanh toán và vận chuyển</span>
+          </div>
           <label>
             Tìm kiếm
             <input
@@ -757,6 +799,12 @@ export default function App() {
       </aside>
 
       <main className="content">
+        <DashboardTopbar
+          session={session}
+          loading={loading}
+          onRefresh={() => void loadDashboard()}
+        />
+
         <SalesDashboard
           report={salesReport}
           adCost={adCost}
