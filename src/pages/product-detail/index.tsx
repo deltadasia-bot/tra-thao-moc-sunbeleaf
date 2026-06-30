@@ -67,6 +67,8 @@ export default function ProductDetailPage() {
   } | null>(null);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [isCartOptionsOpen, setIsCartOptionsOpen] = useState(false);
+  const [cartActionMode, setCartActionMode] = useState<"add" | "buy">("add");
   const [isPurchaseProtectionOpen, setIsPurchaseProtectionOpen] =
     useState(false);
   const [selectedRatingFilter, setSelectedRatingFilter] = useState<"all" | number>("all");
@@ -241,6 +243,34 @@ export default function ProductDetailPage() {
     }));
   };
 
+  const ensureSingleOptionDefaults = () => {
+    if (!product) return;
+
+    setVariantSelections((current) => {
+      const next = { ...current };
+      product.variantGroups.forEach((variantGroup) => {
+        if (
+          variantGroup.type === "SINGLE" &&
+          variantGroup.isRequired &&
+          variantGroup.options.length === 1 &&
+          !next[variantGroup.id]
+        ) {
+          next[variantGroup.id] = {
+            type: "SINGLE",
+            value: variantGroup.options[0].id,
+          };
+        }
+      });
+      return next;
+    });
+  };
+
+  const openCartOptions = (mode: "add" | "buy") => {
+    setCartActionMode(mode);
+    ensureSingleOptionDefaults();
+    setIsCartOptionsOpen(true);
+  };
+
   const totalPrice = useMemo(() => {
     if (!product) return 0;
 
@@ -391,8 +421,63 @@ export default function ProductDetailPage() {
     return product.image;
   }, [product, variantSelections]);
 
+  const missingRequiredVariant = useMemo(() => {
+    if (!product) return false;
+
+    return product.variantGroups.some((variantGroup) => {
+      if (!variantGroup.isRequired || variantGroup.options.length <= 1) {
+        return false;
+      }
+
+      const selection = variantSelections[variantGroup.id];
+      if (!selection) return true;
+
+      if (variantGroup.type === "SINGLE") {
+        return typeof selection.value !== "string" || !selection.value;
+      }
+
+      if (variantGroup.type === "MULTIPLE") {
+        return !Array.isArray(selection.value) || selection.value.length === 0;
+      }
+
+      if (
+        (variantGroup.type === "ADJUSTMENT" ||
+          variantGroup.type === "QUANTITY") &&
+        typeof selection.value === "object" &&
+        !Array.isArray(selection.value)
+      ) {
+        return !Object.values(selection.value).some((value) => Number(value) > 0);
+      }
+
+      return true;
+    });
+  }, [product, variantSelections]);
+
+  const hasMultipleVariantOptions = useMemo(() => {
+    if (!product) return false;
+    return product.variantGroups.some((variantGroup) => variantGroup.options.length > 1);
+  }, [product]);
+
   const handleAddToCart = (buyNow = false) => {
     if (!product) return;
+
+    const effectiveVariantSelections: VariantSelections = {
+      ...variantSelections,
+    };
+
+    product.variantGroups.forEach((variantGroup) => {
+      if (
+        variantGroup.type === "SINGLE" &&
+        variantGroup.isRequired &&
+        variantGroup.options.length === 1 &&
+        !effectiveVariantSelections[variantGroup.id]
+      ) {
+        effectiveVariantSelections[variantGroup.id] = {
+          type: "SINGLE",
+          value: variantGroup.options[0].id,
+        };
+      }
+    });
 
     // Convert variantSelections to selectedVariants array
     const selectedVariants: Array<{
@@ -404,7 +489,7 @@ export default function ProductDetailPage() {
       quantity?: number;
     }> = [];
 
-    Object.entries(variantSelections).forEach(([groupId, selection]) => {
+    Object.entries(effectiveVariantSelections).forEach(([groupId, selection]) => {
       const variantGroup = product.variantGroups.find(
         (vg) => vg.id === groupId,
       );
@@ -489,12 +574,13 @@ export default function ProductDetailPage() {
       addToCart(cartItemData);
     }
 
+    setIsCartOptionsOpen(false);
+
     if (buyNow) {
       navigate("/checkout");
       return;
     }
 
-    navigate(-1);
   };
 
   if (isLoading) {
@@ -1013,14 +1099,14 @@ export default function ProductDetailPage() {
           </button>
           <button
             type="button"
-            onClick={() => handleAddToCart(false)}
+            onClick={() => openCartOptions("add")}
             className="flex flex-1 items-center justify-center bg-[#ffeee8] px-2 text-center font-medium text-[#ee4d2d]"
           >
             {isEditMode ? "Cập nhật giỏ hàng" : "Thêm vào giỏ"}
           </button>
           <button
             type="button"
-            onClick={() => handleAddToCart(true)}
+            onClick={() => openCartOptions("buy")}
             className="flex flex-1 flex-col items-center justify-center bg-[#ee4d2d] px-2 text-white"
           >
             <span className="font-semibold">Mua ngay</span>
@@ -1028,6 +1114,162 @@ export default function ProductDetailPage() {
           </button>
         </div>
       </div>
+
+      <Sheet
+        autoHeight
+        visible={isCartOptionsOpen}
+        onClose={() => setIsCartOptionsOpen(false)}
+      >
+        <div className="max-h-[86vh] overflow-y-auto rounded-t-3xl bg-white pb-[max(16px,var(--zaui-safe-area-inset-bottom))]">
+          <div className="sticky top-0 z-20 border-b border-gray-100 bg-white/95 px-4 py-3 backdrop-blur">
+            <div className="flex items-start gap-3">
+              <img
+                src={displayedProductImage || product.image}
+                alt={product.name}
+                className="h-20 w-20 shrink-0 rounded-xl border border-gray-100 object-cover"
+              />
+              <div className="min-w-0 flex-1">
+                <div className="line-clamp-2 text-sm font-semibold leading-5 text-gray-900">
+                  {product.name}
+                </div>
+                <div className="mt-2 text-xl font-bold text-[#ee4d2d]">
+                  {formatCurrency(unitPrice)}
+                </div>
+                <div className="mt-1 text-xs text-gray-500">
+                  {hasMultipleVariantOptions
+                    ? "Vui lòng chọn phân loại trước khi thêm vào giỏ."
+                    : "Kiểm tra số lượng rồi thêm vào giỏ."}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4 px-4 py-4">
+            {product.variantGroups.length > 0 ? (
+              <div className="rounded-2xl border border-gray-100 bg-[#fafafa] px-3 py-2">
+                <div className="mb-1 text-base font-semibold text-gray-900">
+                  Phân loại sản phẩm
+                </div>
+                {product.variantGroups.map((variantGroup) => {
+                  const selection = variantSelections[variantGroup.id];
+                  return (
+                    <div
+                      key={variantGroup.id}
+                      className="border-t border-gray-100 py-2 first:border-t-0"
+                    >
+                      <VariantSelect
+                        variantGroup={variantGroup}
+                        selectedOptionId={
+                          variantGroup.type === "SINGLE" &&
+                          typeof selection?.value === "string"
+                            ? selection.value
+                            : undefined
+                        }
+                        selectedOptionIds={
+                          variantGroup.type === "MULTIPLE" &&
+                          Array.isArray(selection?.value)
+                            ? selection.value
+                            : []
+                        }
+                        selectedValues={
+                          (variantGroup.type === "ADJUSTMENT" ||
+                            variantGroup.type === "QUANTITY") &&
+                          typeof selection?.value === "object" &&
+                          !Array.isArray(selection?.value)
+                            ? (selection.value as Record<string, number>)
+                            : {}
+                        }
+                        onSelect={(optionId) => {
+                          if (variantGroup.type === "SINGLE") {
+                            handleVariantChange(
+                              variantGroup.id,
+                              optionId,
+                              variantGroup.type,
+                            );
+                            const selectedOption = variantGroup.options.find(
+                              (option) => option.id === optionId,
+                            );
+                            if (selectedOption?.image) {
+                              handleMediaSelect("image", selectedOption.image);
+                            }
+                          } else if (variantGroup.type === "MULTIPLE") {
+                            const currentSelection = Array.isArray(
+                              selection?.value,
+                            )
+                              ? selection.value
+                              : [];
+                            handleVariantChange(
+                              variantGroup.id,
+                              currentSelection.includes(optionId)
+                                ? currentSelection.filter(
+                                    (value) => value !== optionId,
+                                  )
+                                : [...currentSelection, optionId],
+                              variantGroup.type,
+                            );
+                          }
+                        }}
+                        onValueChange={(optionId, value) => {
+                          const currentValues =
+                            typeof selection?.value === "object" &&
+                            !Array.isArray(selection?.value)
+                              ? (selection.value as Record<string, number>)
+                              : {};
+                          handleVariantChange(
+                            variantGroup.id,
+                            { ...currentValues, [optionId]: value },
+                            variantGroup.type,
+                          );
+                        }}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="rounded-2xl bg-[#fff7f5] px-4 py-3 text-sm text-[#b42318]">
+                Sản phẩm không có phân loại, có thể thêm trực tiếp vào giỏ.
+              </div>
+            )}
+
+            <div className="flex items-center justify-between rounded-2xl border border-gray-100 px-4 py-3">
+              <span className="font-medium text-gray-900">Số lượng</span>
+              <QuantityStepper
+                value={quantity}
+                onDecrease={() => setQuantity(Math.max(1, quantity - 1))}
+                onIncrease={() => setQuantity(quantity + 1)}
+                minValue={1}
+                variant="rounded"
+              />
+            </div>
+
+            {missingRequiredVariant && (
+              <div className="rounded-xl bg-[#fff1ee] px-3 py-2 text-sm font-medium text-[#d0011b]">
+                Hãy chọn phân loại sản phẩm trước khi thêm vào giỏ hàng.
+              </div>
+            )}
+          </div>
+
+          <div className="sticky bottom-0 z-20 border-t border-gray-100 bg-white px-4 py-3">
+            <button
+              type="button"
+              disabled={missingRequiredVariant}
+              onClick={() => handleAddToCart(cartActionMode === "buy")}
+              className={`h-12 w-full rounded-xl text-base font-semibold text-white active:opacity-80 ${
+                missingRequiredVariant
+                  ? "bg-gray-300"
+                  : "bg-[#d0011b]"
+              }`}
+            >
+              {cartActionMode === "buy"
+                ? `Mua ngay · ${formatCurrency(totalPrice)}`
+                : isEditMode
+                  ? "Cập nhật giỏ hàng"
+                  : "Thêm vào giỏ hàng"}
+            </button>
+          </div>
+        </div>
+      </Sheet>
 
       <Sheet
         autoHeight
