@@ -357,7 +357,7 @@ async function checkNhanhConnection() {
     };
   }
 
-  const result = await nhanhRequest("/product/search", { limit: 1 });
+  const result = await nhanhRequest("/product/list", { limit: 1 });
   if (!result.ok) {
     return {
       ok: false,
