@@ -357,7 +357,10 @@ async function checkNhanhConnection() {
     };
   }
 
-  const result = await nhanhRequest("/product/list", { limit: 1 });
+  const result = await nhanhRequest("/product/list", {
+    filters: {},
+    paginator: { size: 1 },
+  });
   if (!result.ok) {
     return {
       ok: false,
