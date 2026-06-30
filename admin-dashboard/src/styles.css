@@ -959,6 +959,68 @@ textarea {
   }
 }
 
+.order-row-sync {
+  display: flex;
+  margin-top: 10px;
+}
+
+.sapo-sync-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  max-width: 100%;
+  width: fit-content;
+  padding: 7px 11px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 1.2;
+  white-space: normal;
+}
+
+.sapo-sync-badge.compact {
+  padding: 5px 9px;
+  font-size: 11px;
+}
+
+.sapo-sync-dot {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: currentColor;
+  box-shadow: 0 0 0 4px color-mix(in srgb, currentColor 16%, transparent);
+}
+
+.sapo-sync-badge.synced {
+  color: #047857;
+  border-color: rgba(4, 120, 87, 0.18);
+  background: linear-gradient(135deg, rgba(236, 253, 245, 0.96), rgba(209, 250, 229, 0.76));
+}
+
+.sapo-sync-badge.pending {
+  color: #b45309;
+  border-color: rgba(180, 83, 9, 0.2);
+  background: linear-gradient(135deg, rgba(255, 251, 235, 0.98), rgba(254, 243, 199, 0.76));
+}
+
+.sapo-sync-badge.error {
+  color: #b42318;
+  border-color: rgba(180, 35, 24, 0.2);
+  background: linear-gradient(135deg, rgba(254, 243, 242, 0.98), rgba(254, 228, 226, 0.78));
+}
+
+.sapo-sync-card {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(16, 185, 129, 0.12), transparent 34%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(247, 254, 251, 0.72));
+}
+
+.sapo-sync-card .sapo-sync-badge {
+  margin: 4px 0 8px;
+}
+
 /* Reference dashboard refinement */
 :root {
   --surface: #ffffff;

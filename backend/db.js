@@ -218,6 +218,9 @@ module.exports = {
       paidAt: existing?.paidAt ?? null,
       sepayTransactionId: existing?.sepayTransactionId ?? null,
       sapoOrderId: existing?.sapoOrderId ?? null,
+      nhanhOrderId: existing?.nhanhOrderId ?? null,
+      nhanhSyncedAt: existing?.nhanhSyncedAt ?? null,
+      nhanhSyncError: existing?.nhanhSyncError ?? null,
       state: existing?.state ?? "pending",
       stateLabel: existing?.stateLabel ?? STATE_LABELS.pending,
       customerPhone: order.customerPhone || existing?.customerPhone || "",
@@ -265,6 +268,29 @@ module.exports = {
     return upsertOrder({
       ...order,
       sapoOrderId,
+      updatedAt: new Date().toISOString(),
+    });
+  },
+
+  setNhanhSyncResult(id, result) {
+    const order = this.getOrder(id);
+    if (!order) return null;
+    const patch = result?.ok
+      ? {
+          nhanhOrderId: result.data?.id || order.nhanhOrderId || null,
+          nhanhTrackingUrl:
+            result.data?.trackingUrl || order.nhanhTrackingUrl || "",
+          nhanhSyncedAt: new Date().toISOString(),
+          nhanhSyncError: null,
+        }
+      : {
+          nhanhSyncError: result?.message || result?.error || "Nhanh sync failed",
+          nhanhSyncedAt: result?.skipped ? order.nhanhSyncedAt || null : new Date().toISOString(),
+        };
+
+    return upsertOrder({
+      ...order,
+      ...patch,
       updatedAt: new Date().toISOString(),
     });
   },

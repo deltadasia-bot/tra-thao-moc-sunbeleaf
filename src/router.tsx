@@ -16,6 +16,7 @@ const OrderSuccessPage = lazy(() => import("./pages/order-success"));
 const OrderDetailPage = lazy(() => import("./pages/order-detail"));
 const ArticlesPage = lazy(() => import("./pages/articles"));
 const NewsPage = lazy(() => import("./pages/news"));
+const VouchersPage = lazy(() => import("./pages/profile/vouchers"));
 import { copy } from "@/constants/copy";
 
 const router = createBrowserRouter(
@@ -55,6 +56,17 @@ const router = createBrowserRouter(
             hideHeader: true,
             hideCart: true,
             whiteBackground: true,
+          },
+        },
+        {
+          path: "/profile/vouchers",
+          element: <VouchersPage />,
+          handle: {
+            title: "Ví voucher của tôi",
+            back: true,
+            whiteBackground: true,
+            hideFooter: true,
+            headerPosition: "sticky",
           },
         },
         { path: "/menu/search", element: <SearchPage /> },

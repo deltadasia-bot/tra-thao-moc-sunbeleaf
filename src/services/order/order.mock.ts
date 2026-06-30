@@ -167,6 +167,7 @@ export function createMockOrder(
   pickupStoreId?: string,
   paymentMethod: NonNullable<Order["payment"]>["method"] = "bank_transfer",
   note?: string,
+  discount: number = 0,
 ): Order {
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
@@ -179,8 +180,7 @@ export function createMockOrder(
           items.map((item) => item.productId),
         )
       : 0;
-  const discount = 0;
-  const total = subtotal + shippingFee;
+  const total = Math.max(0, subtotal + shippingFee - discount);
 
   const orderId = `order-${Date.now()}`;
   const orderCode = `DH-${new Date().toISOString().split("T")[0].replace(/-/g, "")}-${Math.floor(Math.random() * 900) + 100}`;

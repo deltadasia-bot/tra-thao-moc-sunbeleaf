@@ -2,6 +2,7 @@ const express  = require("express");
 const router   = express.Router();
 const db       = require("../db");
 const { pushOrderToSapo, createSapoReturn }  = require("../services/sapo");
+const { syncOrderToNhanh } = require("../services/nhanh");
 const { notifyNewOrder }   = require("../services/notifier");
 const { createSPXOrder }   = require("../services/spx");
 
@@ -152,7 +153,17 @@ router.post("/", async (req, res) => {
     }
 
     try {
-      // 2. Gửi thông báo Zalo + Email
+      // 2. Dong bo sang Nhanh.vn. Loi Nhanh khong lam hong flow dat hang.
+      const nhanhResult = await syncOrderToNhanh(order);
+      if (!nhanhResult?.skipped) {
+        db.setNhanhSyncResult(order.id, nhanhResult);
+      }
+    } catch (err) {
+      console.error("[Nhanh] Loi dong bo don hang:", err.message);
+      db.setNhanhSyncResult(order.id, { ok: false, message: err.message });
+    }
+
+    try {
       await notifyNewOrder(order);
     } catch (err) {
       console.error("[Notifier] Lỗi gửi thông báo:", err.message);

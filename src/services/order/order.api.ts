@@ -42,6 +42,7 @@ export const orderService = {
       request.pickupStoreId,
       request.paymentMethod,
       request.note,
+      request.discount ?? 0,
     );
 
     let finalOrder = normalizeOrderImages(newOrder);

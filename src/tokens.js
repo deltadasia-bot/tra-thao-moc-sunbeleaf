@@ -353,7 +353,7 @@ const semantic = {
       logout: "Đăng xuất",
       personalProfile: "Hồ sơ cá nhân",
       vouchers: "Phiếu giảm giá",
-      supportCenter: "Trung tâm trợ giúp",
+      supportCenter: "Liên hệ và hỗ trợ qua Zalo OA",
       avatarAlt: "Ảnh đại diện của khách hàng",
       sampleName: "Bình Nguyễn",
       featureDeveloping: "Chức năng dành cho các bên tích hợp phát triển...",

@@ -78,11 +78,35 @@ async function checkAndSyncOrders() {
     const activeTab = tabs[0];
     const orderToSync = pendingOrders[0];
     
-    chrome.tabs.sendMessage(activeTab.id, {
-      action: "syncOrder",
-      order: orderToSync,
-      backendUrl: backendUrl
-    });
+    chrome.tabs.sendMessage(
+      activeTab.id,
+      {
+        action: "syncOrder",
+        order: orderToSync,
+        backendUrl: backendUrl
+      },
+      (result) => {
+        if (chrome.runtime.lastError) {
+          const message =
+            "Content script chưa chạy trên tab Sapo. Hãy reload trang Sapo Go rồi bấm Đồng bộ ngay.";
+          console.error("[Sapo Sync]", chrome.runtime.lastError.message);
+          addLog(message);
+          chrome.action.setBadgeText({ text: "ERR" });
+          chrome.action.setBadgeBackgroundColor({ color: "#d8000c" });
+          return;
+        }
+
+        if (!result?.success) {
+          addLog(`Lỗi đơn ${orderToSync.orderCode}: ${result?.error || "Không rõ lỗi từ Sapo"}`);
+          chrome.action.setBadgeText({ text: "ERR" });
+          chrome.action.setBadgeBackgroundColor({ color: "#d8000c" });
+          return;
+        }
+
+        addLog(`Đã tạo đơn ${orderToSync.orderCode} trên Sapo #${result.sapoOrderId}`);
+        chrome.action.setBadgeText({ text: "" });
+      }
+    );
   } catch (error) {
     console.error("[Sapo Sync background] Lỗi checkAndSyncOrders:", error.message);
     addLog(`Lỗi kiểm tra đơn: ${error.message}`);

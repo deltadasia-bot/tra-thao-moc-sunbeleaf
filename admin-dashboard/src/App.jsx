@@ -628,6 +628,40 @@ function paymentStatusLabel(status) {
   return labels[status] || status || "-";
 }
 
+function sapoSyncInfo(order) {
+  if (order?.sapoOrderId) {
+    return {
+      status: "synced",
+      label: `Đã đồng bộ Sapo #${order.sapoOrderId}`,
+      detail: "Đơn này đã được extension tạo trên Sapo và báo ngược về hệ thống.",
+    };
+  }
+
+  if (order?.sapoSyncError) {
+    return {
+      status: "error",
+      label: "Lỗi đồng bộ Sapo",
+      detail: order.sapoSyncError,
+    };
+  }
+
+  return {
+    status: "pending",
+    label: "Chờ đồng bộ Sapo",
+    detail: "Extension sẽ tự tạo đơn trên Sapo khi tab Sapo Go đang mở và đã đăng nhập.",
+  };
+}
+
+function SapoSyncBadge({ order, compact = false }) {
+  const info = sapoSyncInfo(order);
+  return (
+    <span className={`sapo-sync-badge ${info.status} ${compact ? "compact" : ""}`}>
+      <span className="sapo-sync-dot" />
+      {info.label}
+    </span>
+  );
+}
+
 export default function App() {
   const [session, setSession] = useState(readSession);
   const currentDate = new Date();
@@ -1283,6 +1317,9 @@ export default function App() {
                     <span>{order.stateLabel}</span>
                     <span>{formatDate(order.createdAt)}</span>
                   </div>
+                  <div className="order-row-sync">
+                    <SapoSyncBadge order={order} compact />
+                  </div>
                 </button>
               ))}
 
@@ -1298,6 +1335,7 @@ export default function App() {
                     <div>
                       <h2>{selectedOrder.orderCode || selectedOrder.id}</h2>
                       <p>{formatDate(selectedOrder.createdAt)}</p>
+                      <SapoSyncBadge order={selectedOrder} />
                     </div>
                   </div>
 
@@ -1313,6 +1351,11 @@ export default function App() {
                       <p>Phương thức: {paymentLabel(selectedOrder.paymentMethod)}</p>
                       <p>Trạng thái: {paymentStatusLabel(selectedOrder.paymentStatus)}</p>
                       <p>Tổng tiền: {formatCurrency(selectedOrder.totalAmount)}đ</p>
+                    </div>
+                    <div className="detail-card sapo-sync-card">
+                      <h3>Đồng bộ Sapo</h3>
+                      <SapoSyncBadge order={selectedOrder} />
+                      <p>{sapoSyncInfo(selectedOrder).detail}</p>
                     </div>
                     {selectedOrder.deliveryType === "delivery" && (
                       <div className="detail-card wide-card">

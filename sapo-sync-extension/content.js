@@ -4,14 +4,38 @@ console.log("[Sunbeleaf Sapo Assistant] Content script đã tải hoạt động
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "syncOrder") {
-    handleSyncOrder(request.order, request.backendUrl);
+    handleSyncOrder(request.order, request.backendUrl)
+      .then((result) => sendResponse(result))
+      .catch((error) => sendResponse({ success: false, error: error.message }));
+    return true;
   } else if (request.action === "queryTracking") {
-    handleQueryTracking(request.id, request.sapoOrderId, request.backendUrl);
+    handleQueryTracking(request.id, request.sapoOrderId, request.backendUrl)
+      .then((result) => sendResponse(result || { success: true }))
+      .catch((error) => sendResponse({ success: false, error: error.message }));
+    return true;
+  } else if (request.action === "ping") {
+    sendResponse({ success: true, url: location.href });
   }
 });
 
 // Khóa chống đồng bộ lặp lại
 let isSyncing = false;
+
+const CSRF_META_SELECTORS = [
+  'meta[name="csrf-token"]',
+  'meta[name="csrf_token"]',
+  'meta[name="_csrf"]',
+  'meta[name="csrf"]',
+  'meta[property="csrf-token"]',
+  'meta[name="X-CSRF-TOKEN"]'
+];
+
+const CSRF_INPUT_SELECTORS = [
+  'input[name="authenticity_token"]',
+  'input[name="_csrf"]',
+  'input[name="csrf_token"]',
+  'input[name="csrf-token"]'
+];
 
 // Hàm ghi log vào Storage của Extension
 function addLogToStorage(message) {
@@ -24,6 +48,68 @@ function addLogToStorage(message) {
   });
 }
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function readCookie(name) {
+  const found = document.cookie
+    .split(";")
+    .map((item) => item.trim())
+    .find((item) => item.startsWith(`${name}=`));
+  return found ? decodeURIComponent(found.slice(name.length + 1)) : "";
+}
+
+function findTokenInStorage(storage) {
+  try {
+    for (let i = 0; i < storage.length; i += 1) {
+      const key = storage.key(i);
+      const value = storage.getItem(key);
+      if (!key || !value) continue;
+      if (/csrf|xsrf|token/i.test(key) && value.length >= 16) return value;
+
+      if (/csrf|xsrf/i.test(value) && value.length < 2000) {
+        const match = value.match(/["']?(?:csrf|xsrf)[^"']*["']?\s*[:=]\s*["']([^"']{16,})["']/i);
+        if (match?.[1]) return match[1];
+      }
+    }
+  } catch (_error) {
+    // Ignore blocked storage keys and keep trying other token sources.
+  }
+  return "";
+}
+
+function resolveSapoCsrfTokenOnce() {
+  for (const selector of CSRF_META_SELECTORS) {
+    const token = document.querySelector(selector)?.getAttribute("content");
+    if (token) return token;
+  }
+
+  for (const selector of CSRF_INPUT_SELECTORS) {
+    const token = document.querySelector(selector)?.value;
+    if (token) return token;
+  }
+
+  const cookieToken =
+    readCookie("XSRF-TOKEN") ||
+    readCookie("CSRF-TOKEN") ||
+    readCookie("_csrf") ||
+    readCookie("csrfToken") ||
+    readCookie("csrf-token");
+  if (cookieToken) return cookieToken;
+
+  return findTokenInStorage(localStorage) || findTokenInStorage(sessionStorage);
+}
+
+async function resolveSapoCsrfToken() {
+  for (let i = 0; i < 10; i += 1) {
+    const token = resolveSapoCsrfTokenOnce();
+    if (token) return token;
+    await sleep(300);
+  }
+  return "";
+}
+
 // 1. Đồng bộ xuôi (Tạo đơn hàng sang Sapo)
 async function handleSyncOrder(order, backendUrl) {
   if (isSyncing) return;
@@ -34,9 +120,9 @@ async function handleSyncOrder(order, backendUrl) {
   
   try {
     // Lấy CSRF token của phiên làm việc Sapo hiện tại
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    const csrfToken = await resolveSapoCsrfToken();
     if (!csrfToken) {
-      throw new Error("Không lấy được mã bảo mật (CSRF Token) từ trang Sapo. Hãy tải lại trang Sapo Go.");
+      addLogToStorage("Không tìm thấy CSRF token, thử tạo đơn bằng session cookie hiện tại.");
     }
     
     // Chuyển đổi phương thức thanh toán sang nhãn hiển thị tiếng Việt
@@ -101,12 +187,26 @@ async function handleSyncOrder(order, backendUrl) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-CSRF-Token": csrfToken
+        "Accept": "application/json",
+        ...(csrfToken
+          ? {
+              "X-CSRF-Token": csrfToken,
+              "X-CSRFToken": csrfToken,
+              "X-XSRF-TOKEN": csrfToken
+            }
+          : {})
       },
+      credentials: "same-origin",
       body: JSON.stringify(payload)
     });
     
-    const resData = await response.json();
+    const responseText = await response.text();
+    let resData;
+    try {
+      resData = responseText ? JSON.parse(responseText) : {};
+    } catch (_error) {
+      resData = { raw: responseText };
+    }
     
     if (!response.ok || !resData.order || !resData.order.id) {
       const errorMsg = JSON.stringify(resData.errors || resData);
@@ -134,10 +234,12 @@ async function handleSyncOrder(order, backendUrl) {
     }
     
     showToastNotification(`Đã tự động đồng bộ đơn ${order.orderCode} từ Zalo App vào Sapo!`);
+    return { success: true, sapoOrderId: String(sapoOrderId) };
   } catch (error) {
     console.error("[Sapo Assistant] Lỗi đồng bộ:", error.message);
     addLogToStorage(`Lỗi đơn ${order.orderCode}: ${error.message}`);
     showToastNotification(`Lỗi đồng bộ Zalo App: ${error.message}`, true);
+    return { success: false, error: error.message };
   } finally {
     isSyncing = false;
   }

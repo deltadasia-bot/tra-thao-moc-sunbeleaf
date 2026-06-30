@@ -3,6 +3,7 @@ const crypto   = require("crypto");
 const router   = express.Router();
 const db       = require("../db");
 const { markSapoOrderPaid }       = require("../services/sapo");
+const { markNhanhOrderPaid }      = require("../services/nhanh");
 const { notifyPaymentConfirmed }  = require("../services/notifier");
 
 const EXPECTED_BANK_ACCOUNT = process.env.BANK_ACCOUNT_NUMBER || "34931868";
@@ -131,6 +132,15 @@ router.post("/sepay-webhook", (req, res) => {
       console.error("[Sapo] Lỗi cập nhật trạng thái paid:", err.message);
     }
     try {
+      const nhanhResult = await markNhanhOrderPaid(updated);
+      if (!nhanhResult?.skipped) {
+        db.setNhanhSyncResult(updated.id, nhanhResult);
+      }
+    } catch (err) {
+      console.error("[Nhanh] Loi cap nhat thanh toan:", err.message);
+      db.setNhanhSyncResult(updated.id, { ok: false, message: err.message });
+    }
+    try {
       await notifyPaymentConfirmed(updated);
     } catch (err) {
       console.error("[Notifier] Lỗi gửi thông báo xác nhận:", err.message);
@@ -229,6 +239,15 @@ router.post("/zalo-callback", async (req, res) => {
       console.error("[Sapo] Lỗi cập nhật trạng thái paid:", err.message);
     }
     try {
+      const nhanhResult = await markNhanhOrderPaid(updated);
+      if (!nhanhResult?.skipped) {
+        db.setNhanhSyncResult(updated.id, nhanhResult);
+      }
+    } catch (err) {
+      console.error("[Nhanh] Loi cap nhat thanh toan:", err.message);
+      db.setNhanhSyncResult(updated.id, { ok: false, message: err.message });
+    }
+    try {
       await notifyPaymentConfirmed(updated);
     } catch (err) {
       console.error("[Notifier] Lỗi gửi thông báo xác nhận:", err.message);
@@ -277,4 +296,3 @@ router.post("/sign", (req, res) => {
 });
 
 module.exports = router;
-

@@ -105,6 +105,7 @@ export interface CreateOrderRequest {
   paymentMethod: "cash" | "zalopay" | "momo" | "credit_card" | "bank_transfer";
   shippingCarrier?: string;
   note?: string;
+  discount?: number;
 }
 
 export interface OrderListResponse {

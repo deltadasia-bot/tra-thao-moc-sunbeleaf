@@ -14,6 +14,7 @@ import { useOrders } from "@/services/order/order.queries";
 import { BACKEND_URL } from "@/constants/api";
 import ProfileBgImg from "@/static/profile-header-bg.png";
 import { chooseImage } from "zmp-sdk/apis";
+import { openChat, openWebview } from "zmp-sdk";
 
 // Icons
 const SettingsIcon = () => (
@@ -419,9 +420,28 @@ export default function ProfilePage() {
     },
   ];
 
-  const handleMenuClick = (item: MenuItem) => {
+  const handleMenuClick = async (item: MenuItem) => {
     if (item.id === "3") {
       setTermsVisible(true);
+    } else if (item.id === "1") {
+      navigate(item.path);
+    } else if (item.id === "2") {
+      try {
+        await openChat({
+          type: "oa",
+          id: "2373245714894928774",
+          message: "Xin chào chuyên gia, tôi cần tư vấn về sản phẩm trà thảo mộc Sunbeleaf.",
+        });
+      } catch (error) {
+        console.warn("openChat failed, falling back to phone chat:", error);
+        try {
+          await openWebview({
+            url: "https://zalo.me/0903349318",
+          });
+        } catch (err) {
+          console.error("Failed to open Zalo phone chat:", err);
+        }
+      }
     } else {
       openSnackbar({
         text: copy.profile.featureDeveloping,

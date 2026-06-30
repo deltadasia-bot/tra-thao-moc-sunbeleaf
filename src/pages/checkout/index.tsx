@@ -78,6 +78,9 @@ export default function CheckoutPage() {
     useState(false);
   const [completedOrder, setCompletedOrder] = useState<Order | null>(null);
   const [termsVisible, setTermsVisible] = useState(false);
+  const [promoCode, setPromoCode] = useState("");
+  const [appliedPromo, setAppliedPromo] = useState<string | null>(null);
+  const [discountAmount, setDiscountAmount] = useState(0);
 
   const { openSnackbar } = useSnackbar();
   const { items: cartItems, updateQuantity, clearCart } = useCartStore();
@@ -107,8 +110,8 @@ export default function CheckoutPage() {
 
   const totalWithDelivery = totalItems + shippingFee;
   const totalWithoutDelivery = totalItems;
-  const finalTotal =
-    activeTab === "delivery" ? totalWithDelivery : totalWithoutDelivery;
+  const rawTotal = activeTab === "delivery" ? totalWithDelivery : totalWithoutDelivery;
+  const finalTotal = Math.max(0, rawTotal - discountAmount);
 
   const tabs: Tab<DeliveryMethod>[] = [
     { value: "delivery", label: copy.checkout.delivery },
@@ -164,6 +167,44 @@ export default function CheckoutPage() {
     });
   };
 
+  const handleApplyPromo = () => {
+    const code = promoCode.trim().toUpperCase();
+    if (!code) {
+      openSnackbar({ text: "Vui lòng nhập mã giảm giá!", type: "warning" });
+      return;
+    }
+
+    if (code === "SUNNEW10") {
+      const discount = Math.round(totalItems * 0.1);
+      setDiscountAmount(discount);
+      setAppliedPromo("SUNNEW10");
+      openSnackbar({ text: `Áp dụng thành công mã SUNNEW10 (Giảm 10%)`, type: "success" });
+    } else if (code === "SUNOA5") {
+      const discount = Math.round(totalItems * 0.05);
+      setDiscountAmount(discount);
+      setAppliedPromo("SUNOA5");
+      openSnackbar({ text: `Áp dụng thành công mã SUNOA5 (Giảm 5%)`, type: "success" });
+    } else if (code === "SUN100K") {
+      if (totalItems < 1000000) {
+        openSnackbar({ text: "Đơn hàng chưa đạt giá trị tối thiểu 1.000.000đ để áp dụng mã này!", type: "error" });
+        return;
+      }
+      const discount = Math.round(totalItems * 0.1);
+      setDiscountAmount(discount);
+      setAppliedPromo("SUN100K");
+      openSnackbar({ text: `Áp dụng thành công mã SUN100K (Giảm 10%)`, type: "success" });
+    } else {
+      openSnackbar({ text: "Mã giảm giá không tồn tại hoặc đã hết hạn!", type: "error" });
+    }
+  };
+
+  const handleRemovePromo = () => {
+    setPromoCode("");
+    setAppliedPromo(null);
+    setDiscountAmount(0);
+    openSnackbar({ text: "Đã hủy áp dụng mã giảm giá.", type: "info" });
+  };
+
   const buildOrderPayload = () => ({
     deliveryType: activeTab,
     items: cartItems.map((item) => ({
@@ -202,6 +243,7 @@ export default function CheckoutPage() {
       | "bank_transfer",
     shippingCarrier: activeTab === "delivery" ? shippingCarrier : undefined,
     note,
+    discount: discountAmount,
   });
 
   // Luồng thanh toán ZaloPay / MoMo qua Zalo Checkout CDK
@@ -567,6 +609,51 @@ export default function CheckoutPage() {
           </div>
         </div>
 
+        {/* Coupon code entry */}
+        <div className="mx-3.5 mt-3 rounded-lg bg-white p-4 shadow-sm">
+          <div className="text-large-m mb-3 flex items-center gap-1.5 font-bold text-gray-900">
+            <span>🎟️</span> Khuyến mãi & Voucher
+          </div>
+          
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <input
+                type="text"
+                value={promoCode}
+                onChange={(e) => setPromoCode(e.target.value)}
+                disabled={appliedPromo !== null}
+                placeholder="Nhập mã giảm giá (e.g. SUN100K)"
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-xs focus:border-[#2c714b] focus:outline-none disabled:bg-gray-50 disabled:text-gray-400 font-medium"
+              />
+            </div>
+            
+            {appliedPromo ? (
+              <button
+                type="button"
+                onClick={handleRemovePromo}
+                className="rounded-lg bg-rose-50 text-rose-600 px-4 py-2 text-xs font-bold active:scale-95 transition"
+              >
+                Hủy
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleApplyPromo}
+                className="rounded-lg bg-[#2c714b] text-white px-4 py-2 text-xs font-bold active:scale-95 transition"
+              >
+                Áp dụng
+              </button>
+            )}
+          </div>
+
+          {appliedPromo && (
+            <div className="mt-2.5 flex items-center justify-between text-xs bg-emerald-50 text-[#1b5e20] p-2.5 rounded-lg font-bold">
+              <span>✓ Đã áp dụng mã: <span className="font-mono text-emerald-950 font-extrabold">{appliedPromo}</span></span>
+              <span>-{formatCurrency(discountAmount)}đ</span>
+            </div>
+          )}
+        </div>
+
         {/* Payment summary */}
         <div className="mx-3.5 mt-3 flex flex-col gap-3 rounded-lg bg-white px-4 py-4">
           <div className="text-large-m">{copy.common.paymentSummary}</div>
@@ -585,6 +672,12 @@ export default function CheckoutPage() {
                   {copy.common.shippingFee} ({shippingCarrier === "Giao hàng Hỏa tốc" ? "Hỏa tốc" : "Nhanh"})
                 </div>
                 <div>{formatCurrency(shippingFee)}</div>
+              </div>
+            )}
+            {discountAmount > 0 && (
+              <div className="flex justify-between text-small text-emerald-700 font-bold">
+                <div>Giảm giá (Voucher):</div>
+                <div>-{formatCurrency(discountAmount)}đ</div>
               </div>
             )}
             <hr />
