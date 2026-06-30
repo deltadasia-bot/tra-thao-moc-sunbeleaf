@@ -523,9 +523,18 @@ router.get("/extension/pending", (req, res) => {
   try {
     const allOrders = require("../db").getAllOrders();
     // Lọc các đơn chưa có sapoOrderId và không bị hủy
-    const pending = allOrders.filter(
-      (order) => !order.sapoOrderId && order.state !== "cancelled"
-    );
+    const excludedStates = new Set(["cancelled", "returned", "completed"]);
+    const pending = allOrders
+      .filter((order) => {
+        if (order.sapoOrderId || order.sapoSyncError) return false;
+        if (excludedStates.has(order.state)) return false;
+        if (order.paymentStatus === "refunded") return false;
+        if (!Array.isArray(order.items) || order.items.length === 0) return false;
+        return order.items.some(
+          (item) => String(item.name || "").trim() && Number(item.price || 0) > 0
+        );
+      })
+      .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
     return res.json({ orders: pending });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -551,6 +560,23 @@ router.post("/extension/success", (req, res) => {
 });
 
 // Lấy danh sách đơn cần cập nhật mã vận đơn thực tế từ Sapo
+router.post("/extension/failure", (req, res) => {
+  const { id, error } = req.body;
+  if (!id || !error) {
+    return res.status(400).json({ error: "Thieu id don hang hoac noi dung loi" });
+  }
+  try {
+    const updated = require("../db").setSapoSyncError(id, error);
+    if (!updated) {
+      return res.status(404).json({ error: "Khong tim thay don hang tren Zalo" });
+    }
+    console.log(`[Sapo Extension] Dong bo loi: Zalo ID ${id} -> ${error}`);
+    return res.json({ success: true, order: updated });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 router.get("/extension/pending-tracking", (req, res) => {
   try {
     const allOrders = require("../db").getAllOrders();

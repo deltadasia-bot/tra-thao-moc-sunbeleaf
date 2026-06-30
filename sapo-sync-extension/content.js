@@ -21,6 +21,54 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 // Khóa chống đồng bộ lặp lại
 let isSyncing = false;
 
+function buildSapoLineItems(order) {
+  const sourceItems = Array.isArray(order.items) ? order.items : [];
+  const lineItems = sourceItems
+    .map((item) => {
+      const name = String(item.name || item.productName || "").trim();
+      const quantity = Number.parseInt(item.quantity || 1, 10);
+      const price = Number(item.price || 0);
+      if (!name || !Number.isFinite(price) || price <= 0) return null;
+
+      return {
+        name,
+        title: name,
+        quantity: Number.isFinite(quantity) && quantity > 0 ? quantity : 1,
+        price,
+        grams: 300,
+        requires_shipping: order.deliveryType === "delivery",
+        taxable: false,
+        properties: Array.isArray(item.options)
+          ? item.options
+              .map((option) => ({
+                name: option.name || "Quy cach",
+                value: option.value || option.name || ""
+              }))
+              .filter((option) => option.value)
+          : []
+      };
+    })
+    .filter(Boolean);
+
+  if (lineItems.length) return lineItems;
+
+  const fallbackAmount = Number(order.totalAmount || order.amount || 0);
+  if (!Number.isFinite(fallbackAmount) || fallbackAmount <= 0) {
+    throw new Error("Don hang khong co san pham hop le de dong bo sang Sapo.");
+  }
+
+  return [{
+    name: `Don hang ${order.orderCode}`,
+    title: `Don hang ${order.orderCode}`,
+    quantity: 1,
+    price: fallbackAmount,
+    grams: 300,
+    requires_shipping: order.deliveryType === "delivery",
+    taxable: false,
+    properties: []
+  }];
+}
+
 const CSRF_META_SELECTORS = [
   'meta[name="csrf-token"]',
   'meta[name="csrf_token"]',
@@ -153,6 +201,8 @@ async function handleSyncOrder(order, backendUrl) {
           }
         ];
 
+    const sapoLineItems = buildSapoLineItems(order);
+
     // Chuẩn bị dữ liệu gửi lên API nội bộ của Sapo
     const payload = {
       order: {
@@ -161,7 +211,8 @@ async function handleSyncOrder(order, backendUrl) {
         financial_status: order.paymentStatus === "paid" ? "paid" : "pending",
         fulfillment_status: null,
         gateway: paymentMethodLabel,
-        line_items: lineItems,
+        order_line_items: sapoLineItems,
+        line_items: sapoLineItems,
         ...(order.deliveryAddress && {
           shipping_address: {
             first_name: order.deliveryAddress.recipientName || "Khách hàng",

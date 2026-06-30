@@ -50,6 +50,49 @@ function addLog(message) {
   });
 }
 
+function sendMessageToTab(tabId, message) {
+  return new Promise((resolve) => {
+    chrome.tabs.sendMessage(tabId, message, (result) => {
+      if (chrome.runtime.lastError) {
+        resolve({
+          success: false,
+          extensionError: chrome.runtime.lastError.message
+        });
+        return;
+      }
+      resolve(result || { success: true });
+    });
+  });
+}
+
+async function ensureContentScript(tabId) {
+  const pingResult = await sendMessageToTab(tabId, { action: "ping" });
+  if (pingResult?.success) return true;
+
+  await chrome.scripting.executeScript({
+    target: { tabId },
+    files: ["content.js"]
+  });
+
+  const injectedPing = await sendMessageToTab(tabId, { action: "ping" });
+  return Boolean(injectedPing?.success);
+}
+
+async function reportSapoFailure(order, error) {
+  try {
+    await fetch(`${backendUrl}/api/sapo/extension/failure`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: order.id,
+        error: String(error || "Khong ro loi tu Sapo")
+      })
+    });
+  } catch (reportError) {
+    addLog(`Khong ghi duoc loi Sapo cho ${order.orderCode}: ${reportError.message}`);
+  }
+}
+
 // 1. Tạo đơn hàng tự động
 async function checkAndSyncOrders() {
   try {
@@ -76,37 +119,35 @@ async function checkAndSyncOrders() {
     }
     
     const activeTab = tabs[0];
-    const orderToSync = pendingOrders[0];
-    
-    chrome.tabs.sendMessage(
-      activeTab.id,
-      {
+    const contentReady = await ensureContentScript(activeTab.id);
+    if (!contentReady) {
+      throw new Error("Không thể kích hoạt content script trên tab Sapo. Hãy reload extension rồi mở lại tab Sapo.");
+    }
+
+    let failedCount = 0;
+    for (const orderToSync of pendingOrders.slice(0, 5)) {
+      const result = await sendMessageToTab(activeTab.id, {
         action: "syncOrder",
         order: orderToSync,
         backendUrl: backendUrl
-      },
-      (result) => {
-        if (chrome.runtime.lastError) {
-          const message =
-            "Content script chưa chạy trên tab Sapo. Hãy reload trang Sapo Go rồi bấm Đồng bộ ngay.";
-          console.error("[Sapo Sync]", chrome.runtime.lastError.message);
-          addLog(message);
-          chrome.action.setBadgeText({ text: "ERR" });
-          chrome.action.setBadgeBackgroundColor({ color: "#d8000c" });
-          return;
-        }
+      });
 
-        if (!result?.success) {
-          addLog(`Lỗi đơn ${orderToSync.orderCode}: ${result?.error || "Không rõ lỗi từ Sapo"}`);
-          chrome.action.setBadgeText({ text: "ERR" });
-          chrome.action.setBadgeBackgroundColor({ color: "#d8000c" });
-          return;
-        }
-
-        addLog(`Đã tạo đơn ${orderToSync.orderCode} trên Sapo #${result.sapoOrderId}`);
-        chrome.action.setBadgeText({ text: "" });
+      if (!result?.success) {
+        const errorMessage = result?.error || result?.extensionError || "Không rõ lỗi từ Sapo";
+        addLog(`Lỗi đơn ${orderToSync.orderCode}: ${errorMessage}`);
+        await reportSapoFailure(orderToSync, errorMessage);
+        failedCount += 1;
+        chrome.action.setBadgeText({ text: "ERR" });
+        chrome.action.setBadgeBackgroundColor({ color: "#d8000c" });
+        continue;
       }
-    );
+
+      addLog(`Đã tạo đơn ${orderToSync.orderCode} trên Sapo #${result.sapoOrderId}`);
+    }
+
+    if (failedCount === 0) {
+      chrome.action.setBadgeText({ text: "" });
+    }
   } catch (error) {
     console.error("[Sapo Sync background] Lỗi checkAndSyncOrders:", error.message);
     addLog(`Lỗi kiểm tra đơn: ${error.message}`);
@@ -130,10 +171,12 @@ async function checkAndUpdateTracking() {
     if (tabs.length === 0) return;
     
     const activeTab = tabs[0];
+    const contentReady = await ensureContentScript(activeTab.id);
+    if (!contentReady) return;
     
     // Gửi yêu cầu truy vấn thông tin vận đơn cho từng đơn
     for (const order of ordersNeedingTracking) {
-      chrome.tabs.sendMessage(activeTab.id, {
+      await sendMessageToTab(activeTab.id, {
         action: "queryTracking",
         id: order.id,
         sapoOrderId: order.sapoOrderId,

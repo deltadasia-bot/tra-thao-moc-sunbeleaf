@@ -1,12 +1,13 @@
 {
   "manifest_version": 3,
   "name": "Sunbeleaf Sapo Assistant",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Tự động đồng bộ đơn hàng từ Zalo Mini App sang Sapo Go",
   "permissions": [
     "storage",
     "alarms",
-    "tabs"
+    "tabs",
+    "scripting"
   ],
   "host_permissions": [
     "https://*.mysapogo.com/*",

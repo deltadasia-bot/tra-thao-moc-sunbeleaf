@@ -218,6 +218,7 @@ module.exports = {
       paidAt: existing?.paidAt ?? null,
       sepayTransactionId: existing?.sepayTransactionId ?? null,
       sapoOrderId: existing?.sapoOrderId ?? null,
+      sapoSyncError: existing?.sapoSyncError ?? null,
       nhanhOrderId: existing?.nhanhOrderId ?? null,
       nhanhSyncedAt: existing?.nhanhSyncedAt ?? null,
       nhanhSyncError: existing?.nhanhSyncError ?? null,
@@ -268,6 +269,17 @@ module.exports = {
     return upsertOrder({
       ...order,
       sapoOrderId,
+      sapoSyncError: null,
+      updatedAt: new Date().toISOString(),
+    });
+  },
+
+  setSapoSyncError(id, error) {
+    const order = this.getOrder(id);
+    if (!order) return null;
+    return upsertOrder({
+      ...order,
+      sapoSyncError: String(error || "Sapo sync failed").slice(0, 1000),
       updatedAt: new Date().toISOString(),
     });
   },
