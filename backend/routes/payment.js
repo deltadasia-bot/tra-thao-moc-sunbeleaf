@@ -32,15 +32,19 @@ const EXPECTED_BANK_ACCOUNT = process.env.BANK_ACCOUNT_NUMBER || "34931868";
  * }
  */
 router.post("/sepay-webhook", (req, res) => {
+  const payload = req.body || {};
   const {
     apiKey,
-    transferType,
-    transferAmount,
-    code,          // nội dung chuyển khoản – chứa orderCode
-    content,       // toàn bộ nội dung gốc
+    code,          // noi dung chuyen khoan - chua orderCode neu Sepay tach duoc
     id: sepayId,
-    accountNumber,
-  } = req.body;
+  } = payload;
+  const amountIn = Number(payload.amount_in || 0);
+  const amountOut = Number(payload.amount_out || 0);
+  const transferType =
+    payload.transferType || (amountIn > 0 ? "in" : amountOut > 0 ? "out" : "");
+  const transferAmount = Number(payload.transferAmount ?? payload.amount_in ?? 0);
+  const content = payload.content || payload.transaction_content || "";
+  const accountNumber = payload.accountNumber || payload.account_number;
 
   // 1. Xác thực API key từ Sepay (header Authorization hoặc body)
   const headerAuth = req.headers["authorization"] || "";
@@ -58,6 +62,11 @@ router.post("/sepay-webhook", (req, res) => {
     return res.json({ success: true, message: "Bỏ qua giao dịch ra" });
   }
 
+  if (!Number.isFinite(transferAmount) || transferAmount <= 0) {
+    console.warn("[Sepay] So tien giao dich khong hop le:", transferAmount);
+    return res.json({ success: true, message: "So tien giao dich khong hop le" });
+  }
+
   // 3. Bỏ qua nếu sai tài khoản ngân hàng
   if (
     accountNumber &&
@@ -67,7 +76,8 @@ router.post("/sepay-webhook", (req, res) => {
     return res.json({ success: true, message: "Không đúng tài khoản ACB" });
   }
 
-  // 4. Tìm đơn hàng – ưu tiên theo mã DH-, fallback theo số tiền + thời gian
+  // 4. Tim don hang theo ma DH trong noi dung chuyen khoan.
+  // Khong fallback theo so tien, vi nhieu don co the trung tong tien.
   let order = null;
 
   // Dấu gạch tùy chọn: khớp cả "DH-20260620-562" lẫn "DH20260620562" (MoMo strip dashes)
@@ -84,34 +94,19 @@ router.post("/sepay-webhook", (req, res) => {
       order = byCode;
       console.log(`[Sepay] Khớp theo mã đơn: ${orderCode}`);
     } else {
-      console.log(`[Sepay] Không tìm thấy đơn với mã: ${orderCode} – thử khớp theo số tiền`);
+      console.log(`[Sepay] Khong tim thay don voi ma: ${orderCode}`);
     }
   }
 
   if (!order) {
-    // Ưu tiên 2: khớp theo số tiền + đơn bank_transfer pending trong vòng 2 tiếng
-    const TWO_HOURS_MS = 2 * 60 * 60 * 1000;
-    const now = Date.now();
-    const candidates = db.getAllOrders()
-      .filter((o) =>
-        o.paymentMethod === "bank_transfer" &&
-        o.paymentStatus  === "pending" &&
-        Math.abs((o.amount ?? 0) - transferAmount) <= 1000 &&
-        now - new Date(o.createdAt).getTime() <= TWO_HOURS_MS,
-      )
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
-    if (candidates.length === 0) {
-      console.log(`[Sepay] Không tìm thấy đơn pending nào khớp ${transferAmount}đ trong 2 tiếng qua`);
-      return res.json({ success: true, message: "Không khớp đơn hàng nào" });
-    }
-
-    order = candidates[0];
-    if (candidates.length > 1) {
-      console.warn(`[Sepay] ⚠️  ${candidates.length} đơn cùng số tiền ${transferAmount}đ – chọn đơn gần nhất: ${order.orderCode}`);
-    } else {
-      console.log(`[Sepay] Khớp theo số tiền: ${order.orderCode} – ${transferAmount}đ`);
-    }
+    console.warn(
+      `[Sepay] Khong tu xac nhan giao dich ${sepayId || "-"}: noi dung khong co ma don hop le. content="${content}" amount=${transferAmount}`,
+    );
+    return res.json({
+      success: true,
+      message: "Khong co ma don hop le trong noi dung chuyen khoan",
+      requiresManualReview: true,
+    });
   }
 
   if (order.paymentStatus === "paid") {
