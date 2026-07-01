@@ -1112,15 +1112,29 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
         return `<img src="${block.url}" alt="${block.alt || ''}" style="max-width:100%; display:block; margin:10px auto; border-radius:8px;" />`;
       } else {
         const style = block.style || 'normal';
-        const text = (block.text || '').replace(/\n/g, '<br>');
+        const text = block.text || '';
+        
+        // Detect bullet list
+        if (text.startsWith('• ')) {
+          const items = text.split('\n').map(line => `<li>${line.replace(/^•\s*/, '')}</li>`).join('');
+          return `<ul>${items}</ul>`;
+        }
+        
+        // Detect numbered list
+        if (/^\d+\.\s*/.test(text)) {
+          const items = text.split('\n').map(line => `<li>${line.replace(/^\d+\.\s*/, '')}</li>`).join('');
+          return `<ol>${items}</ol>`;
+        }
+
+        const formattedText = text.replace(/\n/g, '<br>');
         if (style === 'heading') {
-          return `<h2>${text}</h2>`;
+          return `<h2>${formattedText}</h2>`;
         } else if (style === 'italic') {
-          return `<p><i>${text}</i></p>`;
+          return `<p><i>${formattedText}</i></p>`;
         } else if (style === 'uppercase') {
-          return `<p><b>${text}</b></p>`;
+          return `<p><b>${formattedText}</b></p>`;
         } else {
-          return `<p>${text}</p>`;
+          return `<p>${formattedText}</p>`;
         }
       }
     }).join('');
@@ -1150,6 +1164,26 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
           });
         } else if (tagName === 'br') {
           // Ignored
+        } else if (tagName === 'ul') {
+          const items = Array.from(node.querySelectorAll('li')).map(li => `• ${li.textContent}`).join('\n');
+          if (items) {
+            blocks.push({
+              id: `text-${index}-${Date.now()}`,
+              type: 'text',
+              style: 'normal',
+              text: items
+            });
+          }
+        } else if (tagName === 'ol') {
+          const items = Array.from(node.querySelectorAll('li')).map((li, idx) => `${idx + 1}. ${li.textContent}`).join('\n');
+          if (items) {
+            blocks.push({
+              id: `text-${index}-${Date.now()}`,
+              type: 'text',
+              style: 'normal',
+              text: items
+            });
+          }
         } else {
           const img = node.querySelector('img');
           if (img) {
@@ -1551,20 +1585,45 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
               <div className="wysiwyg-toolbar">
                 <select 
                   onChange={(e) => {
-                    const val = e.target.value;
-                    if (val === 'h2') {
-                      document.execCommand('formatBlock', false, '<h2>');
-                    } else {
-                      document.execCommand('formatBlock', false, '<p>');
-                    }
+                    const font = e.target.value;
+                    document.execCommand('fontName', false, font);
                     triggerEditorChange();
                   }}
-                  defaultValue="p"
-                  className="wysiwyg-select"
+                  defaultValue="Arial"
+                  className="wysiwyg-select font-select"
                 >
-                  <option value="p">Đoạn văn (Normal)</option>
-                  <option value="h2">Tiêu đề (Heading)</option>
+                  <option value="Arial">Arial</option>
+                  <option value="Times New Roman">Times New Roman</option>
+                  <option value="Courier New">Courier New</option>
+                  <option value="Georgia">Georgia</option>
+                  <option value="Tahoma">Tahoma</option>
+                  <option value="Verdana">Verdana</option>
                 </select>
+
+                <button 
+                  type="button" 
+                  className="wysiwyg-btn heading-btn" 
+                  title="Tiêu đề (Heading)"
+                  onClick={() => {
+                    const selection = window.getSelection();
+                    if (selection && selection.anchorNode) {
+                      let parent = selection.anchorNode.parentNode;
+                      while (parent && parent.nodeName !== 'BODY' && parent.nodeName !== 'DIV') {
+                        if (parent.nodeName === 'H2') {
+                          document.execCommand('formatBlock', false, '<p>');
+                          triggerEditorChange();
+                          return;
+                        }
+                        parent = parent.parentNode;
+                      }
+                    }
+                    document.execCommand('formatBlock', false, '<h2>');
+                    triggerEditorChange();
+                  }}
+                >
+                  H
+                </button>
+                
                 <button 
                   type="button" 
                   className="wysiwyg-btn bold-btn" 
@@ -1576,6 +1635,7 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
                 >
                   B
                 </button>
+                
                 <button 
                   type="button" 
                   className="wysiwyg-btn italic-btn" 
@@ -1587,6 +1647,7 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
                 >
                   I
                 </button>
+                
                 <button 
                   type="button" 
                   className="wysiwyg-btn underline-btn" 
@@ -1597,6 +1658,30 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
                   }}
                 >
                   U
+                </button>
+
+                <button 
+                  type="button" 
+                  className="wysiwyg-btn list-ul-btn" 
+                  title="Danh sách dấu chấm (Bullet List)"
+                  onClick={() => {
+                    document.execCommand('insertUnorderedList', false, null);
+                    triggerEditorChange();
+                  }}
+                >
+                  •
+                </button>
+
+                <button 
+                  type="button" 
+                  className="wysiwyg-btn list-ol-btn" 
+                  title="Danh sách số (Numbered List)"
+                  onClick={() => {
+                    document.execCommand('insertOrderedList', false, null);
+                    triggerEditorChange();
+                  }}
+                >
+                  1.
                 </button>
                 
                 <label className="upload-button wysiwyg-upload-btn">
