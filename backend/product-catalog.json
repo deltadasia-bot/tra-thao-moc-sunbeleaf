@@ -1,0 +1,326 @@
+[
+  {
+    "id": 1,
+    "name": "Trà Xạ Đen Túi Zip - Phòng Ngừa Ung Thư, Hỗ Trợ Chức Năng Gan",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-xa-den-shopee-01.webp",
+    "categoryId": "vietnamese",
+    "subCategoryId": "vietnamese-drinks",
+    "price": 167900,
+    "listPrice": 0
+  },
+  {
+    "id": 2,
+    "name": "Trà Cà Gai leo Túi Zip - Mát Gan, Giải Độc Gan, Thanh Lọc Cơ Thể",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p02-shopee-01.webp",
+    "categoryId": "vietnamese",
+    "subCategoryId": "vietnamese-drinks",
+    "price": 167900,
+    "listPrice": 0
+  },
+  {
+    "id": 3,
+    "name": "Trà Dây Túi Zip - Diệt Vi Khuẩn HP, Giảm Viêm Loét Dạ Dày",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p03-shopee-01.webp",
+    "categoryId": "vietnamese",
+    "subCategoryId": "vietnamese-drinks",
+    "price": 167900,
+    "listPrice": 0
+  },
+  {
+    "id": 4,
+    "name": "Trà Chùm Ngây Túi Zip - Chống Lão Hóa, Bổ Sung Dưỡng Chất",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p04-shopee-01.webp",
+    "categoryId": "vietnamese",
+    "subCategoryId": "vietnamese-drinks",
+    "price": 167900,
+    "listPrice": 0
+  },
+  {
+    "id": 5,
+    "name": "Trà Đinh Lăng Túi Zip - Hoạt Huyết Dưỡng Não, Giúp Ngủ Ngon",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p05-shopee-01.webp",
+    "categoryId": "vietnamese",
+    "subCategoryId": "vietnamese-drinks",
+    "price": 167900,
+    "listPrice": 0
+  },
+  {
+    "id": 6,
+    "name": "Trà Nhàu Túi Zip - Giúp Giảm Viêm, Giảm Đau Nhức Xương Khớp",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p06-shopee-01.webp",
+    "categoryId": "vietnamese",
+    "subCategoryId": "vietnamese-drinks",
+    "price": 167900,
+    "listPrice": 0
+  },
+  {
+    "id": 7,
+    "name": "Trà Xạ Đen H25 - Phòng Ngừa Ung Thư, Hỗ Trợ Chức Năng Gan",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p07-shopee-01.webp",
+    "categoryId": "vietnamese",
+    "subCategoryId": "vietnamese-food",
+    "price": 213600,
+    "listPrice": 0
+  },
+  {
+    "id": 8,
+    "name": "Trà Cà Gai Leo Hộp 25 Gói - Mát Gan, Giải Độc Gan, Thanh Lọc Cơ Thể",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p08-shopee-01.webp",
+    "categoryId": "vietnamese",
+    "subCategoryId": "vietnamese-food",
+    "price": 213600,
+    "listPrice": 0
+  },
+  {
+    "id": 9,
+    "name": "Trà Dây Hộp 25 Gói - Diệt Vi Khuẩn HP, Giảm Viêm Loét Dạ Dày",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p09-shopee-01.webp",
+    "categoryId": "vietnamese",
+    "subCategoryId": "vietnamese-food",
+    "price": 213600,
+    "listPrice": 0
+  },
+  {
+    "id": 10,
+    "name": "Trà Chùm Ngây Hộp 25 Gói - Chống Lão Hóa, Bổ Sung Dưỡng Chất",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p10-shopee-01.webp",
+    "categoryId": "vietnamese",
+    "subCategoryId": "vietnamese-food",
+    "price": 213600,
+    "listPrice": 0
+  },
+  {
+    "id": 11,
+    "name": "Trà Đinh Lăng Hộp 25 Gói - Hoạt Huyết Dưỡng Não, Giúp Ngủ Ngon",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p11-shopee-01.webp",
+    "categoryId": "vietnamese",
+    "subCategoryId": "vietnamese-food",
+    "price": 213600,
+    "listPrice": 0
+  },
+  {
+    "id": 12,
+    "name": "Trà Nhàu Hộp 25 Gói - Giúp Giảm Viêm, Giảm Đau Nhức Xương Khớp",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p12-shopee-01.webp",
+    "categoryId": "vietnamese",
+    "subCategoryId": "vietnamese-food",
+    "price": 213600,
+    "listPrice": 0
+  },
+  {
+    "id": 13,
+    "name": "Trà Xạ Đen Hộp 20 Gói - Phòng Ngừa Ung Thư, Hỗ Trợ Chức Năng Gan",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p13-shopee-01.webp",
+    "categoryId": "vietnamese",
+    "subCategoryId": "vietnamese-breakfast",
+    "price": 189600,
+    "listPrice": 0
+  },
+  {
+    "id": 14,
+    "name": "Trà Chùm Ngây Hộp 20 Gói - Chống Lão Hóa, Bổ Sung Dưỡng Chất",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p14-shopee-01.webp",
+    "categoryId": "vietnamese",
+    "subCategoryId": "vietnamese-breakfast",
+    "price": 189600,
+    "listPrice": 0
+  },
+  {
+    "id": 15,
+    "name": "Trà Đinh Lăng Hộp 20 Gói - Hoạt Huyết Dưỡng Não, Giúp Ngủ Ngon",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p15-shopee-01.webp",
+    "categoryId": "vietnamese",
+    "subCategoryId": "vietnamese-breakfast",
+    "price": 189600,
+    "listPrice": 0
+  },
+  {
+    "id": 16,
+    "name": "Trà Tim Sen Hộp 20 Gói - An Thần, Giúp Ngủ Ngon, Bảo Vệ Tim Mạch",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p16-shopee-01.webp",
+    "categoryId": "vietnamese",
+    "subCategoryId": "vietnamese-breakfast",
+    "price": 189600,
+    "listPrice": 0
+  },
+  {
+    "id": 17,
+    "name": "Trà Nhàu Hộp 20 Gói - Giúp Giảm Viêm, Giảm Đau Nhức Xương Khớp",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p17-shopee-01.webp",
+    "categoryId": "vietnamese",
+    "subCategoryId": "vietnamese-breakfast",
+    "price": 189600,
+    "listPrice": 0
+  },
+  {
+    "id": 18,
+    "name": "Trà Lục Trà Hoa Nhài Hộp 20 Gói - Thanh Nhiệt, Thư Giãn Đầu Óc",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p18-shopee-01.webp",
+    "categoryId": "vietnamese",
+    "subCategoryId": "vietnamese-breakfast",
+    "price": 189600,
+    "listPrice": 0
+  },
+  {
+    "id": 19,
+    "name": "Hồng Trà Hộp 20 Gói - Hỗ Trợ Tim Mạch, Giúp Tỉnh Táo",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p19-shopee-01.webp",
+    "categoryId": "vietnamese",
+    "subCategoryId": "vietnamese-breakfast",
+    "price": 189600,
+    "listPrice": 0
+  },
+  {
+    "id": 20,
+    "name": "Trà Sâm Tiên Mao Hộp 20 Gói - Bồi Bổ Sức Khỏe, Tăng Cường Sinh Lực",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p20-shopee-01.webp",
+    "categoryId": "vietnamese",
+    "subCategoryId": "vietnamese-breakfast",
+    "price": 189600,
+    "listPrice": 0
+  },
+  {
+    "id": 21,
+    "name": "Đông Trùng Tứ Vị Trà - Bồi Bổ Cơ Thể, Nâng Cao Sức Đề Kháng",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p21-shopee-01.webp",
+    "categoryId": "vietnamese",
+    "subCategoryId": "vietnamese-soup",
+    "price": 190350,
+    "listPrice": 0
+  },
+  {
+    "id": 22,
+    "name": "Dưỡng Nhan Thất Vị Trà - Dưỡng Nhan, Làm Đẹp Da, Chống Lão Hóa",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p22-shopee-01.webp",
+    "categoryId": "vietnamese",
+    "subCategoryId": "vietnamese-soup",
+    "price": 99000,
+    "listPrice": 0
+  },
+  {
+    "id": 23,
+    "name": "Gạo Lứt Bát Vị Trà - Thanh Nhiệt, Giải Độc, Giảm Cân Đẹp Dáng",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p23-shopee-01.webp",
+    "categoryId": "vietnamese",
+    "subCategoryId": "vietnamese-soup",
+    "price": 211500,
+    "listPrice": 0
+  },
+  {
+    "id": 24,
+    "name": "Trà Giảm Cân - Đốt Cháy Mỡ Thừa, Hỗ Trợ Giảm Cân An Toàn",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p24-shopee-01.webp",
+    "categoryId": "vietnamese",
+    "subCategoryId": "vietnamese-soup",
+    "price": 197400,
+    "listPrice": 0
+  },
+  {
+    "id": 25,
+    "name": "Trà hoa Atiso Đỏ - Mát Gan, Hỗ Trợ Tiêu Hóa, Đẹp Da",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p25-shopee-01.webp",
+    "categoryId": "vietnamese",
+    "subCategoryId": "vietnamese-dessert",
+    "price": 144000,
+    "listPrice": 0
+  },
+  {
+    "id": 26,
+    "name": "Trà hoa Cúc - Thanh Nhiệt, Giải Độc, Giúp Ngủ Ngon",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p26-shopee-01.webp",
+    "categoryId": "vietnamese",
+    "subCategoryId": "vietnamese-dessert",
+    "price": 210000,
+    "listPrice": 0
+  },
+  {
+    "id": 27,
+    "name": "Trà hoa Nhài - Thanh Nhiệt, Thư Giãn Đầu Óc",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p27-shopee-01.webp",
+    "categoryId": "vietnamese",
+    "subCategoryId": "vietnamese-dessert",
+    "price": 213400,
+    "listPrice": 0
+  },
+  {
+    "id": 28,
+    "name": "Trà hoa Hồng - Dưỡng Nhan, Đẹp Da, Giảm Căng Thẳng",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p28-shopee-01.webp",
+    "categoryId": "vietnamese",
+    "subCategoryId": "vietnamese-dessert",
+    "price": 172800,
+    "listPrice": 0
+  },
+  {
+    "id": 29,
+    "name": "Trà hoa Mẫu Đơn - Chống Lão Hóa, Đẹp Da, Thư Giãn",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p29-shopee-01.webp",
+    "categoryId": "vietnamese",
+    "subCategoryId": "vietnamese-dessert",
+    "price": 144000,
+    "listPrice": 0
+  },
+  {
+    "id": 30,
+    "name": "Trà hoa Đậu Biếc - Chống Lão Hóa, Đẹp Da, Sáng Mắt",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p30-shopee-01.webp",
+    "categoryId": "vietnamese",
+    "subCategoryId": "vietnamese-dessert",
+    "price": 180400,
+    "listPrice": 0
+  },
+  {
+    "id": 31,
+    "name": "Cặp Đai chườm đầu gối thảo dược - Giảm Đau Nhức, Hỗ Trợ Lưu Thông Khí Huyết",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/tra-thao-moc-sunbeleaf-dai-chuom-dau-goi-thao-duoc-300x300.jpg?v=20260619-1",
+    "categoryId": "vietnamese",
+    "subCategoryId": "vietnamese-snack",
+    "price": 420000,
+    "listPrice": 0
+  },
+  {
+    "id": 32,
+    "name": "Túi chườm mắt thảo dược - Giảm Nhức Mỏi Mắt, Hỗ Trợ Lưu Thông Khí Huyết",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p32-shopee-01.webp",
+    "categoryId": "vietnamese",
+    "subCategoryId": "vietnamese-snack",
+    "price": 220000,
+    "listPrice": 0
+  },
+  {
+    "id": 33,
+    "name": "Gối chườm thảo dược - Giảm Đau Nhức Vai Gáy, Lưu Thông Khí Huyết",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p33-shopee-01.webp",
+    "categoryId": "vietnamese",
+    "subCategoryId": "vietnamese-snack",
+    "price": 600000,
+    "listPrice": 0
+  },
+  {
+    "id": 34,
+    "name": "Hộp quà Trà Sức Khỏe - Hộp Quà Cao Cấp, Chăm Sóc Sức Khỏe",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-sunbeleaf-bo-qua-tra-suc-khoe.webp",
+    "categoryId": "vietnamese",
+    "subCategoryId": "vietnamese-vegetarian",
+    "price": 512000,
+    "listPrice": 0
+  },
+  {
+    "id": 35,
+    "name": "Bộ Quà Da Cao Cấp - Báu Vật Từ Thiên Nhiên - Hộp Quà Cao Cấp Thượng Hạng",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p35-shopee-01.webp",
+    "categoryId": "vietnamese",
+    "subCategoryId": "vietnamese-vegetarian",
+    "price": 0,
+    "listPrice": 0
+  },
+  {
+    "id": 36,
+    "name": "Lá Xông Giải Cảm Sunbeleaf - Thảo Dược Xông Hơi, Tắm Hoặc Xông Đều Được",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-la-xong-shopee-01.jpg",
+    "categoryId": "vietnamese",
+    "subCategoryId": "vietnamese-snack",
+    "price": 57500,
+    "listPrice": 0
+  }
+]

@@ -25,6 +25,14 @@ export default function ProductGrid({
   const { addToCart, openCheckoutSheet } = useCartStore();
 
   const handleQuickAddToCart = (product: Product) => {
+    const hasManagedStock =
+      product.stockEnabled !== false &&
+      product.stock !== null &&
+      typeof product.stock !== "undefined";
+    if (hasManagedStock && Number(product.stock) <= 0) {
+      return;
+    }
+
     const hasRequiredSelection = product.variantGroups.some(
       (group) =>
         group.isRequired &&

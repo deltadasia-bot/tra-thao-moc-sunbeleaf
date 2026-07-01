@@ -16,8 +16,8 @@
  *               ZALO_OA_APP_ID, ZALO_OA_APP_SECRET, ZALO_OWNER_USER_ID
  */
 
-const crypto = require("crypto");
 const nodemailer = require("nodemailer");
+const { callZaloOfficialAccountApi } = require("./zalo-oa");
 
 /* ─────────────── CẤU HÌNH ─────────────── */
 
@@ -25,49 +25,7 @@ const EMAIL_FROM   = process.env.NOTIFY_EMAIL_FROM;   // deltadasia@gmail.com
 const EMAIL_PASS   = process.env.NOTIFY_EMAIL_PASS;   // App Password Gmail (16 ký tự)
 const EMAIL_TO     = process.env.NOTIFY_EMAIL_TO || "deltadasia@gmail.com";
 
-const ZALO_OA_ACCESS_TOKEN  = process.env.ZALO_OA_ACCESS_TOKEN;
-const ZALO_OA_REFRESH_TOKEN = process.env.ZALO_OA_REFRESH_TOKEN;
-const ZALO_OA_APP_ID        = process.env.ZALO_OA_APP_ID;
-const ZALO_OA_APP_SECRET    = process.env.ZALO_OA_APP_SECRET;
 const ZALO_OWNER_USER_ID    = process.env.ZALO_OWNER_USER_ID; // Zalo User ID của chủ cửa hàng
-
-/* ─────────────── TOKEN ZALO OA ─────────────── */
-
-let cachedZaloToken = ZALO_OA_ACCESS_TOKEN;
-
-function buildZaloAppSecretProof(accessToken) {
-  if (!accessToken || !ZALO_OA_APP_SECRET) return null;
-  return crypto
-    .createHmac("sha256", ZALO_OA_APP_SECRET)
-    .update(accessToken)
-    .digest("hex");
-}
-
-/** Làm mới access token Zalo OA khi hết hạn (hết hạn sau 1 giờ). */
-async function refreshZaloToken() {
-  if (!ZALO_OA_REFRESH_TOKEN || !ZALO_OA_APP_ID || !ZALO_OA_APP_SECRET) return null;
-
-  try {
-    const res = await fetch("https://oauth.zaloapp.com/v4/oa/access_token", {
-      method:  "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded", "secret_key": ZALO_OA_APP_SECRET },
-      body: new URLSearchParams({
-        refresh_token: ZALO_OA_REFRESH_TOKEN,
-        app_id:        ZALO_OA_APP_ID,
-        grant_type:    "refresh_token",
-      }),
-    });
-    const json = await res.json();
-    if (json.access_token) {
-      cachedZaloToken = json.access_token;
-      console.log("[Zalo OA] ✅ Làm mới access token thành công");
-      return cachedZaloToken;
-    }
-  } catch (err) {
-    console.warn("[Zalo OA] Không thể làm mới token:", err.message);
-  }
-  return null;
-}
 
 /* ─────────────── ZALO OA MESSAGE ─────────────── */
 
@@ -75,38 +33,27 @@ async function refreshZaloToken() {
  * Gửi tin nhắn văn bản đến follower qua Zalo OA.
  * Yêu cầu: người nhận đã follow OA.
  */
-async function sendZaloMessage(text, retried = false) {
-  if (!ZALO_OWNER_USER_ID || !cachedZaloToken) {
-    if (!ZALO_OWNER_USER_ID) console.log("[Zalo OA] Chưa cấu hình ZALO_OWNER_USER_ID, bỏ qua.");
-    if (!cachedZaloToken)    console.log("[Zalo OA] Chưa cấu hình access token, bỏ qua.");
+async function sendZaloMessage(text) {
+  if (!ZALO_OWNER_USER_ID) {
+    console.log("[Zalo OA] Chưa cấu hình ZALO_OWNER_USER_ID, bỏ qua.");
     return;
   }
 
-  const res = await fetch("https://openapi.zalo.me/v3.0/oa/message/cs", {
-    method:  "POST",
-    headers: {
-      "Content-Type":  "application/json",
-      "access_token":  cachedZaloToken,
-      "appsecret_proof": buildZaloAppSecretProof(cachedZaloToken),
-    },
-    body: JSON.stringify({
-      recipient: { user_id: ZALO_OWNER_USER_ID },
-      message:   { text },
-    }),
-  });
-
-  const json = await res.json();
-
-  // Access token hết hạn → làm mới rồi thử lại 1 lần
-  if (json.error === -216 && !retried) {
-    const newToken = await refreshZaloToken();
-    if (newToken) return sendZaloMessage(text, true);
-  }
-
-  if (json.error !== 0) {
-    console.warn("[Zalo OA] Gửi tin nhắn thất bại:", json.message);
-  } else {
+  try {
+    const json = await callZaloOfficialAccountApi("https://openapi.zalo.me/v3.0/oa/message/cs", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        recipient: { user_id: ZALO_OWNER_USER_ID },
+        message: { text },
+      }),
+    });
     console.log("[Zalo OA] ✅ Đã gửi thông báo Zalo");
+    return json;
+  } catch (err) {
+    console.warn("[Zalo OA] Gửi tin nhắn thất bại:", err.message);
   }
 }
 
@@ -411,4 +358,34 @@ async function notifyAdminOtp(code, expiresMinutes) {
   ]);
 }
 
-module.exports = { notifyNewOrder, notifyPaymentConfirmed, notifyAdminOtp };
+async function notifyLowStock(product) {
+  const stock = Number(product.stock || 0);
+  const threshold = Number(product.lowStockThreshold || 0);
+  const subject = `Canh bao ton kho thap - ${product.name}`;
+  const text =
+    `CANH BAO TON KHO THAP - SUNBELEAF\n` +
+    `San pham: ${product.name}\n` +
+    `ID: ${product.id}\n` +
+    `Ton kho hien tai: ${stock}\n` +
+    `Nguong canh bao: ${threshold}\n` +
+    `Vui long kiem tra va bo sung hang neu can.`;
+
+  const html = `
+    <div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;padding:24px;border:1px solid #dfe8df;border-radius:16px">
+      <h2 style="margin:0 0 12px;color:#b45309">Canh bao ton kho thap</h2>
+      <p><strong>${product.name}</strong></p>
+      ${product.image ? `<img src="${product.image}" alt="" style="width:120px;height:120px;object-fit:cover;border-radius:12px;border:1px solid #e5e7eb">` : ""}
+      <table style="margin-top:16px;border-collapse:collapse;width:100%">
+        <tr><td style="padding:8px;color:#64748b">ID san pham</td><td style="padding:8px;text-align:right;font-weight:700">${product.id}</td></tr>
+        <tr><td style="padding:8px;color:#64748b">Ton kho hien tai</td><td style="padding:8px;text-align:right;font-weight:700;color:#b45309">${stock}</td></tr>
+        <tr><td style="padding:8px;color:#64748b">Nguong canh bao</td><td style="padding:8px;text-align:right;font-weight:700">${threshold}</td></tr>
+      </table>
+    </div>`;
+
+  await Promise.allSettled([
+    sendZaloMessage(text),
+    sendEmail(subject, html),
+  ]);
+}
+
+module.exports = { notifyNewOrder, notifyPaymentConfirmed, notifyAdminOtp, notifyLowStock };

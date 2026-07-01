@@ -10,6 +10,8 @@ const ORDERS_FILE = path.join(DATA_DIR, "orders.json");
 const VIEWS_FILE = path.join(DATA_DIR, "article_views.json");
 const ADMIN_AUTH_FILE = path.join(DATA_DIR, "admin_auth.json");
 const ADMIN_KPI_FILE = path.join(DATA_DIR, "admin_kpi.json");
+const INVENTORY_FILE = path.join(DATA_DIR, "inventory.json");
+const PRODUCT_OVERRIDES_FILE = path.join(DATA_DIR, "product_overrides.json");
 
 console.log(`[DB] Thư mục lưu đơn hàng: ${DATA_DIR}`);
 
@@ -114,6 +116,188 @@ function readAdminKpi() {
 function writeAdminKpi(kpi) {
   ensureStore();
   fs.writeFileSync(ADMIN_KPI_FILE, JSON.stringify(kpi, null, 2), "utf8");
+}
+
+function readInventory() {
+  ensureStore();
+  if (!fs.existsSync(INVENTORY_FILE)) {
+    fs.writeFileSync(INVENTORY_FILE, "{}", "utf8");
+  }
+  try {
+    const raw = fs.readFileSync(INVENTORY_FILE, "utf8");
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+  } catch (err) {
+    console.error("[DB] Khong doc duoc inventory.json:", err.message);
+    return {};
+  }
+}
+
+function writeInventory(inventory) {
+  ensureStore();
+  fs.writeFileSync(INVENTORY_FILE, JSON.stringify(inventory, null, 2), "utf8");
+}
+
+function readProductOverrides() {
+  ensureStore();
+  if (!fs.existsSync(PRODUCT_OVERRIDES_FILE)) {
+    fs.writeFileSync(PRODUCT_OVERRIDES_FILE, "{}", "utf8");
+  }
+  try {
+    const raw = fs.readFileSync(PRODUCT_OVERRIDES_FILE, "utf8");
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+  } catch (err) {
+    console.error("[DB] Khong doc duoc product_overrides.json:", err.message);
+    return {};
+  }
+}
+
+function writeProductOverrides(overrides) {
+  ensureStore();
+  fs.writeFileSync(PRODUCT_OVERRIDES_FILE, JSON.stringify(overrides, null, 2), "utf8");
+}
+
+function normalizeStringArray(value) {
+  if (Array.isArray(value)) {
+    return value.map((item) => String(item || "").trim()).filter(Boolean);
+  }
+  if (typeof value === "string") {
+    return value
+      .split(/\r?\n|,/)
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+  return undefined;
+}
+
+function normalizeNumberValue(value) {
+  if (value === "" || value === null || typeof value === "undefined") return undefined;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : undefined;
+}
+
+function normalizeDescriptionBlocks(value) {
+  if (!Array.isArray(value)) return undefined;
+  return value
+    .map((block) => {
+      if (!block || typeof block !== "object") return null;
+      const type = block.type === "image" ? "image" : "text";
+      if (type === "image") {
+        const url = String(block.url || "").trim();
+        if (!url) return null;
+        return {
+          id: String(block.id || `image-${Date.now()}`),
+          type,
+          url,
+          alt: String(block.alt || "").trim(),
+        };
+      }
+      const text = String(block.text || "").trim();
+      if (!text) return null;
+      const allowedStyles = new Set(["normal", "heading", "italic", "uppercase"]);
+      return {
+        id: String(block.id || `text-${Date.now()}`),
+        type,
+        text,
+        style: allowedStyles.has(block.style) ? block.style : "normal",
+      };
+    })
+    .filter(Boolean);
+}
+
+function normalizeVariantGroups(value) {
+  if (!Array.isArray(value)) return undefined;
+  return value
+    .map((group, groupIndex) => {
+      if (!group || typeof group !== "object") return null;
+      const options = Array.isArray(group.options)
+        ? group.options
+            .map((option, optionIndex) => {
+              if (!option || typeof option !== "object") return null;
+              const name = String(option.name || "").trim();
+              if (!name) return null;
+              const normalized = {
+                id: String(option.id || `option-${optionIndex + 1}`),
+                name,
+                extraPrice: normalizeNumberValue(option.extraPrice) || 0,
+              };
+              ["image", "sku"].forEach((key) => {
+                const text = String(option[key] || "").trim();
+                if (text) normalized[key] = text;
+              });
+              ["weightGram", "widthCm", "lengthCm", "heightCm", "stock"].forEach((key) => {
+                const number = normalizeNumberValue(option[key]);
+                if (typeof number !== "undefined") normalized[key] = number;
+              });
+              return normalized;
+            })
+            .filter(Boolean)
+        : [];
+      return {
+        id: String(group.id || `variant-${groupIndex + 1}`),
+        title: String(group.title || "Phan loai").trim(),
+        description: String(group.description || "").trim(),
+        type: ["SINGLE", "MULTIPLE", "ADJUSTMENT", "QUANTITY"].includes(group.type)
+          ? group.type
+          : "SINGLE",
+        isRequired: group.isRequired !== false,
+        options,
+      };
+    })
+    .filter(Boolean);
+}
+
+function normalizeProductOverride(productId, entry = {}) {
+  const allowed = {};
+  ["name", "description", "image", "video", "videoPoster", "sku"].forEach((key) => {
+    if (typeof entry[key] === "string") {
+      const value = entry[key].trim();
+      if (value) allowed[key] = value;
+    }
+  });
+
+  ["price", "listPrice", "weightGram", "widthCm", "lengthCm", "heightCm"].forEach((key) => {
+    const number = normalizeNumberValue(entry[key]);
+    if (typeof number !== "undefined") allowed[key] = number;
+  });
+
+  const images = normalizeStringArray(entry.images);
+  if (images) allowed.images = images;
+
+  const descriptionImages = normalizeStringArray(entry.descriptionImages);
+  if (descriptionImages) allowed.descriptionImages = descriptionImages;
+
+  const descriptionBlocks = normalizeDescriptionBlocks(entry.descriptionBlocks);
+  if (descriptionBlocks) allowed.descriptionBlocks = descriptionBlocks;
+
+  const variantGroups = normalizeVariantGroups(entry.variantGroups);
+  if (variantGroups) allowed.variantGroups = variantGroups;
+
+  return {
+    productId: String(productId),
+    ...allowed,
+    updatedAt: entry.updatedAt || null,
+  };
+}
+
+function normalizeStockEntry(productId, entry = {}) {
+  const stockValue = Number(entry.stock);
+  const hasStock = Number.isFinite(stockValue);
+  return {
+    productId: String(productId),
+    stock: hasStock ? Math.max(0, Math.floor(stockValue)) : null,
+    enabled: entry.enabled !== false,
+    visible: entry.visible !== false,
+    lowStockThreshold: Number.isFinite(Number(entry.lowStockThreshold))
+      ? Math.max(0, Math.floor(Number(entry.lowStockThreshold)))
+      : 5,
+    lowStockAlertedAt: entry.lowStockAlertedAt || null,
+    lowStockAlertedStock: Number.isFinite(Number(entry.lowStockAlertedStock))
+      ? Math.max(0, Math.floor(Number(entry.lowStockAlertedStock)))
+      : null,
+    updatedAt: entry.updatedAt || null,
+  };
 }
 
 function normalizeKpiMonths(months) {
@@ -416,5 +600,143 @@ module.exports = {
     kpis[String(year)] = normalizeKpiMonths(months);
     writeAdminKpi(kpis);
     return this.getAdminKpi(year);
+  },
+
+  getInventory() {
+    const inventory = readInventory();
+    return Object.fromEntries(
+      Object.entries(inventory).map(([productId, entry]) => [
+        String(productId),
+        normalizeStockEntry(productId, entry),
+      ]),
+    );
+  },
+
+  getInventoryEntry(productId) {
+    const inventory = this.getInventory();
+    return inventory[String(productId)] || normalizeStockEntry(productId, {});
+  },
+
+  getProductOverrides() {
+    const overrides = readProductOverrides();
+    return Object.fromEntries(
+      Object.entries(overrides).map(([productId, entry]) => [
+        String(productId),
+        normalizeProductOverride(productId, entry),
+      ]),
+    );
+  },
+
+  getProductOverride(productId) {
+    const overrides = this.getProductOverrides();
+    return overrides[String(productId)] || normalizeProductOverride(productId, {});
+  },
+
+  setProductOverride(productId, patch) {
+    const normalizedProductId = String(productId || "").trim();
+    if (!normalizedProductId) return null;
+
+    const overrides = readProductOverrides();
+    const current = normalizeProductOverride(normalizedProductId, overrides[normalizedProductId]);
+    const next = normalizeProductOverride(normalizedProductId, {
+      ...current,
+      ...patch,
+      updatedAt: new Date().toISOString(),
+    });
+
+    const hasEditableData = ["name", "description", "image", "video", "videoPoster", "images", "descriptionImages"]
+      .some((key) => typeof next[key] !== "undefined");
+
+    if (hasEditableData) {
+      overrides[normalizedProductId] = next;
+    } else {
+      delete overrides[normalizedProductId];
+    }
+    writeProductOverrides(overrides);
+    return overrides[normalizedProductId] || normalizeProductOverride(normalizedProductId, {});
+  },
+
+  setInventoryEntry(productId, patch) {
+    const normalizedProductId = String(productId || "").trim();
+    if (!normalizedProductId) return null;
+
+    const inventory = readInventory();
+    const current = normalizeStockEntry(normalizedProductId, inventory[normalizedProductId]);
+    const next = normalizeStockEntry(normalizedProductId, {
+      ...current,
+      ...patch,
+      updatedAt: new Date().toISOString(),
+    });
+
+    inventory[normalizedProductId] = next;
+    writeInventory(inventory);
+    return next;
+  },
+
+  setInventoryBulk(entries = []) {
+    const inventory = readInventory();
+    const updated = [];
+
+    entries.forEach((entry) => {
+      const productId = String(entry?.productId || "").trim();
+      if (!productId) return;
+      const current = normalizeStockEntry(productId, inventory[productId]);
+      const next = normalizeStockEntry(productId, {
+        ...current,
+        ...entry,
+        updatedAt: new Date().toISOString(),
+      });
+      inventory[productId] = next;
+      updated.push(next);
+    });
+
+    writeInventory(inventory);
+    return updated;
+  },
+
+  markLowStockAlert(productId, stock) {
+    const normalizedProductId = String(productId || "").trim();
+    if (!normalizedProductId) return null;
+
+    const inventory = readInventory();
+    const current = normalizeStockEntry(normalizedProductId, inventory[normalizedProductId]);
+    const next = normalizeStockEntry(normalizedProductId, {
+      ...current,
+      lowStockAlertedAt: new Date().toISOString(),
+      lowStockAlertedStock: stock,
+      updatedAt: current.updatedAt || new Date().toISOString(),
+    });
+    inventory[normalizedProductId] = next;
+    writeInventory(inventory);
+    return next;
+  },
+
+  decreaseInventoryForOrder(items = []) {
+    const inventory = readInventory();
+    let changed = false;
+
+    (Array.isArray(items) ? items : []).forEach((item) => {
+      const productId = String(item?.productId || "").trim();
+      if (!productId || !inventory[productId]) return;
+
+      const current = normalizeStockEntry(productId, inventory[productId]);
+      if (current.stock === null || current.enabled === false) return;
+
+      const quantity = Math.max(0, Math.floor(Number(item.quantity || 0)));
+      if (!quantity) return;
+
+      inventory[productId] = {
+        ...current,
+        stock: Math.max(0, current.stock - quantity),
+        updatedAt: new Date().toISOString(),
+      };
+      changed = true;
+    });
+
+    if (changed) {
+      writeInventory(inventory);
+    }
+
+    return changed ? this.getInventory() : null;
   },
 };

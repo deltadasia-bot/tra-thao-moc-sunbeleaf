@@ -11,6 +11,7 @@ const newsRouter    = require("./routes/news");
 const avatarRouter  = require("./routes/avatar");
 const zaloOaRouter  = require("./routes/zalo-oa");
 const nhanhRouter   = require("./routes/nhanh");
+const inventoryRouter = require("./routes/inventory");
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -59,6 +60,7 @@ app.use("/api/news",    newsRouter);
 app.use("/api/avatar",  avatarRouter);
 app.use("/api/zalo-oa", zaloOaRouter);
 app.use("/api/nhanh",   nhanhRouter);
+app.use("/api/inventory", inventoryRouter);
 const adminDashboardPath = path.join(__dirname, "admin-dist");
 app.use("/admin", express.static(adminDashboardPath));
 app.get("/admin/*", (_req, res) => {

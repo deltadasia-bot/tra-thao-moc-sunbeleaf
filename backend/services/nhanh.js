@@ -130,11 +130,15 @@ function resolveNhanhProductId(item, productMap) {
     ? item.options.map((option) => option.value || option.name).filter(Boolean)
     : [];
 
+  const cleanName = String(item.name || "").replace(/^\d+\s+/, "").trim();
+
   const candidates = [
     String(productId || ""),
     String(item.name || ""),
+    cleanName,
     ...optionValues.map((value) => `${productId}:${value}`),
     ...optionValues.map((value) => `${item.name}:${value}`),
+    ...optionValues.map((value) => `${cleanName}:${value}`),
   ];
 
   for (const candidate of candidates) {
@@ -151,6 +155,7 @@ function resolveNhanhProductId(item, productMap) {
 
   return null;
 }
+
 
 function buildProductPayload(order, config) {
   const sourceItems = Array.isArray(order.items) ? order.items : [];

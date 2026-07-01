@@ -43,6 +43,15 @@ function formatCurrency(value) {
   return new Intl.NumberFormat("vi-VN").format(Number(value || 0));
 }
 
+function normalizeSearchText(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
+    .toLowerCase();
+}
+
 function formatShortCurrency(value) {
   const amount = Number(value || 0);
   if (Math.abs(amount) >= 1000000000) return `${(amount / 1000000000).toFixed(1)} tỷ`;
@@ -662,6 +671,697 @@ function SapoSyncBadge({ order, compact = false }) {
   );
 }
 
+function InventoryDashboard({
+  products,
+  loading,
+  search,
+  onSearchChange,
+  onSave,
+  onBulkSave,
+  onProductSave,
+  onProductMediaUpload,
+  savingId,
+  bulkSaving,
+  }) {
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [bulkDraft, setBulkDraft] = useState({
+    stock: "",
+    lowStockThreshold: "",
+    enabled: "keep",
+    visible: "keep",
+  });
+  const [editingProduct, setEditingProduct] = useState(null);
+
+  const filteredProducts = products.filter((product) => {
+    const keyword = normalizeSearchText(search.trim());
+    if (!keyword) return true;
+    return normalizeSearchText(`${product.id} ${product.name}`).includes(keyword);
+  });
+
+  const managedCount = products.filter((product) => product.stock !== null).length;
+  const outOfStockCount = products.filter(
+    (product) => product.enabled !== false && product.stock !== null && Number(product.stock || 0) <= 0,
+  ).length;
+  const lowStockCount = products.filter(
+    (product) =>
+      product.enabled !== false &&
+      product.stock !== null &&
+      Number(product.stock || 0) > 0 &&
+      Number(product.stock || 0) <= Number(product.lowStockThreshold || 5),
+    ).length;
+
+  const visibleSelectedIds = filteredProducts.map((product) => String(product.id));
+  const allVisibleSelected =
+    visibleSelectedIds.length > 0 &&
+    visibleSelectedIds.every((id) => selectedIds.includes(id));
+
+  function toggleProduct(productId) {
+    const id = String(productId);
+    setSelectedIds((current) =>
+      current.includes(id) ? current.filter((item) => item !== id) : [...current, id],
+    );
+  }
+
+  function toggleAllVisible() {
+    setSelectedIds((current) => {
+      if (allVisibleSelected) {
+        return current.filter((id) => !visibleSelectedIds.includes(id));
+      }
+      return Array.from(new Set([...current, ...visibleSelectedIds]));
+    });
+  }
+
+  async function submitBulkUpdate() {
+    const selectedProducts = products.filter((product) =>
+      selectedIds.includes(String(product.id)),
+    );
+    if (!selectedProducts.length) return;
+
+    const entries = selectedProducts.map((product) => ({
+      productId: product.id,
+      stock: bulkDraft.stock === "" ? product.stock : Number(bulkDraft.stock),
+      lowStockThreshold:
+        bulkDraft.lowStockThreshold === ""
+          ? product.lowStockThreshold
+          : Number(bulkDraft.lowStockThreshold),
+      enabled: bulkDraft.enabled === "keep" ? product.enabled !== false : bulkDraft.enabled === "true",
+      visible: bulkDraft.visible === "keep" ? product.visible !== false : bulkDraft.visible === "true",
+    }));
+
+    await onBulkSave(entries);
+    setSelectedIds([]);
+  }
+
+  return (
+    <section className="inventory-dashboard">
+      <div className="inventory-hero">
+        <div>
+          <p className="eyebrow">Kho hàng</p>
+          <h2>Quản lý tồn kho sản phẩm</h2>
+          <span>
+            Khi lưu số tồn ở đây, mini app sẽ tự đọc tồn kho mới và ẩn thao tác mua nếu sản phẩm hết hàng.
+          </span>
+        </div>
+        <div className="inventory-summary">
+          <div>
+            <strong>{products.length}</strong>
+            <span>Sản phẩm</span>
+          </div>
+          <div>
+            <strong>{managedCount}</strong>
+            <span>Đang quản lý</span>
+          </div>
+          <div>
+            <strong>{lowStockCount}</strong>
+            <span>Sắp hết</span>
+          </div>
+          <div>
+            <strong>{outOfStockCount}</strong>
+            <span>Hết hàng</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="inventory-toolbar">
+        <label>
+          Tìm sản phẩm
+          <input
+            value={search}
+            onChange={(event) => onSearchChange(event.target.value)}
+            placeholder="Nhập tên sản phẩm hoặc ID"
+          />
+        </label>
+        <div className="inventory-note">
+          Để trống ô tồn kho nếu chưa muốn quản lý tồn của sản phẩm đó.
+        </div>
+      </div>
+
+      <div className="inventory-bulk-panel">
+        <div>
+          <strong>Cập nhật hàng loạt</strong>
+          <span>{selectedIds.length} sản phẩm đang được chọn</span>
+        </div>
+        <input
+          type="number"
+          min="0"
+          value={bulkDraft.stock}
+          onChange={(event) => setBulkDraft((current) => ({ ...current, stock: event.target.value.replace(/[^\d]/g, "") }))}
+          placeholder="Tồn kho mới"
+        />
+        <input
+          type="number"
+          min="0"
+          value={bulkDraft.lowStockThreshold}
+          onChange={(event) => setBulkDraft((current) => ({ ...current, lowStockThreshold: event.target.value.replace(/[^\d]/g, "") }))}
+          placeholder="Ngưỡng cảnh báo"
+        />
+        <select
+          value={bulkDraft.enabled}
+          onChange={(event) => setBulkDraft((current) => ({ ...current, enabled: event.target.value }))}
+        >
+          <option value="keep">Giữ bật quản lý</option>
+          <option value="true">Bật quản lý tồn</option>
+          <option value="false">Tắt quản lý tồn</option>
+        </select>
+        <select
+          value={bulkDraft.visible}
+          onChange={(event) => setBulkDraft((current) => ({ ...current, visible: event.target.value }))}
+        >
+          <option value="keep">Giữ hiển thị</option>
+          <option value="true">Hiển thị trên app</option>
+          <option value="false">Ẩn khỏi app</option>
+        </select>
+        <button
+          type="button"
+          disabled={!selectedIds.length || bulkSaving}
+          onClick={submitBulkUpdate}
+        >
+          {bulkSaving ? "Đang lưu..." : "Lưu hàng loạt"}
+        </button>
+      </div>
+
+      <div className="inventory-table-card">
+        <div className="inventory-table-head">
+          <label className="inventory-check-cell">
+            <input
+              type="checkbox"
+              checked={allVisibleSelected}
+              onChange={toggleAllVisible}
+            />
+          </label>
+          <span>Sản phẩm</span>
+          <span>Giá</span>
+          <span>Tồn kho</span>
+          <span>Ngưỡng cảnh báo</span>
+          <span>Trạng thái</span>
+          <span />
+          <span />
+        </div>
+        <div className="inventory-list">
+          {loading ? (
+            <div className="empty-box">Đang tải tồn kho...</div>
+          ) : filteredProducts.length ? (
+            filteredProducts.map((product) => {
+              const stock = product.stock ?? "";
+              const isManaged = product.stock !== null;
+              const isOut = product.enabled !== false && isManaged && Number(product.stock || 0) <= 0;
+              const isLow =
+                product.enabled !== false &&
+                isManaged &&
+                Number(product.stock || 0) > 0 &&
+                Number(product.stock || 0) <= Number(product.lowStockThreshold || 5);
+
+              return (
+                <InventoryRow
+                  key={product.id}
+                  product={product}
+                  stock={stock}
+                  isOut={isOut}
+                  isLow={isLow}
+                  selected={selectedIds.includes(String(product.id))}
+                  onToggle={() => toggleProduct(product.id)}
+                  onEdit={() => setEditingProduct(product)}
+                  saving={savingId === String(product.id)}
+                  onSave={onSave}
+                />
+              );
+            })
+          ) : (
+            <div className="empty-box">Không tìm thấy sản phẩm phù hợp.</div>
+          )}
+        </div>
+      </div>
+      {editingProduct ? (
+        <ProductEditModal
+          product={editingProduct}
+          onClose={() => setEditingProduct(null)}
+          onUpload={onProductMediaUpload}
+          onSave={async (patch) => {
+            const saved = await onProductSave(editingProduct.id, patch);
+            setEditingProduct(null);
+            return saved;
+          }}
+        />
+      ) : null}
+    </section>
+  );
+}
+
+function InventoryRow({ product, stock, isOut, isLow, selected, onToggle, onEdit, saving, onSave }) {
+  const [draft, setDraft] = useState({
+    stock: stock === "" ? "" : String(stock),
+    lowStockThreshold: String(product.lowStockThreshold ?? 5),
+    enabled: product.enabled !== false,
+    visible: product.visible !== false,
+  });
+
+  useEffect(() => {
+    setDraft({
+      stock: product.stock === null ? "" : String(product.stock ?? ""),
+      lowStockThreshold: String(product.lowStockThreshold ?? 5),
+      enabled: product.enabled !== false,
+      visible: product.visible !== false,
+    });
+  }, [product.id, product.stock, product.lowStockThreshold, product.enabled, product.visible]);
+
+  return (
+    <div className="inventory-row">
+      <label className="inventory-check-cell">
+        <input type="checkbox" checked={selected} onChange={onToggle} />
+      </label>
+      <div className="inventory-product">
+        <img src={product.image} alt={product.name} />
+        <div>
+          <strong>{product.name}</strong>
+          <span>ID #{product.id}</span>
+        </div>
+      </div>
+      <div className="inventory-price">
+        <strong>{formatCurrency(product.price)}đ</strong>
+        {product.listPrice && product.listPrice !== product.price ? (
+          <span>{formatCurrency(product.listPrice)}đ</span>
+        ) : null}
+      </div>
+      <input
+        type="number"
+        min="0"
+        value={draft.stock}
+        onChange={(event) =>
+          setDraft((current) => ({
+            ...current,
+            stock: event.target.value.replace(/[^\d]/g, ""),
+          }))
+        }
+        placeholder="Không quản lý"
+      />
+      <input
+        type="number"
+        min="0"
+        value={draft.lowStockThreshold}
+        onChange={(event) =>
+          setDraft((current) => ({
+            ...current,
+            lowStockThreshold: event.target.value.replace(/[^\d]/g, ""),
+          }))
+        }
+        placeholder="5"
+      />
+      <div className="inventory-status-cell">
+        <label className="inventory-toggle">
+          <input
+            type="checkbox"
+            checked={draft.enabled}
+            onChange={(event) =>
+              setDraft((current) => ({ ...current, enabled: event.target.checked }))
+            }
+          />
+          Bật quản lý
+        </label>
+        <label className="inventory-toggle">
+          <input
+            type="checkbox"
+            checked={draft.visible !== false}
+            onChange={(event) =>
+              setDraft((current) => ({ ...current, visible: event.target.checked }))
+            }
+          />
+          Hiển thị
+        </label>
+        <span className={`stock-chip ${isOut ? "out" : isLow ? "low" : "ok"}`}>
+          {product.visible === false
+            ? "Đang ẩn"
+            : product.stock === null
+            ? "Chưa quản lý"
+            : isOut
+              ? "Hết hàng"
+              : isLow
+                ? "Sắp hết"
+                : "Còn hàng"}
+        </span>
+      </div>
+      <button
+        type="button"
+        className="inventory-save-button"
+        disabled={saving}
+        onClick={() =>
+          onSave(product.id, {
+            stock: draft.stock === "" ? null : Number(draft.stock),
+            enabled: draft.enabled,
+            visible: draft.visible !== false,
+            lowStockThreshold: Number(draft.lowStockThreshold || 5),
+          })
+        }
+      >
+        {saving ? "Đang lưu..." : "Lưu"}
+      </button>
+      <button
+        type="button"
+        className="inventory-edit-button"
+        onClick={onEdit}
+      >
+        Sửa
+      </button>
+    </div>
+  );
+}
+
+function asArray(value) {
+  return Array.isArray(value) ? value.filter(Boolean) : [];
+}
+
+function makeDraftId(prefix) {
+  return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function normalizeVariantGroupsForEdit(product) {
+  const groups = asArray(product.variantGroups);
+  return groups.map((group, groupIndex) => ({
+    id: group.id || `variant-${groupIndex + 1}`,
+    title: group.title || "Phân loại",
+    description: group.description || "",
+    type: group.type || "SINGLE",
+    isRequired: group.isRequired !== false,
+    options: asArray(group.options).map((option, optionIndex) => ({
+      id: option.id || `option-${optionIndex + 1}`,
+      name: option.name || "",
+      extraPrice: Number(option.extraPrice || 0),
+      image: option.image || "",
+      sku: option.sku || "",
+      weightGram: option.weightGram ?? "",
+      widthCm: option.widthCm ?? "",
+      lengthCm: option.lengthCm ?? "",
+      heightCm: option.heightCm ?? "",
+      stock: option.stock ?? "",
+    })),
+  }));
+}
+
+function ProductEditModal({ product, onClose, onSave, onUpload }) {
+  const override = product.productOverride || {};
+  const initialImages = asArray(override.images || product.images).slice(0, 9);
+  const initialDescriptionBlocks = asArray(override.descriptionBlocks || product.descriptionBlocks);
+  const fallbackDescriptionBlocks = [
+    ...(product.description ? [{
+      id: "default-description",
+      type: "text",
+      style: "normal",
+      text: product.description,
+    }] : []),
+    ...asArray(product.descriptionImages).map((url, index) => ({
+      id: `default-image-${index}`,
+      type: "image",
+      url,
+      alt: product.name,
+    })),
+  ];
+  const [draft, setDraft] = useState({
+    name: override.name || product.name || "",
+    description: override.description || product.description || "",
+    price: String(override.price ?? product.price ?? 0),
+    listPrice: String(override.listPrice ?? product.listPrice ?? ""),
+    sku: override.sku || product.sku || "",
+    video: override.video || product.video || "",
+    videoPoster: override.videoPoster || product.videoPoster || product.image || "",
+    image: override.image || product.image || "",
+    images: initialImages,
+    descriptionBlocks: initialDescriptionBlocks.length ? initialDescriptionBlocks : fallbackDescriptionBlocks,
+    variantGroups: normalizeVariantGroupsForEdit({ ...product, ...override }),
+    weightGram: String(override.weightGram ?? product.weightGram ?? ""),
+    widthCm: String(override.widthCm ?? product.widthCm ?? ""),
+    lengthCm: String(override.lengthCm ?? product.lengthCm ?? ""),
+    heightCm: String(override.heightCm ?? product.heightCm ?? ""),
+  });
+  const [activeTab, setActiveTab] = useState("basic");
+  const [uploadingSlot, setUploadingSlot] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const setField = (field, value) => {
+    setDraft((current) => ({ ...current, [field]: value }));
+  };
+
+  async function uploadFile(file, onDone, slotKey) {
+    if (!file) return;
+    setUploadingSlot(slotKey);
+    try {
+      const url = await onUpload(file);
+      onDone(url);
+    } catch (error) {
+      alert(error.message || "Upload file thất bại");
+    } finally {
+      setUploadingSlot("");
+    }
+  }
+
+  async function submit(event) {
+    event.preventDefault();
+    setSaving(true);
+    try {
+      await onSave({
+        name: draft.name,
+        description: draft.description,
+        price: Number(draft.price || 0),
+        listPrice: draft.listPrice === "" ? undefined : Number(draft.listPrice || 0),
+        sku: draft.sku,
+        video: draft.video,
+        videoPoster: draft.videoPoster,
+        image: draft.image,
+        images: draft.images.filter(Boolean).slice(0, 9),
+        descriptionBlocks: draft.descriptionBlocks,
+        variantGroups: draft.variantGroups,
+        weightGram: draft.weightGram === "" ? undefined : Number(draft.weightGram),
+        widthCm: draft.widthCm === "" ? undefined : Number(draft.widthCm),
+        lengthCm: draft.lengthCm === "" ? undefined : Number(draft.lengthCm),
+        heightCm: draft.heightCm === "" ? undefined : Number(draft.heightCm),
+      });
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const previewImage = draft.image || draft.images.find(Boolean) || product.image;
+  const firstVariantGroup = draft.variantGroups[0];
+
+  return (
+    <div className="product-edit-backdrop">
+      <form className="product-edit-modal product-edit-page" onSubmit={submit}>
+        <div className="product-edit-topbar">
+          <div>
+            <span>SUNBELEAF PRODUCT CENTER</span>
+            <h2>Chỉnh sửa sản phẩm</h2>
+            <p>ID #{product.id}. Dữ liệu sau khi lưu sẽ đồng bộ về mini app qua backend.</p>
+          </div>
+          <button type="button" className="ghost-button" onClick={onClose}>
+            Đóng
+          </button>
+        </div>
+        <div className="product-edit-tabs">
+          {[
+            ["basic", "Thông tin cơ bản"],
+            ["description", "Mô tả"],
+            ["sales", "Thông tin bán hàng"],
+            ["shipping", "Vận chuyển"],
+          ].map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              className={activeTab === value ? "active" : ""}
+              onClick={() => setActiveTab(value)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        {activeTab === "basic" ? (
+          <section className="edit-section">
+            <h3>Hình ảnh sản phẩm</h3>
+            <div className="media-grid">
+              {[
+                { key: "video", label: "Video sản phẩm", value: draft.video, type: "video" },
+                { key: "image", label: "Thumbnail", value: draft.image, type: "image" },
+                ...Array.from({ length: 9 }, (_, index) => ({
+                  key: `image-${index}`,
+                  label: `Ảnh ${index + 1}`,
+                  value: draft.images[index] || "",
+                  type: "image",
+                  index,
+                })),
+              ].map((slot) => (
+                <div className="media-slot" key={slot.key}>
+                  <div className="media-preview">
+                    {slot.value ? (
+                      slot.type === "video" ? (
+                        <video src={slot.value} muted playsInline />
+                      ) : (
+                        <img src={slot.value} alt={slot.label} />
+                      )
+                    ) : (
+                      <span>+</span>
+                    )}
+                  </div>
+                  <strong>{slot.label}</strong>
+                  <label className="upload-button">
+                    {uploadingSlot === slot.key ? "Đang tải..." : "Tải lên"}
+                    <input
+                      type="file"
+                      accept={slot.type === "video" ? "video/mp4,video/webm" : "image/png,image/jpeg,image/webp,image/gif"}
+                      onChange={(event) =>
+                        uploadFile(
+                          event.target.files?.[0],
+                          (url) => {
+                            if (slot.key === "video") setField("video", url);
+                            else if (slot.key === "image") setField("image", url);
+                            else {
+                              const next = [...draft.images];
+                              next[slot.index] = url;
+                              setField("images", next.slice(0, 9));
+                            }
+                          },
+                          slot.key,
+                        )
+                      }
+                    />
+                  </label>
+                  <input
+                    value={slot.value}
+                    onChange={(event) => {
+                      if (slot.key === "video") setField("video", event.target.value);
+                      else if (slot.key === "image") setField("image", event.target.value);
+                      else {
+                        const next = [...draft.images];
+                        next[slot.index] = event.target.value;
+                        setField("images", next.slice(0, 9));
+                      }
+                    }}
+                    placeholder="Dán URL online"
+                  />
+                </div>
+              ))}
+            </div>
+            <label>Tên sản phẩm<input value={draft.name} onChange={(event) => setField("name", event.target.value)} /></label>
+            <label>Mô tả ngắn<textarea value={draft.description} onChange={(event) => setField("description", event.target.value)} /></label>
+            <label>SKU sản phẩm<input value={draft.sku} onChange={(event) => setField("sku", event.target.value)} /></label>
+          </section>
+        ) : null}
+
+        {activeTab === "description" ? (
+          <section className="edit-section">
+            <div className="description-toolbar">
+              <button type="button" onClick={() => setField("descriptionBlocks", [...draft.descriptionBlocks, { id: makeDraftId("text"), type: "text", style: "normal", text: "" }])}>+ Thêm text</button>
+              <label className="upload-button">+ Thêm ảnh/GIF<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={(event) => uploadFile(event.target.files?.[0], (url) => setField("descriptionBlocks", [...draft.descriptionBlocks, { id: makeDraftId("image"), type: "image", url, alt: draft.name }]), "description-image")} /></label>
+            </div>
+            <div className="description-builder">
+              {draft.descriptionBlocks.map((block, index) => (
+                <div className="description-block" key={block.id}>
+                  <div className="block-actions">
+                    <span>#{index + 1}</span>
+                    {block.type === "text" ? (
+                      <select value={block.style || "normal"} onChange={(event) => setField("descriptionBlocks", draft.descriptionBlocks.map((item) => item.id === block.id ? { ...item, style: event.target.value } : item))}>
+                        <option value="normal">Đoạn thường</option>
+                        <option value="heading">Heading</option>
+                        <option value="italic">In nghiêng</option>
+                        <option value="uppercase">IN HOA</option>
+                      </select>
+                    ) : null}
+                    <button type="button" onClick={() => {
+                      const next = [...draft.descriptionBlocks];
+                      if (index > 0) [next[index - 1], next[index]] = [next[index], next[index - 1]];
+                      setField("descriptionBlocks", next);
+                    }}>↑</button>
+                    <button type="button" onClick={() => {
+                      const next = [...draft.descriptionBlocks];
+                      if (index < next.length - 1) [next[index], next[index + 1]] = [next[index + 1], next[index]];
+                      setField("descriptionBlocks", next);
+                    }}>↓</button>
+                    <button type="button" onClick={() => setField("descriptionBlocks", draft.descriptionBlocks.filter((item) => item.id !== block.id))}>Xóa</button>
+                  </div>
+                  {block.type === "image" ? (
+                    <div className="description-image-row">
+                      <img src={block.url} alt={block.alt || ""} />
+                      <input value={block.url || ""} onChange={(event) => setField("descriptionBlocks", draft.descriptionBlocks.map((item) => item.id === block.id ? { ...item, url: event.target.value } : item))} />
+                    </div>
+                  ) : (
+                    <textarea value={block.text || ""} onChange={(event) => setField("descriptionBlocks", draft.descriptionBlocks.map((item) => item.id === block.id ? { ...item, text: event.target.value } : item))} placeholder="Nhập mô tả..." />
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {activeTab === "sales" ? (
+          <section className="edit-section">
+            <div className="edit-grid-2">
+              <label>Giá bán<input type="number" min="0" value={draft.price} onChange={(event) => setField("price", event.target.value)} /></label>
+              <label>Giá gốc/giá gạch<input type="number" min="0" value={draft.listPrice} onChange={(event) => setField("listPrice", event.target.value)} /></label>
+            </div>
+            <h3>Phân loại sản phẩm</h3>
+            {draft.variantGroups.length ? draft.variantGroups.map((group) => (
+              <div className="variant-group-card" key={group.id}>
+                <strong>{group.title}</strong>
+                {group.options.map((option) => (
+                  <div className="variant-option-row" key={option.id}>
+                    <input value={option.name} onChange={(event) => setField("variantGroups", draft.variantGroups.map((item) => item.id === group.id ? { ...item, options: item.options.map((child) => child.id === option.id ? { ...child, name: event.target.value } : child) } : item))} placeholder="Tên phân loại" />
+                    <input type="number" value={option.extraPrice} onChange={(event) => setField("variantGroups", draft.variantGroups.map((item) => item.id === group.id ? { ...item, options: item.options.map((child) => child.id === option.id ? { ...child, extraPrice: Number(event.target.value || 0) } : child) } : item))} placeholder="Cộng giá" />
+                    <input value={option.sku || ""} onChange={(event) => setField("variantGroups", draft.variantGroups.map((item) => item.id === group.id ? { ...item, options: item.options.map((child) => child.id === option.id ? { ...child, sku: event.target.value } : child) } : item))} placeholder="SKU phân loại" />
+                    <label className="upload-button">Ảnh<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={(event) => uploadFile(event.target.files?.[0], (url) => setField("variantGroups", draft.variantGroups.map((item) => item.id === group.id ? { ...item, options: item.options.map((child) => child.id === option.id ? { ...child, image: url } : child) } : item)), `${group.id}-${option.id}`)} /></label>
+                    {option.image ? <img src={option.image} alt={option.name} /> : null}
+                  </div>
+                ))}
+              </div>
+            )) : <div className="empty-box">Sản phẩm này chưa có phân loại.</div>}
+          </section>
+        ) : null}
+
+        {activeTab === "shipping" ? (
+          <section className="edit-section edit-grid-2">
+            <label>Cân nặng sau đóng gói (gram)<input type="number" min="0" value={draft.weightGram} onChange={(event) => setField("weightGram", event.target.value)} /></label>
+            <label>Dài (cm)<input type="number" min="0" value={draft.lengthCm} onChange={(event) => setField("lengthCm", event.target.value)} /></label>
+            <label>Rộng (cm)<input type="number" min="0" value={draft.widthCm} onChange={(event) => setField("widthCm", event.target.value)} /></label>
+            <label>Cao (cm)<input type="number" min="0" value={draft.heightCm} onChange={(event) => setField("heightCm", event.target.value)} /></label>
+          </section>
+        ) : null}
+        <aside className="product-preview-panel">
+          <div className="preview-label">Xem trước</div>
+          <div className="phone-preview">
+            <div className="preview-media">
+              {draft.video ? (
+                <video src={draft.video} poster={draft.videoPoster || previewImage} muted playsInline />
+              ) : previewImage ? (
+                <img src={previewImage} alt={draft.name} />
+              ) : (
+                <span>Ảnh sản phẩm</span>
+              )}
+            </div>
+            <div className="preview-body">
+              <div className="preview-price">
+                <strong>{formatCurrency(draft.price)}đ</strong>
+                {draft.listPrice ? <span>{formatCurrency(draft.listPrice)}đ</span> : null}
+              </div>
+              <strong>{draft.name || "Tên sản phẩm"}</strong>
+              <p>{draft.description || "Mô tả ngắn sẽ hiển thị tại đây."}</p>
+              {firstVariantGroup ? (
+                <div className="preview-variants">
+                  <small>{firstVariantGroup.title}</small>
+                  <div>
+                    {firstVariantGroup.options.slice(0, 3).map((option) => (
+                      <span key={option.id}>{option.name || "Phân loại"}</span>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+              {draft.sku ? <p>SKU: {draft.sku}</p> : null}
+            </div>
+          </div>
+        </aside>
+        <div className="product-edit-actions">
+          <button type="button" className="ghost-button" onClick={onClose}>Hủy</button>
+          <button type="submit" disabled={saving}>{saving ? "Đang lưu..." : "Lưu sản phẩm"}</button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
 export default function App() {
   const [session, setSession] = useState(readSession);
   const currentDate = new Date();
@@ -680,6 +1380,11 @@ export default function App() {
   const [kpiYear, setKpiYear] = useState(currentDate.getFullYear());
   const [kpiMonths, setKpiMonths] = useState({});
   const [savingKpi, setSavingKpi] = useState(false);
+  const [inventoryProducts, setInventoryProducts] = useState([]);
+  const [loadingInventory, setLoadingInventory] = useState(false);
+  const [savingInventoryId, setSavingInventoryId] = useState("");
+  const [bulkSavingInventory, setBulkSavingInventory] = useState(false);
+  const [inventorySearch, setInventorySearch] = useState("");
   const [adCost, setAdCost] = useState(() => localStorage.getItem(AD_COST_KEY) || "");
   const [dailyAdCosts, setDailyAdCosts] = useState(readDailyAdCosts);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -706,6 +1411,10 @@ export default function App() {
     kpi: {
       title: "KPI năm",
       description: "Thiết lập mục tiêu doanh thu cho 12 tháng trong năm.",
+    },
+    inventory: {
+      title: "Tồn kho",
+      description: "Cập nhật số lượng tồn kho để mini app tự khóa mua khi sản phẩm hết hàng.",
     },
     orders: {
       title: "Tất cả đơn",
@@ -745,6 +1454,23 @@ export default function App() {
       throw new Error(data.error || data.message || "Yêu cầu thất bại");
     }
     return data;
+  }
+
+  async function uploadProductMedia(file) {
+    const formData = new FormData();
+    formData.append("file", file);
+    const response = await fetch(`${API_BASE}/api/admin/product-media/upload`, {
+      method: "POST",
+      headers: {
+        ...authHeaders,
+      },
+      body: formData,
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(data.error || data.message || "Upload media thất bại");
+    }
+    return data.url;
   }
 
   async function loadDashboard() {
@@ -799,6 +1525,72 @@ export default function App() {
     setKpiMonths(data.months || {});
   }
 
+  async function loadInventory() {
+    if (!session?.token) return;
+    setLoadingInventory(true);
+    try {
+      const data = await apiFetch("/api/admin/inventory");
+      setInventoryProducts(data.products || []);
+    } finally {
+      setLoadingInventory(false);
+    }
+  }
+
+  async function saveInventory(productId, patch) {
+    setSavingInventoryId(String(productId));
+    try {
+      const data = await apiFetch(`/api/admin/inventory/${productId}`, {
+        method: "PATCH",
+        body: JSON.stringify(patch),
+      });
+      setInventoryProducts((current) =>
+        current.map((product) =>
+          String(product.id) === String(productId) ? data.product : product,
+        ),
+      );
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setSavingInventoryId("");
+    }
+  }
+
+  async function saveInventoryBulk(entries) {
+    setBulkSavingInventory(true);
+    try {
+      const data = await apiFetch("/api/admin/inventory", {
+        method: "PUT",
+        body: JSON.stringify({ entries }),
+      });
+      if (Array.isArray(data.products)) {
+        setInventoryProducts(data.products);
+      } else {
+        await loadInventory();
+      }
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setBulkSavingInventory(false);
+    }
+  }
+
+  async function saveProductOverride(productId, patch) {
+    const data = await apiFetch(`/api/admin/products/${productId}`, {
+      method: "PATCH",
+      body: JSON.stringify(patch),
+    });
+    if (data.product) {
+      setInventoryProducts((current) =>
+        current.map((product) =>
+          String(product.id) === String(productId) ? data.product : product,
+        ),
+      );
+    } else {
+      await loadInventory();
+    }
+    return data.product;
+  }
+
   async function saveKpi() {
     setSavingKpi(true);
     try {
@@ -845,6 +1637,12 @@ export default function App() {
   useEffect(() => {
     void loadKpi(kpiYear);
   }, [session, kpiYear]);
+
+  useEffect(() => {
+    if (activeView === "inventory") {
+      void loadInventory();
+    }
+  }, [session, activeView]);
 
   async function handleLogin(form) {
     setLoadingAuth(true);
@@ -1056,6 +1854,13 @@ export default function App() {
             KPI năm
           </button>
           <button
+            className={`side-nav-item ${activeView === "inventory" ? "active" : ""}`}
+            type="button"
+            onClick={() => setActiveView("inventory")}
+          >
+            Tồn kho
+          </button>
+          <button
             className={`side-nav-item ${activeView === "orders" ? "active" : ""}`}
             type="button"
             onClick={() => openOrderView("orders", {})}
@@ -1200,8 +2005,10 @@ export default function App() {
       <main className="content">
         <DashboardTopbar
           session={session}
-          loading={loading}
-          onRefresh={() => void loadDashboard()}
+          loading={loading || loadingInventory}
+          onRefresh={() =>
+            activeView === "inventory" ? void loadInventory() : void loadDashboard()
+          }
           title={viewMeta[activeView]?.title || "Dashboard"}
           description={viewMeta[activeView]?.description || ""}
         />
@@ -1235,6 +2042,21 @@ export default function App() {
             onYearChange={setKpiYear}
             onMonthChange={handleKpiMonthChange}
             onSave={() => void saveKpi()}
+          />
+        ) : null}
+
+        {activeView === "inventory" ? (
+          <InventoryDashboard
+            products={inventoryProducts}
+            loading={loadingInventory}
+            search={inventorySearch}
+            onSearchChange={setInventorySearch}
+            onSave={saveInventory}
+            onBulkSave={saveInventoryBulk}
+            onProductSave={saveProductOverride}
+            onProductMediaUpload={uploadProductMedia}
+            savingId={savingInventoryId}
+            bulkSaving={bulkSavingInventory}
           />
         ) : null}
 

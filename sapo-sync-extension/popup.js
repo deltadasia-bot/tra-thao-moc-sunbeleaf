@@ -6,10 +6,12 @@ const saveBtn = document.getElementById("saveBtn");
 const syncBtn = document.getElementById("syncBtn");
 const statusDot = document.getElementById("statusDot");
 const logList = document.getElementById("logList");
+const btnShowCatalog = document.getElementById("btnShowCatalog");
+const txtSapoCatalog = document.getElementById("txtSapoCatalog");
 
 // Load các cấu hình đã lưu
 chrome.storage.local.get(
-  ["backendUrl", "syncInterval", "logs"],
+  ["backendUrl", "syncInterval", "logs", "sapoCatalogText"],
   (result) => {
     backendUrlInput.value = result.backendUrl || "https://tra-thao-moc-sunbeleaf-production.up.railway.app";
     syncIntervalSelect.value = result.syncInterval || "15";
@@ -19,8 +21,34 @@ chrome.storage.local.get(
     } else {
       logList.innerHTML = "<li>Chưa có lịch sử đồng bộ. Mở Sapo Go để bắt đầu.</li>";
     }
+
+    if (result.sapoCatalogText) {
+      btnShowCatalog.style.display = "block";
+      txtSapoCatalog.value = result.sapoCatalogText;
+    }
   }
 );
+
+// Bấm xem & copy danh mục Sapo
+btnShowCatalog.addEventListener("click", () => {
+  if (txtSapoCatalog.style.display === "none") {
+    txtSapoCatalog.style.display = "block";
+    btnShowCatalog.innerText = "Click lần nữa để Copy tất cả";
+  } else {
+    txtSapoCatalog.select();
+    document.execCommand("copy");
+    btnShowCatalog.innerText = "Đã copy vào bộ nhớ tạm! ✓";
+    btnShowCatalog.style.backgroundColor = "#10b981";
+    btnShowCatalog.style.color = "white";
+    setTimeout(() => {
+      btnShowCatalog.innerText = "Xem & Copy danh mục Sapo";
+      btnShowCatalog.style.backgroundColor = "";
+      btnShowCatalog.style.color = "";
+      txtSapoCatalog.style.display = "none";
+    }, 2000);
+  }
+});
+
 
 // Nút lưu cấu hình
 saveBtn.addEventListener("click", () => {

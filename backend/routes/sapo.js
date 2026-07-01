@@ -522,17 +522,13 @@ router.get("/oauth/callback", async (req, res) => {
 router.get("/extension/pending", (req, res) => {
   try {
     const allOrders = require("../db").getAllOrders();
-    // Lọc các đơn chưa có sapoOrderId và không bị hủy
+    console.log(`[ExtensionPending] Total orders in DB: ${allOrders.length}`);
     const excludedStates = new Set(["cancelled", "returned", "completed"]);
     const pending = allOrders
       .filter((order) => {
-        if (order.sapoOrderId || order.sapoSyncError) return false;
-        if (excludedStates.has(order.state)) return false;
-        if (order.paymentStatus === "refunded") return false;
-        if (!Array.isArray(order.items) || order.items.length === 0) return false;
-        return order.items.some(
-          (item) => String(item.name || "").trim() && Number(item.price || 0) > 0
-        );
+        const isPending = !order.sapoOrderId && !excludedStates.has(order.state) && order.paymentStatus !== "refunded" && Array.isArray(order.items) && order.items.length > 0 && order.items.some((item) => String(item.name || "").trim() && Number(item.price || 0) > 0);
+        console.log(`Order ${order.orderCode}: sapoOrderId=${order.sapoOrderId}, state=${order.state}, isPending=${isPending}`);
+        return isPending;
       })
       .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
     return res.json({ orders: pending });
@@ -636,4 +632,18 @@ router.post("/extension/update-tracking", (req, res) => {
   }
 });
 
+// Temporary debug-order endpoint
+router.get("/debug-order/:code", (req, res) => {
+  try {
+    const dbHelper = require("../db");
+    const order = dbHelper.findOrderByCode(req.params.code);
+    return res.json({ order });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;
+
+
+

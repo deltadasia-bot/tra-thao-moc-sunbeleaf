@@ -23,17 +23,19 @@ export default function ProductCard({
 }: ProductCardProps) {
   const promotionalPrice = getDisplayPromotionalPrice(product);
   const listPrice = getDisplayListPrice(product);
+  const hasManagedStock = product.stockEnabled !== false && product.stock !== null && typeof product.stock !== "undefined";
+  const isOutOfStock = hasManagedStock && Number(product.stock) <= 0;
 
   return (
     <div
       className="flex h-full w-full min-w-0 flex-col gap-2 overflow-hidden rounded-xl bg-white p-2"
-      onClick={product.comingSoon ? undefined : onClick}
+      onClick={product.comingSoon || isOutOfStock ? undefined : onClick}
     >
       <div className="relative aspect-square w-full shrink-0 overflow-hidden rounded-lg">
-        {product.comingSoon && (
+        {(product.comingSoon || isOutOfStock) && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/35">
             <div className="rounded-lg bg-white px-3 py-1.5 text-sm font-semibold text-primary">
-              Comming Soon
+              {product.comingSoon ? "Comming Soon" : "Hết hàng"}
             </div>
           </div>
         )}
@@ -75,9 +77,9 @@ export default function ProductCard({
         </Text>
       </div>
       <div className="flex w-full items-end justify-between gap-1">
-        {product.comingSoon ? (
+        {product.comingSoon || isOutOfStock ? (
           <div className="text-base font-semibold text-primary">
-            Comming Soon
+            {product.comingSoon ? "Comming Soon" : "Hết hàng"}
           </div>
         ) : (
           <>
@@ -95,6 +97,11 @@ export default function ProductCard({
               {!isPromotionDisabledForProduct(product) && (
                 <div className="text-xs text-gray-400 line-through">
                   {formatCurrency(listPrice)}
+                </div>
+              )}
+              {hasManagedStock && (
+                <div className="text-[10px] font-semibold text-primary">
+                  Còn {product.stock}
                 </div>
               )}
             </div>

@@ -1,9 +1,16 @@
 const crypto = require("crypto");
+const fs = require("fs");
+const path = require("path");
 const express = require("express");
+const multer = require("multer");
 const db = require("../db");
-const { notifyAdminOtp } = require("../services/notifier");
+const { notifyAdminOtp, notifyLowStock } = require("../services/notifier");
 
 const router = express.Router();
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: Number(process.env.PRODUCT_MEDIA_MAX_MB || 80) * 1024 * 1024 },
+});
 
 const SESSION_TTL_MS = Number(process.env.ADMIN_SESSION_TTL_MS || 8 * 60 * 60 * 1000);
 const OTP_TTL_MS = Number(process.env.ADMIN_OTP_TTL_MS || 10 * 60 * 1000);
@@ -167,6 +174,320 @@ function sortOrders(orders) {
   );
 }
 
+function extractMatchingString(block, key) {
+  const match = block.match(new RegExp(`^\\s{4}${key}\\s*:\\s*(?:"([^"]+)"|\\r?\\n\\s*"([^"]+)")`, "m"));
+  return match ? match[1] || match[2] || "" : "";
+}
+
+function extractMatchingNumber(block, key) {
+  const match = block.match(new RegExp(`^\\s{4}${key}\\s*:\\s*(\\d+)`, "m"));
+  return match ? Number(match[1]) : 0;
+}
+
+function extractMatchingStringArray(block, key) {
+  const start = block.match(new RegExp(`^\\s{4}${key}\\s*:\\s*\\[`, "m"));
+  if (!start) return [];
+  const startIndex = start.index + start[0].length - 1;
+  const valueBlock = extractBalancedBlock(block, startIndex, "[", "]");
+  if (!valueBlock) return [];
+  return [...valueBlock.matchAll(/"([^"]+)"/g)].map((match) => match[1]).filter(Boolean);
+}
+
+function extractBalancedBlock(source, startIndex, openChar, closeChar) {
+  let depth = 0;
+  let inString = false;
+  let escapeNext = false;
+  for (let index = startIndex; index < source.length; index += 1) {
+    const char = source[index];
+    if (escapeNext) {
+      escapeNext = false;
+      continue;
+    }
+    if (char === "\\") {
+      escapeNext = true;
+      continue;
+    }
+    if (char === '"') {
+      inString = !inString;
+      continue;
+    }
+    if (inString) continue;
+    if (char === openChar) depth += 1;
+    if (char === closeChar) {
+      depth -= 1;
+      if (depth === 0) return source.slice(startIndex, index + 1);
+    }
+  }
+  return "";
+}
+
+function splitTopLevelObjects(arrayBlock) {
+  const items = [];
+  for (let index = 0; index < arrayBlock.length; index += 1) {
+    if (arrayBlock[index] !== "{") continue;
+    const item = extractBalancedBlock(arrayBlock, index, "{", "}");
+    if (item) {
+      items.push(item);
+      index += item.length - 1;
+    }
+  }
+  return items;
+}
+
+function extractVariantGroups(block) {
+  const start = block.match(/^ {4}variantGroups\s*:\s*\[/m);
+  if (!start) return [];
+  const arrayStart = start.index + start[0].length - 1;
+  const arrayBlock = extractBalancedBlock(block, arrayStart, "[", "]");
+  if (!arrayBlock) return [];
+  return splitTopLevelObjects(arrayBlock).map((groupBlock, groupIndex) => {
+    const optionsStart = groupBlock.match(/\n\s+options\s*:\s*\[/m);
+    const optionsBlock = optionsStart
+      ? extractBalancedBlock(groupBlock, optionsStart.index + optionsStart[0].length - 1, "[", "]")
+      : "";
+    const options = optionsBlock
+      ? splitTopLevelObjects(optionsBlock).map((optionBlock, optionIndex) => ({
+          id: extractLooseString(optionBlock, "id") || `option-${optionIndex + 1}`,
+          name: extractLooseString(optionBlock, "name") || `Phan loai ${optionIndex + 1}`,
+          extraPrice: extractLooseNumber(optionBlock, "extraPrice"),
+          image: extractLooseString(optionBlock, "image"),
+          sku: extractLooseString(optionBlock, "sku"),
+        }))
+      : [];
+    return {
+      id: extractLooseString(groupBlock, "id") || `variant-${groupIndex + 1}`,
+      title: extractLooseString(groupBlock, "title") || "Phan loai",
+      description: extractLooseString(groupBlock, "description"),
+      type: extractLooseString(groupBlock, "type") || "SINGLE",
+      isRequired: !/isRequired\s*:\s*false/.test(groupBlock),
+      options,
+    };
+  });
+}
+
+function extractLooseString(block, key) {
+  const match = block.match(new RegExp(`${key}\\s*:\\s*"([^"]*)"`, "m"));
+  return match ? match[1] : "";
+}
+
+function extractLooseNumber(block, key) {
+  const match = block.match(new RegExp(`${key}\\s*:\\s*(-?\\d+)`, "m"));
+  return match ? Number(match[1]) : 0;
+}
+
+function getProductCatalog() {
+  const bundledCatalogPath = path.resolve(__dirname, "../product-catalog.json");
+  const productMockPath = path.resolve(
+    __dirname,
+    "../../src/services/product/product.mock.ts",
+  );
+
+  if (!fs.existsSync(productMockPath)) {
+    if (!fs.existsSync(bundledCatalogPath)) return [];
+    try {
+      const rawCatalog = fs.readFileSync(bundledCatalogPath, "utf8");
+      const catalog = JSON.parse(rawCatalog);
+      return Array.isArray(catalog)
+        ? catalog
+            .filter((product) => Number.isFinite(Number(product.id)))
+            .sort((a, b) => Number(a.id) - Number(b.id))
+        : [];
+    } catch (err) {
+      console.error("[Admin] Khong doc duoc product-catalog.json:", err.message);
+      return [];
+    }
+  }
+
+  try {
+    const raw = fs.readFileSync(productMockPath, "utf8");
+    const matches = [
+      ...raw.matchAll(
+        /\n\s{2}\{\s*\r?\n\s{4}id:\s*(\d+),([\s\S]*?)(?=\n\s{2}\{\s*\r?\n\s{4}id:\s*\d+,|\n\s*\];)/g,
+      ),
+    ];
+
+    return matches
+      .map((match) => {
+        const block = match[2];
+        const id = Number(match[1]);
+          return {
+            id,
+            name: extractMatchingString(block, "name") || `Sản phẩm #${id}`,
+            description: extractMatchingString(block, "description"),
+            image: extractMatchingString(block, "image"),
+            images: extractMatchingStringArray(block, "images"),
+            descriptionImages: extractMatchingStringArray(block, "descriptionImages"),
+            video: extractMatchingString(block, "video"),
+            videoPoster: extractMatchingString(block, "videoPoster"),
+            sku: extractMatchingString(block, "sku"),
+            variantGroups: extractVariantGroups(block),
+            categoryId: extractMatchingString(block, "categoryId"),
+            subCategoryId: extractMatchingString(block, "subCategoryId"),
+            price: extractMatchingNumber(block, "price"),
+          listPrice: extractMatchingNumber(block, "listPrice"),
+        };
+      })
+      .filter((product) => Number.isFinite(product.id))
+      .sort((a, b) => a.id - b.id);
+  } catch (err) {
+    console.error("[Admin] Khong doc duoc product catalog:", err.message);
+    return [];
+  }
+}
+
+function mergeProductOverride(product, overrides) {
+  const override = overrides[String(product.id)] || {};
+  return {
+    ...product,
+    ...Object.fromEntries(
+      Object.entries(override).filter(([key, value]) => key !== "productId" && key !== "updatedAt" && typeof value !== "undefined"),
+    ),
+    productOverride: override,
+  };
+}
+
+function getManagedProducts() {
+  const inventory = db.getInventory();
+  const overrides = db.getProductOverrides();
+  const catalog = getProductCatalog().map((product) => mergeProductOverride(product, overrides));
+  const catalogById = new Map(catalog.map((product) => [String(product.id), product]));
+
+  Object.keys(inventory).forEach((productId) => {
+    if (!catalogById.has(productId)) {
+      catalogById.set(productId, mergeProductOverride({
+        id: Number(productId),
+        name: `Sản phẩm #${productId}`,
+        description: "",
+        image: "",
+        categoryId: "",
+        subCategoryId: "",
+        price: 0,
+        listPrice: 0,
+      }, overrides));
+    }
+  });
+
+  return [...catalogById.values()]
+    .sort((a, b) => Number(a.id) - Number(b.id))
+    .map((product) => {
+      const entry =
+        inventory[String(product.id)] ||
+        {
+          productId: String(product.id),
+          stock: null,
+          enabled: true,
+          visible: true,
+          lowStockThreshold: 5,
+          updatedAt: null,
+        };
+
+      return {
+        ...product,
+        stock: entry.stock,
+        enabled: entry.enabled,
+        visible: entry.visible !== false,
+        lowStockThreshold: entry.lowStockThreshold,
+        lowStockAlertedAt: entry.lowStockAlertedAt,
+        lowStockAlertedStock: entry.lowStockAlertedStock,
+        updatedAt: entry.updatedAt,
+        inventory: entry,
+      };
+    });
+}
+
+function shouldSendLowStockAlert(product) {
+  const stock = Number(product.stock);
+  const threshold = Number(product.lowStockThreshold || 0);
+  if (product.enabled === false || product.visible === false) return false;
+  if (!Number.isFinite(stock) || stock < 0) return false;
+  if (!Number.isFinite(threshold) || threshold < 0) return false;
+  if (stock > threshold) return false;
+  return product.lowStockAlertedStock !== stock;
+}
+
+async function queueLowStockAlerts(products) {
+  const targets = products.filter(shouldSendLowStockAlert);
+  targets.forEach((product) => {
+    db.markLowStockAlert(product.id, product.stock);
+    notifyLowStock(product).catch((err) => {
+      console.warn("[Admin] Khong gui duoc canh bao ton kho:", err.message);
+    });
+  });
+}
+
+function getDataDir() {
+  return process.env.DATA_DIR
+    ? path.resolve(process.env.DATA_DIR)
+    : path.resolve(__dirname, "../data");
+}
+
+function getProductMediaDir() {
+  return path.join(getDataDir(), "product-media");
+}
+
+function getPublicBaseUrl(req) {
+  const configured = String(process.env.PUBLIC_BACKEND_URL || "").replace(/\/+$/, "");
+  if (configured) return configured;
+  const proto = req.headers["x-forwarded-proto"] || req.protocol || "https";
+  return `${proto}://${req.get("host")}`;
+}
+
+function sanitizeFilename(filename) {
+  const ext = path.extname(filename || "").toLowerCase();
+  const base = path
+    .basename(filename || "media", ext)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9_-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80);
+  return `${Date.now()}-${base || "media"}${ext || ".bin"}`;
+}
+
+function isAllowedProductMedia(file) {
+  return [
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "image/gif",
+    "video/mp4",
+    "video/webm",
+  ].includes(file?.mimetype);
+}
+
+async function uploadToWordPress(file) {
+  const username = process.env.WORDPRESS_USERNAME;
+  const password = process.env.WORDPRESS_APP_PASSWORD;
+  const mediaUrl =
+    process.env.WORDPRESS_MEDIA_URL || "https://deltadasia.com/wp-json/wp/v2/media";
+  if (!username || !password) return null;
+
+  const filename = sanitizeFilename(file.originalname);
+  const auth = Buffer.from(`${username}:${password}`).toString("base64");
+  const response = await fetch(mediaUrl, {
+    method: "POST",
+    headers: {
+      Authorization: `Basic ${auth}`,
+      "Content-Disposition": `attachment; filename="${filename}"`,
+      "Content-Type": file.mimetype,
+    },
+    body: file.buffer,
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || !data.source_url) {
+    throw new Error(data?.message || "Khong upload duoc media len WordPress");
+  }
+  return data.source_url;
+}
+
+async function saveProductMediaLocally(req, file) {
+  const filename = sanitizeFilename(file.originalname);
+  const targetDir = getProductMediaDir();
+  fs.mkdirSync(targetDir, { recursive: true });
+  fs.writeFileSync(path.join(targetDir, filename), file.buffer);
+  return `${getPublicBaseUrl(req)}/api/admin/product-media/${encodeURIComponent(filename)}`;
+}
+
 function toValidDate(value) {
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? null : date;
@@ -292,6 +613,15 @@ function hasOtpDeliveryConfig() {
   return hasEmail || hasZalo;
 }
 
+router.get("/product-media/:filename", (req, res) => {
+  const filename = path.basename(req.params.filename || "");
+  const target = path.join(getProductMediaDir(), filename);
+  if (!filename || !fs.existsSync(target)) {
+    return res.status(404).send("Not found");
+  }
+  return res.sendFile(target);
+});
+
 router.post("/auth/login", (req, res) => {
   const username = String(req.body.username || "").trim();
   const password = String(req.body.password || "");
@@ -406,6 +736,29 @@ router.post("/auth/reset-password", (req, res) => {
 
 router.use(requireAdminAuth);
 
+router.post("/product-media/upload", upload.single("file"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "Chua co file upload" });
+    }
+    if (!isAllowedProductMedia(req.file)) {
+      return res.status(400).json({ error: "Dinh dang file khong duoc ho tro" });
+    }
+    const wordpressUrl = await uploadToWordPress(req.file);
+    const url = wordpressUrl || (await saveProductMediaLocally(req, req.file));
+    return res.json({
+      success: true,
+      url,
+      storage: wordpressUrl ? "wordpress" : "backend",
+      mimeType: req.file.mimetype,
+      size: req.file.size,
+    });
+  } catch (err) {
+    console.error("[Admin] Product media upload failed:", err.message);
+    return res.status(500).json({ error: err.message || "Upload media that bai" });
+  }
+});
+
 router.get("/me", (req, res) => {
   return res.json({
     ok: true,
@@ -433,6 +786,145 @@ router.get("/stats", (_req, res) => {
   };
 
   return res.json(stats);
+});
+
+router.get("/inventory", (_req, res) => {
+  const products = getManagedProducts();
+
+  return res.json({
+    products,
+    inventory: db.getInventory(),
+    productOverrides: db.getProductOverrides(),
+    total: products.length,
+    updatedAt: new Date().toISOString(),
+  });
+});
+
+router.patch("/inventory/:productId", async (req, res) => {
+  const { stock, enabled, visible, lowStockThreshold } = req.body || {};
+  const patch = {};
+
+  if (stock === "" || stock === null || typeof stock === "undefined") {
+    patch.stock = null;
+  } else {
+    const parsedStock = Number(stock);
+    if (!Number.isFinite(parsedStock) || parsedStock < 0) {
+      return res.status(400).json({ error: "Ton kho khong hop le" });
+    }
+    patch.stock = Math.floor(parsedStock);
+  }
+
+  if (typeof enabled !== "undefined") {
+    patch.enabled = Boolean(enabled);
+  }
+
+  if (typeof visible !== "undefined") {
+    patch.visible = Boolean(visible);
+  }
+
+  if (typeof lowStockThreshold !== "undefined") {
+    const parsedThreshold = Number(lowStockThreshold);
+    if (!Number.isFinite(parsedThreshold) || parsedThreshold < 0) {
+      return res.status(400).json({ error: "Nguong ton kho thap khong hop le" });
+    }
+    patch.lowStockThreshold = Math.floor(parsedThreshold);
+  }
+
+  const entry = db.setInventoryEntry(req.params.productId, patch);
+  const catalogProduct = getManagedProducts().find(
+    (product) => String(product.id) === String(req.params.productId),
+  ) || {
+    id: Number(req.params.productId),
+    name: `Sản phẩm #${req.params.productId}`,
+    image: "",
+    categoryId: "",
+      subCategoryId: "",
+    };
+  const responseProduct = {
+    ...catalogProduct,
+    stock: entry.stock,
+    enabled: entry.enabled,
+    visible: entry.visible !== false,
+    lowStockThreshold: entry.lowStockThreshold,
+    lowStockAlertedAt: entry.lowStockAlertedAt,
+    lowStockAlertedStock: entry.lowStockAlertedStock,
+    updatedAt: entry.updatedAt,
+    inventory: entry,
+  };
+  queueLowStockAlerts([responseProduct]);
+  return res.json({
+    success: true,
+    inventory: entry,
+    product: responseProduct,
+  });
+});
+
+router.put("/inventory", async (req, res) => {
+  const entries = Array.isArray(req.body?.entries) ? req.body.entries : [];
+  const normalized = entries.map((entry) => ({
+    productId: entry.productId,
+    stock:
+      entry.stock === "" || entry.stock === null || typeof entry.stock === "undefined"
+        ? null
+          : Math.max(0, Math.floor(Number(entry.stock))),
+    enabled: entry.enabled !== false,
+    visible: entry.visible !== false,
+    lowStockThreshold: Math.max(0, Math.floor(Number(entry.lowStockThreshold ?? 5))),
+  }));
+
+  if (normalized.some((entry) => entry.stock !== null && !Number.isFinite(entry.stock))) {
+    return res.status(400).json({ error: "Danh sach ton kho co gia tri khong hop le" });
+  }
+
+  const updated = db.setInventoryBulk(normalized);
+  const updatedIds = new Set(updated.map((entry) => String(entry.productId)));
+  const products = getManagedProducts();
+  queueLowStockAlerts(products.filter((product) => updatedIds.has(String(product.id))));
+  return res.json({
+    success: true,
+    updated,
+    inventory: db.getInventory(),
+    products,
+  });
+});
+
+router.patch("/products/:productId", (req, res) => {
+  const allowed = {};
+  ["name", "description", "image", "video", "videoPoster", "sku"].forEach((key) => {
+    if (typeof req.body?.[key] === "string") {
+      allowed[key] = req.body[key].trim();
+    }
+  });
+
+  ["price", "listPrice", "weightGram", "widthCm", "lengthCm", "heightCm"].forEach((key) => {
+    if (typeof req.body?.[key] !== "undefined") {
+      allowed[key] = req.body[key];
+    }
+  });
+
+  ["images", "descriptionImages"].forEach((key) => {
+    if (Array.isArray(req.body?.[key]) || typeof req.body?.[key] === "string") {
+      allowed[key] = req.body[key];
+    }
+  });
+
+  ["descriptionBlocks", "variantGroups"].forEach((key) => {
+    if (Array.isArray(req.body?.[key])) {
+      allowed[key] = req.body[key];
+    }
+  });
+
+  const override = db.setProductOverride(req.params.productId, allowed);
+  const product = getManagedProducts().find(
+    (item) => String(item.id) === String(req.params.productId),
+  );
+
+  return res.json({
+    success: true,
+    product,
+    override,
+    productOverrides: db.getProductOverrides(),
+  });
 });
 
 router.get("/reports/sales", (_req, res) => {

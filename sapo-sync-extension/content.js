@@ -158,6 +158,85 @@ async function resolveSapoCsrfToken() {
   return "";
 }
 
+async function resolveSapoLocationId() {
+  try {
+    const res = await fetch("/admin/locations.json");
+    if (res.ok) {
+      const data = await res.json();
+      const locations = data.locations || [];
+      if (locations.length > 0) {
+        const defaultLoc = locations.find(l => l.default === true || l.is_default === true) || locations[0];
+        if (defaultLoc && defaultLoc.id) {
+          console.log("[Sapo Assistant] Found Location ID from API:", defaultLoc.id);
+          return String(defaultLoc.id);
+        }
+      }
+    }
+  } catch (error) {
+    console.error("[Sapo Assistant] Error fetching locations:", error);
+  }
+
+  // Fallback 1: Scan cookies
+  const cookieLoc = readCookie("location_id") || readCookie("sapo_location_id") || readCookie("current_location_id");
+  if (cookieLoc) {
+    console.log("[Sapo Assistant] Found Location ID from cookie:", cookieLoc);
+    return cookieLoc;
+  }
+
+  // Fallback 2: Scan localStorage/sessionStorage
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && /location_id|currentLocationId|current_location_id|sapo_location_id/i.test(key)) {
+        const val = localStorage.getItem(key);
+        if (val && !isNaN(val)) {
+          console.log("[Sapo Assistant] Found Location ID from localStorage:", val);
+          return val;
+        }
+      }
+    }
+  } catch (e) {
+    // Ignore storage errors
+  }
+
+  return "";
+}
+
+async function fetchSapoProductsAndLog() {
+  try {
+    const res = await fetch("/admin/products.json?limit=250");
+    if (res.ok) {
+      const data = await res.json();
+      const products = data.products || [];
+      console.log("[Sapo Assistant] Product count:", products.length);
+      addLogToStorage(`Tìm thấy ${products.length} SP trên Sapo.`);
+      
+      let catalogLines = [];
+      products.forEach(p => {
+        p.variants?.forEach(v => {
+          catalogLines.push(`SKU: ${v.sku || 'N/A'} | Tên Sapo: ${p.name}${v.title && v.title !== 'Default Title' ? ` - ${v.title}` : ''} | VariantID: ${v.id}`);
+        });
+      });
+      
+      const catalogText = catalogLines.join("\n");
+      chrome.storage.local.set({ sapoCatalogText: catalogText }, () => {
+        console.log("[Sapo Assistant] Saved catalog text to storage.");
+      });
+
+      // Log first 3 products in popup activity log
+      products.slice(0, 3).forEach(p => {
+        const variantsInfo = p.variants?.map(v => `${v.title || 'Mặc định'} (ID: ${v.id}, SKU: ${v.sku || 'N/A'})`).join(', ');
+        addLogToStorage(`SP Sapo: ${p.name.slice(0, 20)}... | ${variantsInfo}`);
+      });
+      return products;
+    }
+  } catch (error) {
+    console.error("[Sapo Assistant] Error fetching products:", error);
+    addLogToStorage(`Lỗi tải danh sách SP: ${error.message}`);
+  }
+  return [];
+}
+
 // 1. Đồng bộ xuôi (Tạo đơn hàng sang Sapo)
 async function handleSyncOrder(order, backendUrl) {
   if (isSyncing) return;
@@ -172,6 +251,16 @@ async function handleSyncOrder(order, backendUrl) {
     if (!csrfToken) {
       addLogToStorage("Không tìm thấy CSRF token, thử tạo đơn bằng session cookie hiện tại.");
     }
+
+    // Lấy Location ID của cửa hàng Sapo
+    const locationId = await resolveSapoLocationId();
+    if (!locationId) {
+      console.warn("[Sapo Assistant] Khong tim thay Location ID, tiep tuc gui ma khong co location header.");
+    }
+
+    // Thử tải và log danh sách sản phẩm để debug
+    await fetchSapoProductsAndLog();
+
     
     // Chuyển đổi phương thức thanh toán sang nhãn hiển thị tiếng Việt
     const paymentMap = {
@@ -239,6 +328,7 @@ async function handleSyncOrder(order, backendUrl) {
       headers: {
         "Content-Type": "application/json",
         "Accept": "application/json",
+        ...(locationId ? { "X-Sapo-LocationId": locationId } : {}),
         ...(csrfToken
           ? {
               "X-CSRF-Token": csrfToken,
@@ -299,8 +389,13 @@ async function handleSyncOrder(order, backendUrl) {
 // 2. Đồng bộ ngược (Quét mã vận đơn SPX từ Sapo về Zalo)
 async function handleQueryTracking(zaloOrderId, sapoOrderId, backendUrl) {
   try {
+    const locationId = await resolveSapoLocationId();
     // Gọi API nội bộ của Sapo để lấy thông tin chi tiết đơn
-    const response = await fetch(`/admin/orders/${sapoOrderId}.json`);
+    const response = await fetch(`/admin/orders/${sapoOrderId}.json`, {
+      headers: {
+        ...(locationId ? { "X-Sapo-LocationId": locationId } : {})
+      }
+    });
     if (!response.ok) return;
     
     const data = await response.json();

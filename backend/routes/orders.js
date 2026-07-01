@@ -3,7 +3,7 @@ const router   = express.Router();
 const db       = require("../db");
 const { pushOrderToSapo, createSapoReturn }  = require("../services/sapo");
 const { syncOrderToNhanh } = require("../services/nhanh");
-const { notifyNewOrder }   = require("../services/notifier");
+const { notifyNewOrder, notifyLowStock }   = require("../services/notifier");
 const { createSPXOrder }   = require("../services/spx");
 
 /**
@@ -99,6 +99,23 @@ router.post("/", async (req, res) => {
   }
 
   // Tự động tạo đơn giao hàng trên SPX Express nếu chọn hình thức Giao hàng tận nơi
+  const inventory = db.getInventory();
+  const outOfStockItem = (Array.isArray(items) ? items : []).find((item) => {
+    const productId = String(item?.productId || "").trim();
+    const entry = productId ? inventory[productId] : null;
+    if (!entry || entry.stock === null || entry.enabled === false) return false;
+    return Number(item.quantity || 0) > Number(entry.stock || 0);
+  });
+
+  if (outOfStockItem) {
+    const productId = String(outOfStockItem.productId || "");
+    return res.status(400).json({
+      error: `San pham "${outOfStockItem.productName || outOfStockItem.name || productId}" khong du ton kho`,
+      productId,
+      stock: inventory[productId]?.stock ?? 0,
+    });
+  }
+
   let trackingInfo = {
     shippingCarrier: shippingCarrier || "SPX Express"
   };
@@ -141,6 +158,37 @@ router.post("/", async (req, res) => {
   });
 
   // Chạy nền – không block response trả về mini app
+  const updatedInventory = db.decreaseInventoryForOrder(order.items);
+  if (updatedInventory) {
+    (order.items || []).forEach((item) => {
+      const productId = String(item?.productId || "").trim();
+      const entry = productId ? updatedInventory[productId] : null;
+      if (!entry || entry.stock === null || entry.enabled === false || entry.visible === false) {
+        return;
+      }
+
+      const stock = Number(entry.stock);
+      const threshold = Number(entry.lowStockThreshold || 0);
+      if (!Number.isFinite(stock) || !Number.isFinite(threshold) || stock > threshold) {
+        return;
+      }
+      if (entry.lowStockAlertedStock === stock) {
+        return;
+      }
+
+      db.markLowStockAlert(productId, stock);
+      notifyLowStock({
+        id: productId,
+        name: item.productName || item.name || `San pham #${productId}`,
+        image: item.image || item.thumbnail || "",
+        stock,
+        lowStockThreshold: threshold,
+      }).catch((err) => {
+        console.warn("[Inventory] Khong gui duoc canh bao ton kho:", err.message);
+      });
+    });
+  }
+
   setImmediate(async () => {
     try {
       // 1. Đồng bộ sang Sapo

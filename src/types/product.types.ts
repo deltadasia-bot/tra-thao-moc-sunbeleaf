@@ -3,6 +3,12 @@ export interface VariantOption {
   name: string;
   extraPrice: number;
   image?: string;
+  sku?: string;
+  weightGram?: number;
+  widthCm?: number;
+  lengthCm?: number;
+  heightCm?: number;
+  stock?: number;
   defaultValue?: string | number | boolean;
   value?: string | number;
   maxValue?: string | number;
@@ -35,6 +41,15 @@ export interface ProductDescriptionSection {
   content: string;
 }
 
+export interface ProductDescriptionBlock {
+  id: string;
+  type: "text" | "image";
+  text?: string;
+  url?: string;
+  alt?: string;
+  style?: "normal" | "heading" | "italic" | "uppercase";
+}
+
 export interface ProductReview {
   id: string;
   author: string;
@@ -53,15 +68,24 @@ export interface Product {
   images?: string[];
   descriptionImages?: string[];
   descriptionSections?: ProductDescriptionSection[];
+  descriptionBlocks?: ProductDescriptionBlock[];
   reviews?: ProductReview[];
   video?: string;
   videoPoster?: string;
+  sku?: string;
+  weightGram?: number;
+  widthCm?: number;
+  lengthCm?: number;
+  heightCm?: number;
   variantGroups: VariantGroup[];
   features: string[];
 
   newMarked?: boolean;
   comingSoon?: boolean;
   sales?: ProductSales;
+  stock?: number | null;
+  stockEnabled?: boolean;
+  lowStockThreshold?: number;
 
   categoryId: string;
   subCategoryId: string;

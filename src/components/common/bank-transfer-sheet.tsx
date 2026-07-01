@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Button, Sheet } from "zmp-ui";
+import { Button, Modal, Sheet } from "zmp-ui";
 import { formatCurrency } from "@/utils/format";
 import { orderService } from "@/services/order/order.api";
 import { saveImageToGallery, showToast } from "zmp-sdk/apis";
@@ -36,6 +36,8 @@ export default function BankTransferSheet({
   const [copiedField, setCopiedField]     = useState<string | null>(null);
   const [verifyState, setVerifyState]     = useState<VerifyState>("waiting");
   const [saveStatus, setSaveStatus]       = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [warningVisible, setWarningVisible] = useState(false);
+  const [warningAccepted, setWarningAccepted] = useState(false);
   const intervalRef  = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef = useRef<number>(Date.now());
 
@@ -46,7 +48,18 @@ export default function BankTransferSheet({
     `&accountName=${encodeURIComponent(BANK_INFO.accountName)}`;
 
   useEffect(() => {
-    if (!visible) return;
+    if (!visible) {
+      setWarningVisible(false);
+      setWarningAccepted(false);
+      return;
+    }
+
+    setWarningVisible(true);
+    setWarningAccepted(false);
+  }, [visible, orderId]);
+
+  useEffect(() => {
+    if (!visible || !warningAccepted) return;
 
     setVerifyState("waiting");
     startTimeRef.current = Date.now();
@@ -72,7 +85,12 @@ export default function BankTransferSheet({
 
     intervalRef.current = setInterval(check, POLL_INTERVAL_MS);
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [visible, orderId]);
+  }, [visible, warningAccepted, orderId, onConfirmed]);
+
+  const acceptWarning = () => {
+    setWarningVisible(false);
+    setWarningAccepted(true);
+  };
 
   const handleCopy = async (field: string, text: string) => {
     try {
@@ -120,7 +138,8 @@ export default function BankTransferSheet({
   };
 
   return (
-    <Sheet autoHeight visible={visible} onClose={onClose} maskClosable={false}>
+    <>
+      <Sheet autoHeight visible={visible} onClose={onClose} maskClosable={false}>
         <div className="flex max-h-[88vh] flex-col bg-white pb-safe">
           {/* Header */}
           <div className="flex items-center border-b border-divider01 px-4 py-3">
@@ -194,7 +213,20 @@ export default function BankTransferSheet({
               <Divider />
               <Row label="Chủ tài khoản" value={BANK_INFO.accountName} />
               <Divider />
-              <Row label="Số tiền" value={formatCurrency(amount)} highlight />
+
+              {/* Số tiền + sao chép */}
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <p className="text-xs text-text-secondary">Số tiền</p>
+                  <p className="mt-0.5 text-sm font-semibold text-primary">
+                    {formatCurrency(amount)}
+                  </p>
+                </div>
+                <CopyButton
+                  copied={copiedField === "amount"}
+                  onCopy={() => handleCopy("amount", String(amount))}
+                />
+              </div>
               <Divider />
 
               {/* Nội dung CK + sao chép */}
@@ -247,6 +279,34 @@ export default function BankTransferSheet({
           </div>
         </div>
       </Sheet>
+      <Modal
+        visible={visible && warningVisible}
+        title="Lưu ý trước khi chuyển khoản"
+        onClose={acceptWarning}
+        verticalActions
+      >
+        <div className="flex flex-col gap-3 py-2 text-left">
+          <div className="rounded-xl bg-orange-50 px-3 py-3 text-xs leading-relaxed text-orange-700">
+            Không tự sửa <strong>số tiền</strong> hoặc <strong>nội dung chuyển khoản</strong> trong app ngân hàng.
+            Nếu nội dung sai, hệ thống sẽ không tự ghi nhận đơn hàng.
+          </div>
+          <div className="rounded-xl border border-divider01 bg-white px-3 py-3">
+            <p className="text-xs text-text-secondary">Nội dung phải giữ nguyên dạng mã đơn</p>
+            <p className="mt-1 break-all text-base font-bold text-text-primary">{orderCode}</p>
+            <p className="mt-1 text-xs text-text-secondary">
+              Dạng mã: <strong>DH-YYYYMMDD-XXX</strong>. Không thêm, xóa hoặc đổi ký tự.
+            </p>
+          </div>
+          <div className="rounded-xl border border-divider01 bg-white px-3 py-3">
+            <p className="text-xs text-text-secondary">Số tiền phải chuyển đúng</p>
+            <p className="mt-1 text-base font-bold text-primary">{formatCurrency(amount)}</p>
+          </div>
+          <Button className="w-full rounded-xl bg-primary py-3 font-semibold text-white" fullWidth onClick={acceptWarning}>
+            Tôi đã hiểu
+          </Button>
+        </div>
+      </Modal>
+    </>
   );
 }
 
