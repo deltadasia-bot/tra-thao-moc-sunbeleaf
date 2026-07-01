@@ -957,35 +957,34 @@ export default function ProductDetailPage() {
             Chi tiết sản phẩm
           </h2>
           <dl className="mt-3 divide-y divide-gray-100 text-sm">
-            <div className="grid grid-cols-[112px_1fr] gap-3 py-2.5">
-              <dt className="text-gray-500">Thương hiệu</dt>
-              <dd className="text-gray-900">Sunbeleaf</dd>
-            </div>
-            <div className="grid grid-cols-[112px_1fr] gap-3 py-2.5">
-              <dt className="text-gray-500">Xuất xứ</dt>
-              <dd className="text-gray-900">Việt Nam</dd>
-            </div>
-            <div className="grid grid-cols-[112px_1fr] gap-3 py-2.5">
-              <dt className="text-gray-500">Danh mục</dt>
-              <dd className="text-gray-900">
-                Trà thảo mộc và sản phẩm chăm sóc sức khỏe
-              </dd>
-            </div>
-            <div className="grid grid-cols-[112px_1fr] gap-3 py-2.5">
-              <dt className="text-gray-500">Kho hàng</dt>
-              <dd className="text-gray-900">Còn hàng</dd>
-            </div>
-            {product.sku ? (
-              <div className="grid grid-cols-[112px_1fr] gap-3 py-2.5">
-                <dt className="text-gray-500">SKU</dt>
-                <dd className="text-gray-900">{product.sku}</dd>
-              </div>
-            ) : null}
+            {[
+              { label: "Thương hiệu", value: product.brand || "Sunbeleaf" },
+              { label: "Xuất xứ", value: product.origin || "Việt Nam" },
+              product.expiry ? { label: "Hạn sử dụng", value: product.expiry } : null,
+              product.volume ? { label: "Thể tích", value: product.volume } : null,
+              product.manufactureDate ? { label: "Ngày sản xuất", value: product.manufactureDate } : null,
+              product.expiryDate ? { label: "Ngày hết hạn", value: product.expiryDate } : null,
+              product.responsibleOrg ? { label: "Tổ chức sản xuất", value: product.responsibleOrg } : null,
+              product.responsibleOrgAddress ? { label: "Địa chỉ sản xuất", value: product.responsibleOrgAddress } : null,
+              product.flavor ? { label: "Hương vị", value: product.flavor } : null,
+              product.ingredients ? { label: "Thành phần", value: product.ingredients } : null,
+              product.packageSize ? { label: "Kích cỡ", value: product.packageSize } : null,
+              { label: "Danh mục", value: "Trà thảo mộc và sản phẩm chăm sóc sức khỏe" },
+              { label: "Kho hàng", value: "Còn hàng" },
+              product.sku ? { label: "SKU", value: product.sku } : null,
+            ]
+              .filter((item): item is { label: string; value: string } => !!item && !!item.value)
+              .map((item) => (
+                <div key={item.label} className="grid grid-cols-[112px_1fr] gap-3 py-2.5">
+                  <dt className="text-gray-500">{item.label}</dt>
+                  <dd className="text-gray-900">{item.value}</dd>
+                </div>
+              ))}
             {product.weightGram || product.widthCm || product.lengthCm || product.heightCm ? (
               <div className="grid grid-cols-[112px_1fr] gap-3 py-2.5">
-                <dt className="text-gray-500">Váº­n chuyá»ƒn</dt>
+                <dt className="text-gray-500">Vận chuyển</dt>
                 <dd className="text-gray-900">
-                  {product.weightGram ? `${product.weightGram}g` : "ChÆ°a cáº­p nháº­t"}
+                  {product.weightGram ? `${product.weightGram}g` : "Chưa cập nhật"}
                   {product.lengthCm || product.widthCm || product.heightCm
                     ? ` · ${product.lengthCm || 0} x ${product.widthCm || 0} x ${product.heightCm || 0}cm`
                     : ""}

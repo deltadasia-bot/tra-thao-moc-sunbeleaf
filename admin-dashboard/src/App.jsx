@@ -1090,13 +1090,38 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
     widthCm: String(override.widthCm ?? product.widthCm ?? ""),
     lengthCm: String(override.lengthCm ?? product.lengthCm ?? ""),
     heightCm: String(override.heightCm ?? product.heightCm ?? ""),
+    brand: override.brand || product.brand || "",
+    origin: override.origin || product.origin || "",
+    expiry: override.expiry || product.expiry || "",
+    responsibleOrg: override.responsibleOrg || product.responsibleOrg || "",
+    responsibleOrgAddress: override.responsibleOrgAddress || product.responsibleOrgAddress || "",
+    volume: override.volume || product.volume || "",
+    expiryDate: override.expiryDate || product.expiryDate || "",
+    manufactureDate: override.manufactureDate || product.manufactureDate || "",
+    flavor: override.flavor || product.flavor || "",
+    ingredients: override.ingredients || product.ingredients || "",
+    packageSize: override.packageSize || product.packageSize || "",
   });
+
   const [activeTab, setActiveTab] = useState("basic");
   const [uploadingSlot, setUploadingSlot] = useState("");
   const [saving, setSaving] = useState(false);
+  const [showPreviewDetails, setShowPreviewDetails] = useState(false);
 
   const setField = (field, value) => {
     setDraft((current) => ({ ...current, [field]: value }));
+  };
+
+  const handleTabClick = (tabId) => {
+    setActiveTab(tabId);
+    const container = document.getElementById("product-edit-form-scroll");
+    const element = document.getElementById(`edit-section-${tabId}`);
+    if (container && element) {
+      container.scrollTo({
+        top: element.offsetTop - 10,
+        behavior: "smooth"
+      });
+    }
   };
 
   async function uploadFile(file, onDone, slotKey) {
@@ -1132,6 +1157,17 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
         widthCm: draft.widthCm === "" ? undefined : Number(draft.widthCm),
         lengthCm: draft.lengthCm === "" ? undefined : Number(draft.lengthCm),
         heightCm: draft.heightCm === "" ? undefined : Number(draft.heightCm),
+        brand: draft.brand,
+        origin: draft.origin,
+        expiry: draft.expiry,
+        responsibleOrg: draft.responsibleOrg,
+        responsibleOrgAddress: draft.responsibleOrgAddress,
+        volume: draft.volume,
+        expiryDate: draft.expiryDate,
+        manufactureDate: draft.manufactureDate,
+        flavor: draft.flavor,
+        ingredients: draft.ingredients,
+        packageSize: draft.packageSize,
       });
     } finally {
       setSaving(false);
@@ -1143,7 +1179,7 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
 
   return (
     <div className="product-edit-backdrop">
-      <form className="product-edit-modal product-edit-page" onSubmit={submit}>
+      <form className="product-edit-modal" onSubmit={submit}>
         <div className="product-edit-topbar">
           <div>
             <span>SUNBELEAF PRODUCT CENTER</span>
@@ -1157,205 +1193,475 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
         <div className="product-edit-tabs">
           {[
             ["basic", "Thông tin cơ bản"],
+            ["details", "Thông tin chi tiết"],
             ["description", "Mô tả"],
             ["sales", "Thông tin bán hàng"],
             ["shipping", "Vận chuyển"],
+            ["others", "Thông tin khác"],
           ].map(([value, label]) => (
             <button
               key={value}
               type="button"
               className={activeTab === value ? "active" : ""}
-              onClick={() => setActiveTab(value)}
+              onClick={() => handleTabClick(value)}
             >
               {label}
             </button>
           ))}
         </div>
-        {activeTab === "basic" ? (
-          <section className="edit-section">
-            <h3>Hình ảnh sản phẩm</h3>
-            <div className="media-grid">
-              {[
-                { key: "video", label: "Video sản phẩm", value: draft.video, type: "video" },
-                { key: "image", label: "Thumbnail", value: draft.image, type: "image" },
-                ...Array.from({ length: 9 }, (_, index) => ({
-                  key: `image-${index}`,
-                  label: `Ảnh ${index + 1}`,
-                  value: draft.images[index] || "",
-                  type: "image",
-                  index,
-                })),
-              ].map((slot) => (
-                <div className="media-slot" key={slot.key}>
-                  <div className="media-preview">
-                    {slot.value ? (
-                      slot.type === "video" ? (
-                        <video src={slot.value} muted playsInline />
-                      ) : (
+
+        <div className="product-edit-body">
+          <div className="product-edit-form-scroll" id="product-edit-form-scroll">
+            
+            {/* 1. THÔNG TIN CƠ BẢN */}
+            <section id="edit-section-basic" className="edit-section">
+              <h3 className="section-title"><span className="required-star">*</span> Hình ảnh tỷ lệ 1:1</h3>
+              <div className="media-grid">
+                {[
+                  { key: "image", label: "Thumbnail", value: draft.image, type: "image", isCover: true },
+                  ...Array.from({ length: 8 }, (_, index) => ({
+                    key: `image-${index}`,
+                    label: `Ảnh ${index + 2}`,
+                    value: draft.images[index] || "",
+                    type: "image",
+                    index,
+                  })),
+                ].map((slot) => (
+                  <div className={`media-slot ${slot.isCover ? 'cover-slot' : ''}`} key={slot.key}>
+                    <div className="media-preview">
+                      {slot.value ? (
                         <img src={slot.value} alt={slot.label} />
-                      )
+                      ) : (
+                        <span>+</span>
+                      )}
+                      {slot.isCover && <div className="cover-badge">* Ảnh bìa</div>}
+                    </div>
+                    <strong>{slot.label}</strong>
+                    <label className="upload-button">
+                      {uploadingSlot === slot.key ? "Đang tải..." : "Tải lên"}
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp,image/gif"
+                        onChange={(event) =>
+                          uploadFile(
+                            event.target.files?.[0],
+                            (url) => {
+                              if (slot.key === "image") setField("image", url);
+                              else {
+                                const next = [...draft.images];
+                                next[slot.index] = url;
+                                setField("images", next.slice(0, 9));
+                              }
+                            },
+                            slot.key,
+                          )
+                        }
+                      />
+                    </label>
+                    <input
+                      value={slot.value}
+                      onChange={(event) => {
+                        if (slot.key === "image") setField("image", event.target.value);
+                        else {
+                          const next = [...draft.images];
+                          next[slot.index] = event.target.value;
+                          setField("images", next.slice(0, 9));
+                        }
+                      }}
+                      placeholder="Dán URL online"
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {/* Tỷ lệ 3:4 Checkbox Alert Card */}
+              <div className="ratio-alert-card">
+                <input type="checkbox" id="ratio-3-4-chk" disabled />
+                <label htmlFor="ratio-3-4-chk">
+                  <strong>Hình ảnh tỷ lệ 3:4</strong>
+                  <span>Giúp sản phẩm thời trang thêm nổi bật với tỷ lệ hình ảnh 3:4. <a href="#" onClick={(e) => e.preventDefault()}>Xem ví dụ</a></span>
+                </label>
+              </div>
+
+              {/* Video sản phẩm */}
+              <h3 className="section-title">Video sản phẩm</h3>
+              <div className="video-section-layout">
+                <div className="media-slot video-slot">
+                  <div className="media-preview">
+                    {draft.video ? (
+                      <video src={draft.video} muted playsInline />
                     ) : (
                       <span>+</span>
                     )}
+                    {draft.video && <div className="video-duration-tag">00:29</div>}
                   </div>
-                  <strong>{slot.label}</strong>
+                  <strong>Video sản phẩm</strong>
                   <label className="upload-button">
-                    {uploadingSlot === slot.key ? "Đang tải..." : "Tải lên"}
+                    {uploadingSlot === "video" ? "Đang tải..." : "Tải lên"}
                     <input
                       type="file"
-                      accept={slot.type === "video" ? "video/mp4,video/webm" : "image/png,image/jpeg,image/webp,image/gif"}
+                      accept="video/mp4,video/webm"
                       onChange={(event) =>
                         uploadFile(
                           event.target.files?.[0],
-                          (url) => {
-                            if (slot.key === "video") setField("video", url);
-                            else if (slot.key === "image") setField("image", url);
-                            else {
-                              const next = [...draft.images];
-                              next[slot.index] = url;
-                              setField("images", next.slice(0, 9));
-                            }
-                          },
-                          slot.key,
+                          (url) => setField("video", url),
+                          "video",
                         )
                       }
                     />
                   </label>
                   <input
-                    value={slot.value}
-                    onChange={(event) => {
-                      if (slot.key === "video") setField("video", event.target.value);
-                      else if (slot.key === "image") setField("image", event.target.value);
-                      else {
-                        const next = [...draft.images];
-                        next[slot.index] = event.target.value;
-                        setField("images", next.slice(0, 9));
-                      }
-                    }}
-                    placeholder="Dán URL online"
+                    value={draft.video}
+                    onChange={(event) => setField("video", event.target.value)}
+                    placeholder="Dán URL video"
                   />
                 </div>
-              ))}
-            </div>
-            <label>Tên sản phẩm<input value={draft.name} onChange={(event) => setField("name", event.target.value)} /></label>
-            <label>Mô tả ngắn<textarea value={draft.description} onChange={(event) => setField("description", event.target.value)} /></label>
-            <label>SKU sản phẩm<input value={draft.sku} onChange={(event) => setField("sku", event.target.value)} /></label>
-          </section>
-        ) : null}
-
-        {activeTab === "description" ? (
-          <section className="edit-section">
-            <div className="description-toolbar">
-              <button type="button" onClick={() => setField("descriptionBlocks", [...draft.descriptionBlocks, { id: makeDraftId("text"), type: "text", style: "normal", text: "" }])}>+ Thêm text</button>
-              <label className="upload-button">+ Thêm ảnh/GIF<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={(event) => uploadFile(event.target.files?.[0], (url) => setField("descriptionBlocks", [...draft.descriptionBlocks, { id: makeDraftId("image"), type: "image", url, alt: draft.name }]), "description-image")} /></label>
-            </div>
-            <div className="description-builder">
-              {draft.descriptionBlocks.map((block, index) => (
-                <div className="description-block" key={block.id}>
-                  <div className="block-actions">
-                    <span>#{index + 1}</span>
-                    {block.type === "text" ? (
-                      <select value={block.style || "normal"} onChange={(event) => setField("descriptionBlocks", draft.descriptionBlocks.map((item) => item.id === block.id ? { ...item, style: event.target.value } : item))}>
-                        <option value="normal">Đoạn thường</option>
-                        <option value="heading">Heading</option>
-                        <option value="italic">In nghiêng</option>
-                        <option value="uppercase">IN HOA</option>
-                      </select>
-                    ) : null}
-                    <button type="button" onClick={() => {
-                      const next = [...draft.descriptionBlocks];
-                      if (index > 0) [next[index - 1], next[index]] = [next[index], next[index - 1]];
-                      setField("descriptionBlocks", next);
-                    }}>↑</button>
-                    <button type="button" onClick={() => {
-                      const next = [...draft.descriptionBlocks];
-                      if (index < next.length - 1) [next[index], next[index + 1]] = [next[index + 1], next[index]];
-                      setField("descriptionBlocks", next);
-                    }}>↓</button>
-                    <button type="button" onClick={() => setField("descriptionBlocks", draft.descriptionBlocks.filter((item) => item.id !== block.id))}>Xóa</button>
-                  </div>
-                  {block.type === "image" ? (
-                    <div className="description-image-row">
-                      <img src={block.url} alt={block.alt || ""} />
-                      <input value={block.url || ""} onChange={(event) => setField("descriptionBlocks", draft.descriptionBlocks.map((item) => item.id === block.id ? { ...item, url: event.target.value } : item))} />
-                    </div>
-                  ) : (
-                    <textarea value={block.text || ""} onChange={(event) => setField("descriptionBlocks", draft.descriptionBlocks.map((item) => item.id === block.id ? { ...item, text: event.target.value } : item))} placeholder="Nhập mô tả..." />
-                  )}
+                <div className="video-guidelines">
+                  <ul>
+                    <li>Size: Max 30MB, resolution should not less than 1x1px</li>
+                    <li>Độ dài: 10s-60s</li>
+                    <li>Định dạng: MP4</li>
+                    <li className="guideline-note">Lưu ý: sản phẩm có thể hiển thị trong khi video đang được xử lý. Video sẽ tự động hiển thị sau khi đã xử lý thành công.</li>
+                  </ul>
                 </div>
-              ))}
-            </div>
-          </section>
-        ) : null}
+              </div>
 
-        {activeTab === "sales" ? (
-          <section className="edit-section">
-            <div className="edit-grid-2">
-              <label>Giá bán<input type="number" min="0" value={draft.price} onChange={(event) => setField("price", event.target.value)} /></label>
-              <label>Giá gốc/giá gạch<input type="number" min="0" value={draft.listPrice} onChange={(event) => setField("listPrice", event.target.value)} /></label>
-            </div>
-            <h3>Phân loại sản phẩm</h3>
-            {draft.variantGroups.length ? draft.variantGroups.map((group) => (
-              <div className="variant-group-card" key={group.id}>
-                <strong>{group.title}</strong>
-                {group.options.map((option) => (
-                  <div className="variant-option-row" key={option.id}>
-                    <input value={option.name} onChange={(event) => setField("variantGroups", draft.variantGroups.map((item) => item.id === group.id ? { ...item, options: item.options.map((child) => child.id === option.id ? { ...child, name: event.target.value } : child) } : item))} placeholder="Tên phân loại" />
-                    <input type="number" value={option.extraPrice} onChange={(event) => setField("variantGroups", draft.variantGroups.map((item) => item.id === group.id ? { ...item, options: item.options.map((child) => child.id === option.id ? { ...child, extraPrice: Number(event.target.value || 0) } : child) } : item))} placeholder="Cộng giá" />
-                    <input value={option.sku || ""} onChange={(event) => setField("variantGroups", draft.variantGroups.map((item) => item.id === group.id ? { ...item, options: item.options.map((child) => child.id === option.id ? { ...child, sku: event.target.value } : child) } : item))} placeholder="SKU phân loại" />
-                    <label className="upload-button">Ảnh<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={(event) => uploadFile(event.target.files?.[0], (url) => setField("variantGroups", draft.variantGroups.map((item) => item.id === group.id ? { ...item, options: item.options.map((child) => child.id === option.id ? { ...child, image: url } : child) } : item)), `${group.id}-${option.id}`)} /></label>
-                    {option.image ? <img src={option.image} alt={option.name} /> : null}
+              {/* Tên sản phẩm & Ngành hàng */}
+              <div className="field-group">
+                <label className="field-label required-label">
+                  Tên sản phẩm
+                  <div className="input-with-counter">
+                    <input
+                      maxLength={120}
+                      value={draft.name}
+                      onChange={(event) => setField("name", event.target.value)}
+                      placeholder="Nhập tên sản phẩm..."
+                    />
+                    <span className="char-counter">{draft.name.length}/120</span>
+                  </div>
+                </label>
+              </div>
+
+              <div className="field-group">
+                <label className="field-label required-label">
+                  Ngành hàng
+                  <div className="readonly-input-wrapper">
+                    <input
+                      readOnly
+                      value="Thực phẩm và đồ uống > Đồ uống > Trà thảo mộc"
+                    />
+                    <span className="edit-icon-pencil">✏️</span>
+                  </div>
+                </label>
+              </div>
+            </section>
+
+            {/* 2. THÔNG TIN CHI TIẾT */}
+            <section id="edit-section-details" className="edit-section">
+              <h3 className="section-title">Thông tin chi tiết</h3>
+              <p className="section-subtitle">
+                Hoàn thành: 9 / 16 Điền thông tin thuộc tính để tăng mức độ hiển thị cho sản phẩm <a href="#" onClick={(e) => e.preventDefault()}>Xem hướng dẫn bổ sung thuộc tính.</a>
+              </p>
+
+              <div className="edit-grid-2">
+                <label className="field-label required-label">
+                  Thương hiệu
+                  <input list="brands" value={draft.brand} onChange={(e) => setField("brand", e.target.value)} placeholder="Chọn hoặc nhập thương hiệu..." />
+                  <datalist id="brands">
+                    <option value="Sunbeleaf" />
+                    <option value="Delta D'Asia" />
+                  </datalist>
+                </label>
+
+                <label className="field-label required-label">
+                  Xuất xứ
+                  <input list="origins" value={draft.origin} onChange={(e) => setField("origin", e.target.value)} placeholder="Chọn hoặc nhập xuất xứ..." />
+                  <datalist id="origins">
+                    <option value="Việt Nam" />
+                    <option value="Nhật Bản" />
+                    <option value="Hàn Quốc" />
+                    <option value="Thái Lan" />
+                  </datalist>
+                </label>
+
+                <label className="field-label required-label">
+                  Hạn sử dụng
+                  <input list="expiries" value={draft.expiry} onChange={(e) => setField("expiry", e.target.value)} placeholder="Chọn hoặc nhập hạn sử dụng..." />
+                  <datalist id="expiries">
+                    <option value="12 tháng" />
+                    <option value="24 tháng" />
+                    <option value="36 tháng" />
+                  </datalist>
+                </label>
+
+                <label className="field-label">
+                  Thể tích / Khối lượng
+                  <input list="volumes" value={draft.volume} onChange={(e) => setField("volume", e.target.value)} placeholder="Chọn hoặc nhập thể tích..." />
+                  <datalist id="volumes">
+                    <option value="100g" />
+                    <option value="200g" />
+                    <option value="500g" />
+                    <option value="100ml" />
+                    <option value="200ml" />
+                    <option value="500ml" />
+                  </datalist>
+                </label>
+
+                <label className="field-label">
+                  Ngày sản xuất
+                  <input type="date" value={draft.manufactureDate} onChange={(e) => setField("manufactureDate", e.target.value)} />
+                </label>
+
+                <label className="field-label">
+                  Ngày hết hạn
+                  <input type="date" value={draft.expiryDate} onChange={(e) => setField("expiryDate", e.target.value)} />
+                </label>
+
+                <label className="field-label">
+                  Tên tổ chức chịu trách nhiệm sản xuất
+                  <input value={draft.responsibleOrg} onChange={(e) => setField("responsibleOrg", e.target.value)} placeholder="Nhập tên tổ chức..." />
+                </label>
+
+                <label className="field-label">
+                  Địa chỉ tổ chức chịu trách nhiệm sản xuất
+                  <input value={draft.responsibleOrgAddress} onChange={(e) => setField("responsibleOrgAddress", e.target.value)} placeholder="Nhập địa chỉ..." />
+                </label>
+
+                <label className="field-label">
+                  Hương vị
+                  <input value={draft.flavor} onChange={(e) => setField("flavor", e.target.value)} placeholder="Ví dụ: Thơm thảo mộc, vị ngọt nhẹ..." />
+                </label>
+
+                <label className="field-label">
+                  Thành phần
+                  <input value={draft.ingredients} onChange={(e) => setField("ingredients", e.target.value)} placeholder="Ví dụ: 100% Nụ hoa hồng khô..." />
+                </label>
+
+                <label className="field-label">
+                  Kích cỡ cái
+                  <input value={draft.packageSize} onChange={(e) => setField("packageSize", e.target.value)} placeholder="Ví dụ: 100 G/Cái..." />
+                </label>
+              </div>
+            </section>
+
+            {/* 3. MÔ TẢ SẢN PHẨM */}
+            <section id="edit-section-description" className="edit-section">
+              <h3 className="section-title"><span className="required-star">*</span> Mô tả sản phẩm</h3>
+              <div className="description-toolbar">
+                <span className="toolbar-title">Tải lên hình ảnh ({draft.descriptionBlocks.filter(b=>b.type==='image').length}/12)</span>
+                <button type="button" className="text-add-btn" onClick={() => setField("descriptionBlocks", [...draft.descriptionBlocks, { id: makeDraftId("text"), type: "text", style: "normal", text: "" }])}>+ Thêm text</button>
+                <label className="upload-button inline-upload-btn">
+                  + Thêm ảnh/GIF
+                  <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={(event) => uploadFile(event.target.files?.[0], (url) => setField("descriptionBlocks", [...draft.descriptionBlocks, { id: makeDraftId("image"), type: "image", url, alt: draft.name }]), "description-image")} />
+                </label>
+                <span className="description-char-counter">{draft.descriptionBlocks.reduce((acc, b) => acc + (b.text || '').length, 0)}/5000</span>
+              </div>
+              <div className="description-builder">
+                {draft.descriptionBlocks.map((block, index) => (
+                  <div className="description-block" key={block.id}>
+                    <div className="block-actions">
+                      <span>#{index + 1}</span>
+                      {block.type === "text" ? (
+                        <select value={block.style || "normal"} onChange={(event) => setField("descriptionBlocks", draft.descriptionBlocks.map((item) => item.id === block.id ? { ...item, style: event.target.value } : item))}>
+                          <option value="normal">Đoạn thường</option>
+                          <option value="heading">Heading</option>
+                          <option value="italic">In nghiêng</option>
+                          <option value="uppercase">IN HOA</option>
+                        </select>
+                      ) : null}
+                      <button type="button" className="action-arrow-btn" onClick={() => {
+                        const next = [...draft.descriptionBlocks];
+                        if (index > 0) [next[index - 1], next[index]] = [next[index], next[index - 1]];
+                        setField("descriptionBlocks", next);
+                      }}>↑</button>
+                      <button type="button" className="action-arrow-btn" onClick={() => {
+                        const next = [...draft.descriptionBlocks];
+                        if (index < next.length - 1) [next[index], next[index + 1]] = [next[index + 1], next[index]];
+                        setField("descriptionBlocks", next);
+                      }}>↓</button>
+                      <button type="button" className="action-delete-btn" onClick={() => setField("descriptionBlocks", draft.descriptionBlocks.filter((item) => item.id !== block.id))}>Xóa</button>
+                    </div>
+                    {block.type === "image" ? (
+                      <div className="description-image-row">
+                        <img src={block.url} alt={block.alt || ""} />
+                        <input value={block.url || ""} onChange={(event) => setField("descriptionBlocks", draft.descriptionBlocks.map((item) => item.id === block.id ? { ...item, url: event.target.value } : item))} placeholder="URL hình ảnh" />
+                      </div>
+                    ) : (
+                      <textarea value={block.text || ""} onChange={(event) => setField("descriptionBlocks", draft.descriptionBlocks.map((item) => item.id === block.id ? { ...item, text: event.target.value } : item))} placeholder="Nhập mô tả..." />
+                    )}
                   </div>
                 ))}
               </div>
-            )) : <div className="empty-box">Sản phẩm này chưa có phân loại.</div>}
-          </section>
-        ) : null}
+            </section>
 
-        {activeTab === "shipping" ? (
-          <section className="edit-section edit-grid-2">
-            <label>Cân nặng sau đóng gói (gram)<input type="number" min="0" value={draft.weightGram} onChange={(event) => setField("weightGram", event.target.value)} /></label>
-            <label>Dài (cm)<input type="number" min="0" value={draft.lengthCm} onChange={(event) => setField("lengthCm", event.target.value)} /></label>
-            <label>Rộng (cm)<input type="number" min="0" value={draft.widthCm} onChange={(event) => setField("widthCm", event.target.value)} /></label>
-            <label>Cao (cm)<input type="number" min="0" value={draft.heightCm} onChange={(event) => setField("heightCm", event.target.value)} /></label>
-          </section>
-        ) : null}
-        <aside className="product-preview-panel">
-          <div className="preview-label">Xem trước</div>
-          <div className="phone-preview">
-            <div className="preview-media">
-              {draft.video ? (
-                <video src={draft.video} poster={draft.videoPoster || previewImage} muted playsInline />
-              ) : previewImage ? (
-                <img src={previewImage} alt={draft.name} />
-              ) : (
-                <span>Ảnh sản phẩm</span>
-              )}
-            </div>
-            <div className="preview-body">
-              <div className="preview-price">
-                <strong>{formatCurrency(draft.price)}đ</strong>
-                {draft.listPrice ? <span>{formatCurrency(draft.listPrice)}đ</span> : null}
+            {/* 4. THÔNG TIN BÁN HÀNG */}
+            <section id="edit-section-sales" className="edit-section">
+              <h3 className="section-title">Thông tin bán hàng</h3>
+              <div className="edit-grid-2">
+                <label className="field-label">Giá bán<input type="number" min="0" value={draft.price} onChange={(event) => setField("price", event.target.value)} /></label>
+                <label className="field-label">Giá gốc/giá gạch<input type="number" min="0" value={draft.listPrice} onChange={(event) => setField("listPrice", event.target.value)} /></label>
               </div>
-              <strong>{draft.name || "Tên sản phẩm"}</strong>
-              <p>{draft.description || "Mô tả ngắn sẽ hiển thị tại đây."}</p>
-              {firstVariantGroup ? (
-                <div className="preview-variants">
-                  <small>{firstVariantGroup.title}</small>
-                  <div>
-                    {firstVariantGroup.options.slice(0, 3).map((option) => (
-                      <span key={option.id}>{option.name || "Phân loại"}</span>
-                    ))}
+              <h3 className="section-subtitle-bold">Phân loại sản phẩm</h3>
+              {draft.variantGroups.length ? draft.variantGroups.map((group) => (
+                <div className="variant-group-card" key={group.id}>
+                  <strong>{group.title}</strong>
+                  {group.options.map((option) => (
+                    <div className="variant-option-row" key={option.id}>
+                      <input value={option.name} onChange={(event) => setField("variantGroups", draft.variantGroups.map((item) => item.id === group.id ? { ...item, options: item.options.map((child) => child.id === option.id ? { ...child, name: event.target.value } : child) } : item))} placeholder="Tên phân loại" />
+                      <input type="number" value={option.extraPrice} onChange={(event) => setField("variantGroups", draft.variantGroups.map((item) => item.id === group.id ? { ...item, options: item.options.map((child) => child.id === option.id ? { ...child, extraPrice: Number(event.target.value || 0) } : child) } : item))} placeholder="Cộng giá" />
+                      <input value={option.sku || ""} onChange={(event) => setField("variantGroups", draft.variantGroups.map((item) => item.id === group.id ? { ...item, options: item.options.map((child) => child.id === option.id ? { ...child, sku: event.target.value } : child) } : item))} placeholder="SKU phân loại" />
+                      <label className="upload-button sm-upload-btn">Ảnh<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={(event) => uploadFile(event.target.files?.[0], (url) => setField("variantGroups", draft.variantGroups.map((item) => item.id === group.id ? { ...item, options: item.options.map((child) => child.id === option.id ? { ...child, image: url } : child) } : item)), `${group.id}-${option.id}`)} /></label>
+                      {option.image ? <img src={option.image} alt={option.name} /> : null}
+                    </div>
+                  ))}
+                </div>
+              )) : <div className="empty-box">Sản phẩm này chưa có phân loại.</div>}
+            </section>
+
+            {/* 5. VẬN CHUYỂN */}
+            <section id="edit-section-shipping" className="edit-section">
+              <h3 className="section-title">Vận chuyển</h3>
+              <div className="edit-grid-2">
+                <label className="field-label">Cân nặng sau đóng gói (gram)<input type="number" min="0" value={draft.weightGram} onChange={(event) => setField("weightGram", event.target.value)} /></label>
+                <label className="field-label">Dài (cm)<input type="number" min="0" value={draft.lengthCm} onChange={(event) => setField("lengthCm", event.target.value)} /></label>
+                <label className="field-label">Rộng (cm)<input type="number" min="0" value={draft.widthCm} onChange={(event) => setField("widthCm", event.target.value)} /></label>
+                <label className="field-label">Cao (cm)<input type="number" min="0" value={draft.heightCm} onChange={(event) => setField("heightCm", event.target.value)} /></label>
+              </div>
+            </section>
+
+            {/* 6. THÔNG TIN KHÁC */}
+            <section id="edit-section-others" className="edit-section">
+              <h3 className="section-title">Thông tin khác</h3>
+              <div className="edit-grid-2">
+                <label className="field-label">
+                  Hàng đặt trước (Pre-order)
+                  <select value="no" readOnly disabled>
+                    <option value="no">Không</option>
+                    <option value="yes">Có</option>
+                  </select>
+                </label>
+                <label className="field-label">
+                  Tình trạng sản phẩm
+                  <select value="new" readOnly disabled>
+                    <option value="new">Mới</option>
+                    <option value="used">Đã sử dụng</option>
+                  </select>
+                </label>
+              </div>
+            </section>
+          </div>
+
+          {/* CỘT PHẢI - PHONE PREVIEW */}
+          <aside className="product-preview-panel">
+            <div className="preview-label">Xem trước</div>
+            <div className="phone-preview">
+              <div className="phone-screen-container">
+                
+                {/* Media preview */}
+                <div className="preview-media">
+                  {draft.video ? (
+                    <video src={draft.video} poster={draft.videoPoster || previewImage} muted playsInline />
+                  ) : previewImage ? (
+                    <img src={previewImage} alt={draft.name} />
+                  ) : (
+                    <span>Ảnh sản phẩm</span>
+                  )}
+                </div>
+
+                {/* Body Preview */}
+                <div className="preview-body">
+                  <div className="preview-price">
+                    <strong>{formatCurrency(draft.price)}đ</strong>
+                    {draft.listPrice ? <span>{formatCurrency(draft.listPrice)}đ</span> : null}
+                  </div>
+                  <strong className="preview-title">{draft.name || "Tên sản phẩm"}</strong>
+                  
+                  {/* Variant choices simulation */}
+                  <div className="preview-variants-tabs">
+                    <span className="active-variant">Túi 100g</span>
+                    <span>Tạm hết hàng</span>
+                  </div>
+
+                  {/* Shop Profile simulation */}
+                  <div className="preview-shop-row">
+                    <div className="shop-info">
+                      <div className="shop-avatar">S</div>
+                      <div>
+                        <strong>Trà thảo mộc Sunbeleaf</strong>
+                        <span>tra_thao_moc_sunbeleaf</span>
+                      </div>
+                    </div>
+                    <button type="button" className="shop-view-btn">Xem</button>
+                  </div>
+
+                  {/* Dynamic Specifications Row trigger */}
+                  <div className="preview-specs-row" onClick={() => setShowPreviewDetails(true)}>
+                    <span>Thông tin chi tiết</span>
+                    <span className="specs-summary">
+                      Thương hiệu: {draft.brand || "Sunbeleaf"}...
+                    </span>
+                    <span className="arrow-right">&gt;</span>
+                  </div>
+
+                  {/* Description Preview snippet */}
+                  <div className="preview-description">
+                    <strong>Mô tả</strong>
+                    <p>{draft.description || "Mô tả ngắn sẽ hiển thị tại đây."}</p>
+                    <span className="xem-them-btn">Xem Thêm ▾</span>
                   </div>
                 </div>
-              ) : null}
-              {draft.sku ? <p>SKU: {draft.sku}</p> : null}
+
+                {/* Bottom Bar simulation */}
+                <div className="preview-bottom-bar">
+                  <div className="bottom-icon">💬</div>
+                  <div className="bottom-icon">🛒</div>
+                  <button type="button" className="buy-now-btn">Mua Ngay</button>
+                </div>
+
+                {/* Interactive Details Drawer */}
+                <div className={`preview-details-drawer ${showPreviewDetails ? 'active' : ''}`}>
+                  <div className="drawer-header">
+                    <h4>Thông tin chi tiết</h4>
+                    <button type="button" className="close-drawer-btn" onClick={() => setShowPreviewDetails(false)}>×</button>
+                  </div>
+                  <div className="drawer-content">
+                    <dl className="drawer-specs-list">
+                      <div className="spec-item"><dt>Thương hiệu</dt><dd>{draft.brand || "Sunbeleaf"}</dd></div>
+                      <div className="spec-item"><dt>Xuất xứ</dt><dd>{draft.origin || "Việt Nam"}</dd></div>
+                      <div className="spec-item"><dt>Hạn sử dụng</dt><dd>{draft.expiry || "12 tháng"}</dd></div>
+                      {draft.volume && <div className="spec-item"><dt>Thể tích</dt><dd>{draft.volume}</dd></div>}
+                      {draft.manufactureDate && <div className="spec-item"><dt>Ngày sản xuất</dt><dd>{draft.manufactureDate}</dd></div>}
+                      {draft.expiryDate && <div className="spec-item"><dt>Ngày hết hạn</dt><dd>{draft.expiryDate}</dd></div>}
+                      {draft.responsibleOrg && <div className="spec-item"><dt>Tổ chức sản xuất</dt><dd>{draft.responsibleOrg}</dd></div>}
+                      {draft.responsibleOrgAddress && <div className="spec-item"><dt>Địa chỉ sản xuất</dt><dd>{draft.responsibleOrgAddress}</dd></div>}
+                      {draft.flavor && <div className="spec-item"><dt>Hương vị</dt><dd>{draft.flavor}</dd></div>}
+                      {draft.ingredients && <div className="spec-item"><dt>Thành phần</dt><dd>{draft.ingredients}</dd></div>}
+                      {draft.packageSize && <div className="spec-item"><dt>Kích cỡ</dt><dd>{draft.packageSize}</dd></div>}
+                    </dl>
+                    <button type="button" className="drawer-agree-btn" onClick={() => setShowPreviewDetails(false)}>ĐỒNG Ý</button>
+                  </div>
+                </div>
+
+              </div>
             </div>
+            <div className="preview-footer-note">Hình ảnh có tính chất tham khảo, không phải hình ảnh cuối cùng Người mua thấy.</div>
+          </aside>
+        </div>
+
+        {/* Footer sticky panel */}
+        <div className="product-edit-footer">
+          <div className="malaysia-sync-banner">
+            <span className="banner-icon">⚠️</span>
+            <p>
+              Thông tin bắt buộc và thông tin đã thiết lập để đồng bộ tự động sẽ được cập nhật vào sản phẩm tương ứng trong cửa hàng Malaysia. 
+              Xin lưu ý rằng do sự khác biệt về chính sách khu vực, việc đồng bộ tự động có thể thất bại. Bạn có thể kiểm tra lại trong cửa hàng Malaysia sau.
+            </p>
           </div>
-        </aside>
-        <div className="product-edit-actions">
-          <button type="button" className="ghost-button" onClick={onClose}>Hủy</button>
-          <button type="submit" disabled={saving}>{saving ? "Đang lưu..." : "Lưu sản phẩm"}</button>
+          <div className="product-edit-actions">
+            <button type="button" className="ghost-button" onClick={onClose}>Hủy</button>
+            <button type="button" className="ghost-button" disabled={saving}>Ẩn</button>
+            <button type="submit" className="submit-red-button" disabled={saving}>{saving ? "Đang lưu..." : "Cập nhật"}</button>
+          </div>
         </div>
       </form>
     </div>

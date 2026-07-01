@@ -890,7 +890,25 @@ router.put("/inventory", async (req, res) => {
 
 router.patch("/products/:productId", (req, res) => {
   const allowed = {};
-  ["name", "description", "image", "video", "videoPoster", "sku"].forEach((key) => {
+  [
+    "name",
+    "description",
+    "image",
+    "video",
+    "videoPoster",
+    "sku",
+    "brand",
+    "origin",
+    "expiry",
+    "responsibleOrg",
+    "responsibleOrgAddress",
+    "volume",
+    "expiryDate",
+    "manufactureDate",
+    "flavor",
+    "ingredients",
+    "packageSize",
+  ].forEach((key) => {
     if (typeof req.body?.[key] === "string") {
       allowed[key] = req.body[key].trim();
     }

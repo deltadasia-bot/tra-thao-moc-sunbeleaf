@@ -250,7 +250,25 @@ function normalizeVariantGroups(value) {
 
 function normalizeProductOverride(productId, entry = {}) {
   const allowed = {};
-  ["name", "description", "image", "video", "videoPoster", "sku"].forEach((key) => {
+  [
+    "name",
+    "description",
+    "image",
+    "video",
+    "videoPoster",
+    "sku",
+    "brand",
+    "origin",
+    "expiry",
+    "responsibleOrg",
+    "responsibleOrgAddress",
+    "volume",
+    "expiryDate",
+    "manufactureDate",
+    "flavor",
+    "ingredients",
+    "packageSize",
+  ].forEach((key) => {
     if (typeof entry[key] === "string") {
       const value = entry[key].trim();
       if (value) allowed[key] = value;
