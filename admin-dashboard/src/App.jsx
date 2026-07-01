@@ -1153,30 +1153,39 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
     const doc = parser.parseFromString(html, 'text/html');
     const blocks = [];
     
-    const traverse = (node, index) => {
-      if (node.nodeType === Node.ELEMENT_NODE) {
+    const traverse = (node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        const text = node.textContent;
+        if (text && text.trim()) {
+          blocks.push({
+            id: `text-${Math.random().toString(36).substr(2, 9)}`,
+            type: 'text',
+            style: 'normal',
+            text: text
+          });
+        }
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
         const tagName = node.tagName.toLowerCase();
+        
         if (tagName === 'img') {
           blocks.push({
-            id: `img-${index}-${Date.now()}`,
+            id: `img-${Math.random().toString(36).substr(2, 9)}`,
             type: 'image',
             url: node.getAttribute('src') || '',
             alt: node.getAttribute('alt') || ''
           });
         } else if (tagName === 'h1' || tagName === 'h2' || tagName === 'h3' || tagName === 'h4') {
           blocks.push({
-            id: `text-${index}-${Date.now()}`,
+            id: `text-${Math.random().toString(36).substr(2, 9)}`,
             type: 'text',
             style: 'heading',
             text: node.textContent || ''
           });
-        } else if (tagName === 'br') {
-          // Ignored
         } else if (tagName === 'ul') {
           const items = Array.from(node.querySelectorAll('li')).map(li => `• ${li.textContent}`).join('\n');
           if (items) {
             blocks.push({
-              id: `text-${index}-${Date.now()}`,
+              id: `text-${Math.random().toString(36).substr(2, 9)}`,
               type: 'text',
               style: 'normal',
               text: items
@@ -1186,28 +1195,25 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
           const items = Array.from(node.querySelectorAll('li')).map((li, idx) => `${idx + 1}. ${li.textContent}`).join('\n');
           if (items) {
             blocks.push({
-              id: `text-${index}-${Date.now()}`,
+              id: `text-${Math.random().toString(36).substr(2, 9)}`,
               type: 'text',
               style: 'normal',
               text: items
             });
           }
+        } else if (tagName === 'br') {
+          // Ignored
         } else {
-          const img = node.querySelector('img');
-          if (img) {
-            blocks.push({
-              id: `img-${index}-${Date.now()}`,
-              type: 'image',
-              url: img.getAttribute('src') || '',
-              alt: img.getAttribute('alt') || ''
-            });
+          const hasImg = node.querySelector('img') !== null;
+          if (hasImg) {
+            Array.from(node.childNodes).forEach(traverse);
           } else {
-            const isItalic = node.querySelector('i, em') !== null || node.style?.fontStyle === 'italic';
-            const isBold = node.querySelector('b, strong') !== null || node.style?.fontWeight === 'bold';
+            const isItalic = node.querySelector('i, em') !== null || node.style?.fontStyle === 'italic' || tagName === 'i' || tagName === 'em';
+            const isBold = node.querySelector('b, strong') !== null || node.style?.fontWeight === 'bold' || tagName === 'b' || tagName === 'strong';
             const text = node.innerHTML.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '');
             if (text.trim() || text === '\n') {
               blocks.push({
-                id: `text-${index}-${Date.now()}`,
+                id: `text-${Math.random().toString(36).substr(2, 9)}`,
                 type: 'text',
                 style: isItalic ? 'italic' : isBold ? 'uppercase' : 'normal',
                 text: text
@@ -1215,20 +1221,10 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
             }
           }
         }
-      } else if (node.nodeType === Node.TEXT_NODE) {
-        const text = node.textContent;
-        if (text && text.trim()) {
-          blocks.push({
-            id: `text-${index}-${Date.now()}`,
-            type: 'text',
-            style: 'normal',
-            text: text
-          });
-        }
       }
     };
     
-    Array.from(doc.body.childNodes).forEach((node, index) => traverse(node, index));
+    Array.from(doc.body.childNodes).forEach(traverse);
     return blocks.filter(b => b.type === 'image' ? b.url : b.text);
   };
 
@@ -1738,15 +1734,17 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
                   1.
                 </button>
                 
-                 <label 
-                  className="upload-button wysiwyg-upload-btn"
-                  onMouseDown={() => {
-                    const sel = window.getSelection();
-                    if (sel && sel.rangeCount > 0) {
-                      window.savedWysiwygRange = sel.getRangeAt(0);
-                    }
-                  }}
-                >
+                  <label 
+                   className="upload-button wysiwyg-upload-btn"
+                   onMouseDown={() => {
+                     const sel = window.getSelection();
+                     if (sel && sel.rangeCount > 0 && editorRef.current?.contains(sel.anchorNode)) {
+                       window.savedWysiwygRange = sel.getRangeAt(0);
+                     } else {
+                       window.savedWysiwygRange = null;
+                     }
+                   }}
+                 >
                   📷 Chèn hình ảnh ({draft.descriptionBlocks.filter(b => b.type === 'image').length}/12)
                   <input 
                     type="file" 

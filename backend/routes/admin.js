@@ -462,22 +462,28 @@ async function uploadToWordPress(file) {
     process.env.WORDPRESS_MEDIA_URL || "https://deltadasia.com/wp-json/wp/v2/media";
   if (!username || !password) return null;
 
-  const filename = sanitizeFilename(file.originalname);
-  const auth = Buffer.from(`${username}:${password}`).toString("base64");
-  const response = await fetch(mediaUrl, {
-    method: "POST",
-    headers: {
-      Authorization: `Basic ${auth}`,
-      "Content-Disposition": `attachment; filename="${filename}"`,
-      "Content-Type": file.mimetype,
-    },
-    body: file.buffer,
-  });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok || !data.source_url) {
-    throw new Error(data?.message || "Khong upload duoc media len WordPress");
+  try {
+    const filename = sanitizeFilename(file.originalname);
+    const auth = Buffer.from(`${username}:${password}`).toString("base64");
+    const response = await fetch(mediaUrl, {
+      method: "POST",
+      headers: {
+        Authorization: `Basic ${auth}`,
+        "Content-Disposition": `attachment; filename="${filename}"`,
+        "Content-Type": file.mimetype,
+      },
+      body: file.buffer,
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.source_url) {
+      console.warn("[WordPress Upload Warning]:", data?.message || "Failed to upload to WordPress");
+      return null;
+    }
+    return data.source_url;
+  } catch (err) {
+    console.warn("[WordPress Upload Warning]:", err.message);
+    return null;
   }
-  return data.source_url;
 }
 
 async function saveProductMediaLocally(req, file) {
