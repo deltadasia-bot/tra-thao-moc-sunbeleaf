@@ -1430,24 +1430,28 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
                       <input
                         type="file"
                         accept="image/png,image/jpeg,image/webp,image/gif"
-                        onChange={(event) =>
-                          uploadFile(
-                            event.target.files?.[0],
-                            (url) => {
-                              if (slot.key === "image") {
-                                setField("image", url);
-                                const next = [...draft.images];
-                                next[0] = url;
-                                setField("images", next);
-                              } else {
-                                const next = [...draft.images];
-                                next[slot.index] = url;
-                                setField("images", next);
-                              }
-                            },
-                            slot.key,
-                          )
-                        }
+                        onChange={(event) => {
+                          const file = event.target.files?.[0];
+                          if (file) {
+                            uploadFile(
+                              file,
+                              (url) => {
+                                if (slot.key === "image") {
+                                  setField("image", url);
+                                  const next = [...draft.images];
+                                  next[0] = url;
+                                  setField("images", next);
+                                } else {
+                                  const next = [...draft.images];
+                                  next[slot.index] = url;
+                                  setField("images", next);
+                                }
+                              },
+                              slot.key,
+                            );
+                          }
+                          event.target.value = "";
+                        }}
                       />
                     </label>
                     <input
@@ -1772,6 +1776,7 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
                           triggerEditorChange();
                         }, "wysiwyg-image-upload");
                       }
+                      event.target.value = "";
                     }} 
                   />
                 </label>
