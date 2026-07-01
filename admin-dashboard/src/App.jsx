@@ -1734,7 +1734,15 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
                   1.
                 </button>
                 
-                <label className="upload-button wysiwyg-upload-btn">
+                 <label 
+                  className="upload-button wysiwyg-upload-btn"
+                  onMouseDown={() => {
+                    const sel = window.getSelection();
+                    if (sel && sel.rangeCount > 0) {
+                      window.savedWysiwygRange = sel.getRangeAt(0);
+                    }
+                  }}
+                >
                   📷 Chèn hình ảnh ({draft.descriptionBlocks.filter(b => b.type === 'image').length}/12)
                   <input 
                     type="file" 
@@ -1742,7 +1750,23 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
                     onChange={(event) => {
                       const file = event.target.files?.[0];
                       if (file) {
+                        const rangeToRestore = window.savedWysiwygRange;
                         uploadFile(file, (url) => {
+                          if (editorRef.current) {
+                            editorRef.current.focus();
+                            if (rangeToRestore) {
+                              const sel = window.getSelection();
+                              sel.removeAllRanges();
+                              sel.addRange(rangeToRestore);
+                            } else {
+                              const sel = window.getSelection();
+                              const range = document.createRange();
+                              range.selectNodeContents(editorRef.current);
+                              range.collapse(false);
+                              sel.removeAllRanges();
+                              sel.addRange(range);
+                            }
+                          }
                           const imgHtml = `<img src="${url}" alt="${draft.name}" style="max-width:100%; display:block; margin:10px auto; border-radius:8px;" />`;
                           document.execCommand('insertHTML', false, imgHtml);
                           triggerEditorChange();
