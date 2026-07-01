@@ -79,6 +79,63 @@ function saveTokens(accessToken, refreshToken) {
 let tokens = loadTokens();
 let cachedStats = null;
 let cachedStatsExpiresAt = 0;
+let lastOaErrorEmailSentAt = 0;
+
+const nodemailer = require("nodemailer");
+
+async function sendZaloTokenErrorEmail(errorMessage) {
+  const emailFrom = process.env.NOTIFY_EMAIL_FROM;
+  const emailPass = process.env.NOTIFY_EMAIL_PASS;
+  const emailTo = process.env.NOTIFY_EMAIL_TO || "deltadasia@gmail.com";
+
+  if (!emailFrom || !emailPass) {
+    console.log("[Zalo OA Alert Email] Gmail config not found, skip sending alert email.");
+    return;
+  }
+
+  try {
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: { user: emailFrom, pass: emailPass },
+    });
+
+    await transporter.sendMail({
+      from: `"Zalo OA Alert System" <${emailFrom}>`,
+      to: emailTo,
+      subject: "🚨 [CẢNH BÁO] Lỗi Token Zalo OA - Cần cập nhật ngay!",
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ecc9c9; border-radius: 12px; background-color: #fdfaf9;">
+          <h2 style="color: #d32f2f; margin-top: 0;">🚨 Phát hiện lỗi Token Zalo OA</h2>
+          <p>Xin chào quản trị viên,</p>
+          <p>Hệ thống kết nối Zalo OA trên backend của dự án <strong>Trà thảo mộc Sunbeleaf</strong> đã phát hiện lỗi kết nối nghiêm trọng do hết hạn hoặc sai lệch Token.</p>
+          
+          <div style="background-color: #ffebee; border-left: 4px solid #ef5350; padding: 12px; margin: 16px 0; border-radius: 4px;">
+            <strong>Chi tiết lỗi:</strong> <code style="color: #c62828;">${errorMessage}</code>
+          </div>
+
+          <p><strong>Hướng dẫn khắc phục:</strong></p>
+          <ol style="line-height: 1.6;">
+            <li>Truy cập trang <a href="https://oa.zalo.me" target="_blank" style="color: #0288d1; font-weight: bold;">Zalo OA Admin</a> -> mục <strong>Phát triển</strong> -> <strong>Quản lý API</strong>.</li>
+            <li>Chọn Ứng dụng liên kết, cấp quyền và bấm <strong>Tạo mới Access Token & Refresh Token</strong>.</li>
+            <li>Đăng nhập vào trang quản trị <strong>Railway</strong> của dự án, cập nhật hai biến môi trường:
+              <br><code>ZALO_OA_ACCESS_TOKEN</code>
+              <br><code>ZALO_OA_REFRESH_TOKEN</code>
+            </li>
+            <li><strong>Redeploy</strong> dịch vụ backend trên Railway để hệ thống tự động nhận và lưu trữ cặp token mới vào ổ đĩa Volume bền vững.</li>
+          </ol>
+          
+          <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+          <p style="font-size: 11px; color: #999; text-align: center; margin: 0;">
+            Email cảnh báo tự động từ hệ thống quản trị Trà thảo mộc Sunbeleaf
+          </p>
+        </div>
+      `
+    });
+    console.log(`[Zalo OA Alert Email] ✅ Sent alert email to ${emailTo}`);
+  } catch (err) {
+    console.warn("[Zalo OA Alert Email] Failed to send alert email:", err.message);
+  }
+}
 
 function buildZaloAppSecretProof(accessToken) {
   if (!accessToken || !ZALO_OA_APP_SECRET) return null;
@@ -94,6 +151,17 @@ async function refreshZaloToken(currentTokens) {
 
   if (!refreshToken || !ZALO_OA_APP_ID || !ZALO_OA_APP_SECRET) {
     throw new Error("Thieu thong tin de lam moi token (ZALO_OA_APP_ID/ZALO_OA_APP_SECRET/REFRESH_TOKEN)");
+  }
+
+  // Warn about local dev conflicts
+  const isLocalDev = !process.env.RAILWAY_ENVIRONMENT && !process.env.PRODUCTION && (process.env.NODE_ENV !== 'production');
+  if (isLocalDev) {
+    console.warn(
+      "\n" +
+      "⚠️  [Zalo OA Warning] BẠN ĐANG CHẠY REFRESH TOKEN TẠI LOCAL DEV.\n" +
+      "   Nếu local refresh thành công, Refresh Token trên Production (Railway) sẽ BỊ VÔ HIỆU HÓA lập tức.\n" +
+      "   Hãy chắc chắn bạn đã hiểu và có ổ đĩa Volume bền vững trên Railway để tự phục hồi.\n"
+    );
   }
 
   console.log(`[Zalo OA Token] Attempting to refresh Access Token using Refresh Token from source: ${activeTokens.source || "unknown"}...`);
@@ -190,6 +258,14 @@ async function callZaloOfficialAccountApi(url, options = {}, attempt = 1) {
       if (attempt === 1 && currentTokens.source !== "env") {
         return callZaloOfficialAccountApi(url, options, 2);
       }
+
+      // If we failed after all attempts (including env fallback), send alert email
+      const ONE_HOUR = 60 * 60 * 1000;
+      if (Date.now() - lastOaErrorEmailSentAt > ONE_HOUR) {
+        lastOaErrorEmailSentAt = Date.now();
+        sendZaloTokenErrorEmail(refreshErr.message || "Loi lam moi token Zalo OA").catch(console.error);
+      }
+
       throw refreshErr;
     }
   }
