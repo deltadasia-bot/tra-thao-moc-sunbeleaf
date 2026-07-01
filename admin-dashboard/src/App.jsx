@@ -1058,14 +1058,22 @@ function normalizeVariantGroupsForEdit(product) {
 
 function ProductEditModal({ product, onClose, onSave, onUpload }) {
   const override = product.productOverride || {};
-  const initialImages = asArray(override.images || product.images).slice(0, 9);
+  
+  const mockImages = asArray(product.images);
+  const overrideImages = asArray(override.images);
+  const initialImages = [];
+  for (let i = 0; i < 9; i++) {
+    initialImages[i] = overrideImages[i] || mockImages[i] || "";
+  }
+
   const initialDescriptionBlocks = asArray(override.descriptionBlocks || product.descriptionBlocks);
+  const currentDescriptionText = override.description || product.description || "";
   const fallbackDescriptionBlocks = [
-    ...(product.description ? [{
+    ...(currentDescriptionText ? [{
       id: "default-description",
       type: "text",
       style: "normal",
-      text: product.description,
+      text: currentDescriptionText,
     }] : []),
     ...asArray(product.descriptionImages).map((url, index) => ({
       id: `default-image-${index}`,
@@ -1395,16 +1403,16 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
             
             {/* 1. THÔNG TIN CƠ BẢN */}
             <section id="edit-section-basic" className="edit-section">
-              <h3 className="section-title"><span className="required-star">*</span> Hình ảnh tỷ lệ 1:1</h3>
+              <h3 className="section-title"><span className="required-star">*</span> Hình ảnh sản phẩm (Tối đa 9 ảnh)</h3>
               <div className="media-grid">
                 {[
-                  { key: "image", label: "Thumbnail", value: draft.image, type: "image", isCover: true },
+                  { key: "image", label: "Ảnh bìa (Thumbnail)", value: draft.image, type: "image", isCover: true, index: 0 },
                   ...Array.from({ length: 8 }, (_, index) => ({
-                    key: `image-${index}`,
+                    key: `image-${index + 1}`,
                     label: `Ảnh ${index + 2}`,
-                    value: draft.images[index] || "",
+                    value: draft.images[index + 1] || "",
                     type: "image",
-                    index,
+                    index: index + 1,
                   })),
                 ].map((slot) => (
                   <div className={`media-slot ${slot.isCover ? 'cover-slot' : ''}`} key={slot.key}>
@@ -1426,11 +1434,15 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
                           uploadFile(
                             event.target.files?.[0],
                             (url) => {
-                              if (slot.key === "image") setField("image", url);
-                              else {
+                              if (slot.key === "image") {
+                                setField("image", url);
+                                const next = [...draft.images];
+                                next[0] = url;
+                                setField("images", next);
+                              } else {
                                 const next = [...draft.images];
                                 next[slot.index] = url;
-                                setField("images", next.slice(0, 9));
+                                setField("images", next);
                               }
                             },
                             slot.key,
@@ -1441,26 +1453,22 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
                     <input
                       value={slot.value}
                       onChange={(event) => {
-                        if (slot.key === "image") setField("image", event.target.value);
-                        else {
+                        const urlVal = event.target.value;
+                        if (slot.key === "image") {
+                          setField("image", urlVal);
                           const next = [...draft.images];
-                          next[slot.index] = event.target.value;
-                          setField("images", next.slice(0, 9));
+                          next[0] = urlVal;
+                          setField("images", next);
+                        } else {
+                          const next = [...draft.images];
+                          next[slot.index] = urlVal;
+                          setField("images", next);
                         }
                       }}
                       placeholder="Dán URL online"
                     />
                   </div>
                 ))}
-              </div>
-
-              {/* Tỷ lệ 3:4 Checkbox Alert Card */}
-              <div className="ratio-alert-card">
-                <input type="checkbox" id="ratio-3-4-chk" disabled />
-                <label htmlFor="ratio-3-4-chk">
-                  <strong>Hình ảnh tỷ lệ 3:4</strong>
-                  <span>Giúp sản phẩm thời trang thêm nổi bật với tỷ lệ hình ảnh 3:4. <a href="#" onClick={(e) => e.preventDefault()}>Xem ví dụ</a></span>
-                </label>
               </div>
 
               {/* Video sản phẩm */}
@@ -1915,13 +1923,6 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
 
         {/* Footer sticky panel */}
         <div className="product-edit-footer">
-          <div className="malaysia-sync-banner">
-            <span className="banner-icon">⚠️</span>
-            <p>
-              Thông tin bắt buộc và thông tin đã thiết lập để đồng bộ tự động sẽ được cập nhật vào sản phẩm tương ứng trong cửa hàng Malaysia. 
-              Xin lưu ý rằng do sự khác biệt về chính sách khu vực, việc đồng bộ tự động có thể thất bại. Bạn có thể kiểm tra lại trong cửa hàng Malaysia sau.
-            </p>
-          </div>
           <div className="product-edit-actions">
             <button type="button" className="ghost-button" onClick={onClose}>Hủy</button>
             <button type="button" className="ghost-button" disabled={saving}>Ẩn</button>

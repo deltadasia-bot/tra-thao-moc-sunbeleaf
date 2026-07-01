@@ -1010,6 +1010,24 @@ export default function ProductDetailPage() {
                       className="block h-auto w-full rounded-xl bg-white object-contain"
                       loading="lazy"
                     />
+                  ) : block.text && block.text.startsWith("• ") ? (
+                    <ul
+                      key={block.id || `${block.text}-${index}`}
+                      className="list-disc pl-5 space-y-1 text-sm text-gray-700 leading-6 whitespace-pre-line"
+                    >
+                      {block.text.split("\n").map((line, idx) => (
+                        <li key={idx}>{line.replace(/^•\s*/, "")}</li>
+                      ))}
+                    </ul>
+                  ) : block.text && /^\d+\.\s*/.test(block.text) ? (
+                    <ol
+                      key={block.id || `${block.text}-${index}`}
+                      className="list-decimal pl-5 space-y-1 text-sm text-gray-700 leading-6 whitespace-pre-line"
+                    >
+                      {block.text.split("\n").map((line, idx) => (
+                        <li key={idx}>{line.replace(/^\d+\.\s*/, "")}</li>
+                      ))}
+                    </ol>
                   ) : (
                     <p
                       key={block.id || `${block.text}-${index}`}
