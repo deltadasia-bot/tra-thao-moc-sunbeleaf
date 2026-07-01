@@ -1238,6 +1238,51 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
     }
   }, []);
 
+  const [availableFonts, setAvailableFonts] = useState([
+    "Arial",
+    "Arial Black",
+    "Bahnschrift",
+    "Calibri",
+    "Cambria",
+    "Candara",
+    "Comic Sans MS",
+    "Consolas",
+    "Constantia",
+    "Corbel",
+    "Courier New",
+    "Ebrima",
+    "Franklin Gothic Medium",
+    "Gabriola",
+    "Georgia",
+    "Impact",
+    "Lucida Console",
+    "Lucida Sans Unicode",
+    "Microsoft Sans Serif",
+    "Segoe UI",
+    "SimSun",
+    "Tahoma",
+    "Times New Roman",
+    "Trebuchet MS",
+    "Verdana"
+  ]);
+
+  useEffect(() => {
+    async function loadLocalFonts() {
+      if ('queryLocalFonts' in window) {
+        try {
+          const fonts = await window.queryLocalFonts();
+          const families = Array.from(new Set(fonts.map(f => f.family))).sort();
+          if (families.length > 0) {
+            setAvailableFonts(families);
+          }
+        } catch (e) {
+          console.warn("Local fonts access query failed, using defaults:", e);
+        }
+      }
+    }
+    loadLocalFonts();
+  }, []);
+
   const [activeTab, setActiveTab] = useState("basic");
   const [uploadingSlot, setUploadingSlot] = useState("");
   const [saving, setSaving] = useState(false);
@@ -1592,12 +1637,9 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
                   defaultValue="Arial"
                   className="wysiwyg-select font-select"
                 >
-                  <option value="Arial">Arial</option>
-                  <option value="Times New Roman">Times New Roman</option>
-                  <option value="Courier New">Courier New</option>
-                  <option value="Georgia">Georgia</option>
-                  <option value="Tahoma">Tahoma</option>
-                  <option value="Verdana">Verdana</option>
+                  {availableFonts.map((font) => (
+                    <option key={font} value={font}>{font}</option>
+                  ))}
                 </select>
 
                 <button 
