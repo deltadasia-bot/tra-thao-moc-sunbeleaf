@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 
 const API_BASE = import.meta.env.VITE_ADMIN_API_BASE ?? "";
 const STORAGE_KEY = "sunbeleaf-admin-session";
@@ -1103,6 +1103,107 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
     packageSize: override.packageSize || product.packageSize || "",
   });
 
+  const editorRef = useRef(null);
+
+  const blocksToHtml = (blocks) => {
+    if (!Array.isArray(blocks)) return "";
+    return blocks.map(block => {
+      if (block.type === 'image') {
+        return `<img src="${block.url}" alt="${block.alt || ''}" style="max-width:100%; display:block; margin:10px auto; border-radius:8px;" />`;
+      } else {
+        const style = block.style || 'normal';
+        const text = (block.text || '').replace(/\n/g, '<br>');
+        if (style === 'heading') {
+          return `<h2>${text}</h2>`;
+        } else if (style === 'italic') {
+          return `<p><i>${text}</i></p>`;
+        } else if (style === 'uppercase') {
+          return `<p><b>${text}</b></p>`;
+        } else {
+          return `<p>${text}</p>`;
+        }
+      }
+    }).join('');
+  };
+
+  const htmlToBlocks = (html) => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const blocks = [];
+    
+    const traverse = (node, index) => {
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        const tagName = node.tagName.toLowerCase();
+        if (tagName === 'img') {
+          blocks.push({
+            id: `img-${index}-${Date.now()}`,
+            type: 'image',
+            url: node.getAttribute('src') || '',
+            alt: node.getAttribute('alt') || ''
+          });
+        } else if (tagName === 'h1' || tagName === 'h2' || tagName === 'h3' || tagName === 'h4') {
+          blocks.push({
+            id: `text-${index}-${Date.now()}`,
+            type: 'text',
+            style: 'heading',
+            text: node.textContent || ''
+          });
+        } else if (tagName === 'br') {
+          // Ignored
+        } else {
+          const img = node.querySelector('img');
+          if (img) {
+            blocks.push({
+              id: `img-${index}-${Date.now()}`,
+              type: 'image',
+              url: img.getAttribute('src') || '',
+              alt: img.getAttribute('alt') || ''
+            });
+          } else {
+            const isItalic = node.querySelector('i, em') !== null || node.style?.fontStyle === 'italic';
+            const isBold = node.querySelector('b, strong') !== null || node.style?.fontWeight === 'bold';
+            const text = node.innerHTML.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '');
+            if (text.trim() || text === '\n') {
+              blocks.push({
+                id: `text-${index}-${Date.now()}`,
+                type: 'text',
+                style: isItalic ? 'italic' : isBold ? 'uppercase' : 'normal',
+                text: text
+              });
+            }
+          }
+        }
+      } else if (node.nodeType === Node.TEXT_NODE) {
+        const text = node.textContent;
+        if (text && text.trim()) {
+          blocks.push({
+            id: `text-${index}-${Date.now()}`,
+            type: 'text',
+            style: 'normal',
+            text: text
+          });
+        }
+      }
+    };
+    
+    Array.from(doc.body.childNodes).forEach((node, index) => traverse(node, index));
+    return blocks.filter(b => b.type === 'image' ? b.url : b.text);
+  };
+
+  const triggerEditorChange = () => {
+    if (editorRef.current) {
+      const html = editorRef.current.innerHTML;
+      const blocks = htmlToBlocks(html);
+      setField("descriptionBlocks", blocks);
+    }
+  };
+
+  useEffect(() => {
+    if (editorRef.current) {
+      editorRef.current.innerHTML = blocksToHtml(draft.descriptionBlocks);
+    }
+  }, []);
+
   const [activeTab, setActiveTab] = useState("basic");
   const [uploadingSlot, setUploadingSlot] = useState("");
   const [saving, setSaving] = useState(false);
@@ -1447,51 +1548,88 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
             {/* 3. MÔ TẢ SẢN PHẨM */}
             <section id="edit-section-description" className="edit-section">
               <h3 className="section-title"><span className="required-star">*</span> Mô tả sản phẩm</h3>
-              <div className="description-toolbar">
-                <span className="toolbar-title">Tải lên hình ảnh ({draft.descriptionBlocks.filter(b=>b.type==='image').length}/12)</span>
-                <button type="button" className="text-add-btn" onClick={() => setField("descriptionBlocks", [...draft.descriptionBlocks, { id: makeDraftId("text"), type: "text", style: "normal", text: "" }])}>+ Thêm text</button>
-                <label className="upload-button inline-upload-btn">
-                  + Thêm ảnh/GIF
-                  <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={(event) => uploadFile(event.target.files?.[0], (url) => setField("descriptionBlocks", [...draft.descriptionBlocks, { id: makeDraftId("image"), type: "image", url, alt: draft.name }]), "description-image")} />
+              <div className="wysiwyg-toolbar">
+                <select 
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === 'h2') {
+                      document.execCommand('formatBlock', false, '<h2>');
+                    } else {
+                      document.execCommand('formatBlock', false, '<p>');
+                    }
+                    triggerEditorChange();
+                  }}
+                  defaultValue="p"
+                  className="wysiwyg-select"
+                >
+                  <option value="p">Đoạn văn (Normal)</option>
+                  <option value="h2">Tiêu đề (Heading)</option>
+                </select>
+                <button 
+                  type="button" 
+                  className="wysiwyg-btn bold-btn" 
+                  title="In đậm"
+                  onClick={() => {
+                    document.execCommand('bold', false, null);
+                    triggerEditorChange();
+                  }}
+                >
+                  B
+                </button>
+                <button 
+                  type="button" 
+                  className="wysiwyg-btn italic-btn" 
+                  title="In nghiêng"
+                  onClick={() => {
+                    document.execCommand('italic', false, null);
+                    triggerEditorChange();
+                  }}
+                >
+                  I
+                </button>
+                <button 
+                  type="button" 
+                  className="wysiwyg-btn underline-btn" 
+                  title="Gạch chân"
+                  onClick={() => {
+                    document.execCommand('underline', false, null);
+                    triggerEditorChange();
+                  }}
+                >
+                  U
+                </button>
+                
+                <label className="upload-button wysiwyg-upload-btn">
+                  📷 Chèn hình ảnh ({draft.descriptionBlocks.filter(b => b.type === 'image').length}/12)
+                  <input 
+                    type="file" 
+                    accept="image/png,image/jpeg,image/webp,image/gif" 
+                    onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      if (file) {
+                        uploadFile(file, (url) => {
+                          const imgHtml = `<img src="${url}" alt="${draft.name}" style="max-width:100%; display:block; margin:10px auto; border-radius:8px;" />`;
+                          document.execCommand('insertHTML', false, imgHtml);
+                          triggerEditorChange();
+                        }, "wysiwyg-image-upload");
+                      }
+                    }} 
+                  />
                 </label>
-                <span className="description-char-counter">{draft.descriptionBlocks.reduce((acc, b) => acc + (b.text || '').length, 0)}/5000</span>
+                
+                <span className="wysiwyg-char-counter">
+                  {draft.descriptionBlocks.reduce((acc, b) => acc + (b.text || '').length, 0)}/5000 ký tự
+                </span>
               </div>
-              <div className="description-builder">
-                {draft.descriptionBlocks.map((block, index) => (
-                  <div className="description-block" key={block.id}>
-                    <div className="block-actions">
-                      <span>#{index + 1}</span>
-                      {block.type === "text" ? (
-                        <select value={block.style || "normal"} onChange={(event) => setField("descriptionBlocks", draft.descriptionBlocks.map((item) => item.id === block.id ? { ...item, style: event.target.value } : item))}>
-                          <option value="normal">Đoạn thường</option>
-                          <option value="heading">Heading</option>
-                          <option value="italic">In nghiêng</option>
-                          <option value="uppercase">IN HOA</option>
-                        </select>
-                      ) : null}
-                      <button type="button" className="action-arrow-btn" onClick={() => {
-                        const next = [...draft.descriptionBlocks];
-                        if (index > 0) [next[index - 1], next[index]] = [next[index], next[index - 1]];
-                        setField("descriptionBlocks", next);
-                      }}>↑</button>
-                      <button type="button" className="action-arrow-btn" onClick={() => {
-                        const next = [...draft.descriptionBlocks];
-                        if (index < next.length - 1) [next[index], next[index + 1]] = [next[index + 1], next[index]];
-                        setField("descriptionBlocks", next);
-                      }}>↓</button>
-                      <button type="button" className="action-delete-btn" onClick={() => setField("descriptionBlocks", draft.descriptionBlocks.filter((item) => item.id !== block.id))}>Xóa</button>
-                    </div>
-                    {block.type === "image" ? (
-                      <div className="description-image-row">
-                        <img src={block.url} alt={block.alt || ""} />
-                        <input value={block.url || ""} onChange={(event) => setField("descriptionBlocks", draft.descriptionBlocks.map((item) => item.id === block.id ? { ...item, url: event.target.value } : item))} placeholder="URL hình ảnh" />
-                      </div>
-                    ) : (
-                      <textarea value={block.text || ""} onChange={(event) => setField("descriptionBlocks", draft.descriptionBlocks.map((item) => item.id === block.id ? { ...item, text: event.target.value } : item))} placeholder="Nhập mô tả..." />
-                    )}
-                  </div>
-                ))}
-              </div>
+              
+              <div 
+                ref={editorRef}
+                contentEditable
+                className="wysiwyg-editor"
+                placeholder="Nhập mô tả sản phẩm của bạn tại đây, bạn có thể định dạng văn bản và chèn hình ảnh tự do..."
+                onInput={triggerEditorChange}
+                onBlur={triggerEditorChange}
+              />
             </section>
 
             {/* 4. THÔNG TIN BÁN HÀNG */}
