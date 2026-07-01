@@ -10,13 +10,12 @@ router.get("/stats", async (req, res) => {
     });
     return res.json(stats);
   } catch (err) {
-    console.warn("[Zalo OA API] Error getting OA stats, using fallback:", err.message);
-    // Fallback to avoid crashing the frontend when Zalo OA environment variables are not fully configured
+    console.warn("[Zalo OA API] Error getting OA stats:", err.message);
     return res.json({
-      followerCount: 8712, // Gần với con số 8,7k mặc định
-      oaName: "Trà thảo mộc Delta D'Asia",
+      followerCount: -1,
+      oaName: null,
       updatedAt: new Date().toISOString(),
-      cached: true,
+      cached: false,
       error: err.message
     });
   }

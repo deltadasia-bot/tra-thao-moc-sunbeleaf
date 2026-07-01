@@ -244,6 +244,7 @@ export default function HomePage() {
       return 240;
     }
   });
+  const [oaError, setOaError] = useState<string | null>(null);
 
   // Fetch real OA stats and keep it synced every 30s
   useEffect(() => {
@@ -251,9 +252,14 @@ export default function HomePage() {
     
     const fetchRealStats = async () => {
       const stats = await getZaloOfficialAccountStats();
-      if (stats && typeof stats.followerCount === "number" && active) {
-        setFollowerCount(stats.followerCount);
-        localStorage.setItem("sunbeleaf_real_followers", String(stats.followerCount));
+      if (stats && active) {
+        if (stats.error) {
+          setOaError(stats.error);
+        } else if (typeof stats.followerCount === "number" && stats.followerCount >= 0) {
+          setFollowerCount(stats.followerCount);
+          setOaError(null);
+          localStorage.setItem("sunbeleaf_real_followers", String(stats.followerCount));
+        }
       }
     };
     
@@ -1591,7 +1597,13 @@ export default function HomePage() {
                   </svg>
                 </span>
                 <span className="opacity-60">|</span>
-                <span>{followerCount.toLocaleString("vi-VN")} Người theo dõi</span>
+                {oaError ? (
+                  <span className="text-red-300 font-medium text-[10px] max-w-[140px] truncate" title={`Lỗi Zalo OA: ${oaError}`}>
+                    Lỗi OA: {oaError}
+                  </span>
+                ) : (
+                  <span>{followerCount.toLocaleString("vi-VN")} Người theo dõi</span>
+                )}
               </div>
             </div>
           </div>

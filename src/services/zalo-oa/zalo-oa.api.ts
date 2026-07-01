@@ -5,6 +5,7 @@ export interface ZaloOfficialAccountStats {
   oaName: string | null;
   updatedAt: string;
   cached: boolean;
+  error?: string | null;
 }
 
 export async function getZaloOfficialAccountStats(): Promise<ZaloOfficialAccountStats | null> {
@@ -15,18 +16,22 @@ export async function getZaloOfficialAccountStats(): Promise<ZaloOfficialAccount
     }
 
     const data = await response.json();
-    if (typeof data?.followerCount !== "number") {
-      return null;
-    }
-
+    
     return {
-      followerCount: data.followerCount,
+      followerCount: typeof data?.followerCount === "number" ? data.followerCount : -1,
       oaName: typeof data?.oaName === "string" ? data.oaName : null,
       updatedAt: typeof data?.updatedAt === "string" ? data.updatedAt : "",
       cached: Boolean(data?.cached),
+      error: typeof data?.error === "string" ? data.error : null,
     };
   } catch (error) {
     console.warn("[zalo-oa] Khong the lay thong tin follower OA:", error);
-    return null;
+    return {
+      followerCount: -1,
+      oaName: null,
+      updatedAt: "",
+      cached: false,
+      error: error instanceof Error ? error.message : String(error),
+    };
   }
 }
