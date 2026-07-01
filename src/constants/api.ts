@@ -1,7 +1,10 @@
 // URL backend – thay bằng URL thật khi deploy lên server/cloud
 // Ví dụ: "https://api.sunbeleaf.com" hoặc "https://your-app.railway.app"
 export const BACKEND_URL =
-  import.meta.env.VITE_BACKEND_URL ?? "http://localhost:3000";
+  import.meta.env.VITE_BACKEND_URL ?? 
+  (import.meta.env.PROD 
+    ? "https://tra-thao-moc-sunbeleaf-production.up.railway.app" 
+    : "http://localhost:3000");
 
 export const GET_LIST_OF_CATEGORY_KEY = "getListOfCategory";
 
