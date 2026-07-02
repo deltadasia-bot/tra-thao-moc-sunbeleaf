@@ -1412,6 +1412,16 @@ button:disabled {
   line-height: 1.3;
 }
 
+.preview-variant-group {
+  margin-top: 6px;
+}
+
+.preview-variant-title {
+  font-size: 10px;
+  color: #888;
+  margin-bottom: 2px;
+}
+
 .preview-variants-tabs {
   display: flex;
   gap: 6px;

@@ -1877,10 +1877,22 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
                   <strong className="preview-title">{draft.name || "Tên sản phẩm"}</strong>
                   
                   {/* Variant choices simulation */}
-                  <div className="preview-variants-tabs">
-                    <span className="active-variant">Túi 100g</span>
-                    <span>Tạm hết hàng</span>
-                  </div>
+                  {draft.variantGroups && draft.variantGroups.length > 0 ? (
+                    <div className="preview-variants-container">
+                      {draft.variantGroups.map((group) => (
+                        <div className="preview-variant-group" key={group.id}>
+                          <div className="preview-variant-title">{group.title}</div>
+                          <div className="preview-variants-tabs">
+                            {group.options.map((option, idx) => (
+                              <span className={idx === 0 ? "active-variant" : ""} key={option.id}>
+                                {option.name || "Tên phân loại"}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
 
                   {/* Shop Profile simulation */}
                   <div className="preview-shop-row">
