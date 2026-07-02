@@ -750,12 +750,11 @@ router.post("/product-media/upload", upload.single("file"), async (req, res) => 
     if (!isAllowedProductMedia(req.file)) {
       return res.status(400).json({ error: "Dinh dang file khong duoc ho tro" });
     }
-    const wordpressUrl = await uploadToWordPress(req.file);
-    const url = wordpressUrl || (await saveProductMediaLocally(req, req.file));
+    const url = await saveProductMediaLocally(req, req.file);
     return res.json({
       success: true,
       url,
-      storage: wordpressUrl ? "wordpress" : "backend",
+      storage: "backend",
       mimeType: req.file.mimetype,
       size: req.file.size,
     });
