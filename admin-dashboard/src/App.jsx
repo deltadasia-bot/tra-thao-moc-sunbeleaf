@@ -981,10 +981,14 @@ function InventoryRow({ product, stock, isOut, isLow, selected, onToggle, onEdit
         </div>
       </div>
       <div className="inventory-price">
-        <strong>{formatCurrency(product.price)}đ</strong>
-        {product.listPrice && product.listPrice !== product.price ? (
-          <span>{formatCurrency(product.listPrice)}đ</span>
-        ) : null}
+        <strong>
+          {formatCurrency(
+            typeof product.listPrice === "number" && product.listPrice > 0
+              ? product.listPrice
+              : Math.round(product.price * 0.4)
+          )}đ
+        </strong>
+        <span>{formatCurrency(product.price)}đ</span>
       </div>
       <input
         type="number"
@@ -1130,7 +1134,11 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
     name: override.name || product.name || "",
     description: override.description || product.description || "",
     price: String(override.price ?? product.price ?? 0),
-    listPrice: String(override.listPrice ?? product.listPrice ?? ""),
+    listPrice: String(
+      override.listPrice ??
+      product.listPrice ??
+      (product.price ? Math.round(product.price * 0.4) : "")
+    ),
     sku: override.sku || product.sku || "",
     video: override.video || product.video || "",
     videoPoster: override.videoPoster || product.videoPoster || product.image || "",
@@ -1846,8 +1854,8 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
             <section id="edit-section-sales" className="edit-section">
               <h3 className="section-title">Thông tin bán hàng</h3>
               <div className="edit-grid-2">
-                <label className="field-label">Giá bán<input type="number" min="0" value={draft.price} onChange={(event) => setField("price", event.target.value)} /></label>
-                <label className="field-label">Giá gốc/giá gạch<input type="number" min="0" value={draft.listPrice} onChange={(event) => setField("listPrice", event.target.value)} /></label>
+                <label className="field-label">Giá bán<input type="number" min="0" value={draft.listPrice} onChange={(event) => setField("listPrice", event.target.value)} /></label>
+                <label className="field-label">Giá gốc/giá gạch<input type="number" min="0" value={draft.price} onChange={(event) => setField("price", event.target.value)} /></label>
               </div>
               <h3 className="section-subtitle-bold">Phân loại sản phẩm</h3>
               {draft.variantGroups.length ? draft.variantGroups.map((group) => (
@@ -1938,8 +1946,14 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
                 {/* Body Preview */}
                 <div className="preview-body">
                   <div className="preview-price">
-                    <strong>{formatCurrency(draft.price)}đ</strong>
-                    {draft.listPrice ? <span>{formatCurrency(draft.listPrice)}đ</span> : null}
+                    <strong>
+                      {formatCurrency(
+                        draft.listPrice && Number(draft.listPrice) > 0
+                          ? Number(draft.listPrice)
+                          : Math.round(Number(draft.price || 0) * 0.4)
+                      )}đ
+                    </strong>
+                    <span>{formatCurrency(Number(draft.price || 0))}đ</span>
                   </div>
                   <strong className="preview-title">{draft.name || "Tên sản phẩm"}</strong>
                   
