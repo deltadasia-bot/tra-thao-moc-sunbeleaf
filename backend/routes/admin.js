@@ -921,6 +921,8 @@ router.post("/products", (req, res) => {
     "categoryName",
     "subCategoryId",
     "subCategoryName",
+    "preOrder",
+    "condition",
   ].forEach((key) => {
     if (typeof req.body?.[key] === "string") {
       allowed[key] = req.body[key].trim();
@@ -1004,6 +1006,8 @@ router.patch("/products/:productId", (req, res) => {
     "categoryName",
     "subCategoryId",
     "subCategoryName",
+    "preOrder",
+    "condition",
   ].forEach((key) => {
     if (typeof req.body?.[key] === "string") {
       allowed[key] = req.body[key].trim();

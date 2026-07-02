@@ -1241,6 +1241,8 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
     flavor: override.flavor || product.flavor || "",
     ingredients: override.ingredients || product.ingredients || "",
     packageSize: override.packageSize || product.packageSize || "",
+    preOrder: override.preOrder || product.preOrder || "no",
+    condition: override.condition || product.condition || "new",
   });
 
   const editorRef = useRef(null);
@@ -1490,6 +1492,8 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
         categoryName: draft.categoryName,
         subCategoryId: draft.subCategoryId,
         subCategoryName: draft.subCategoryName,
+        preOrder: draft.preOrder,
+        condition: draft.condition,
       });
     } finally {
       setSaving(false);
@@ -2029,6 +2033,7 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
               <div className="edit-grid-2">
                 <label className="field-label">Giá bán<input type="number" min="0" value={draft.listPrice} onChange={(event) => setField("listPrice", event.target.value)} /></label>
                 <label className="field-label">Giá gốc/giá gạch<input type="number" min="0" value={draft.price} onChange={(event) => setField("price", event.target.value)} /></label>
+                <label className="field-label">Mã SKU sản phẩm<input value={draft.sku} onChange={(event) => setField("sku", event.target.value)} placeholder="Nhập mã SKU sản phẩm..." /></label>
               </div>
               <h3 className="section-subtitle-bold">Phân loại sản phẩm</h3>
               {draft.variantGroups.length ? draft.variantGroups.map((group) => (
@@ -2083,14 +2088,14 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
               <div className="edit-grid-2">
                 <label className="field-label">
                   Hàng đặt trước (Pre-order)
-                  <select value="no" readOnly disabled>
+                  <select value={draft.preOrder} onChange={(e) => setField("preOrder", e.target.value)}>
                     <option value="no">Không</option>
                     <option value="yes">Có</option>
                   </select>
                 </label>
                 <label className="field-label">
                   Tình trạng sản phẩm
-                  <select value="new" readOnly disabled>
+                  <select value={draft.condition} onChange={(e) => setField("condition", e.target.value)}>
                     <option value="new">Mới</option>
                     <option value="used">Đã sử dụng</option>
                   </select>
