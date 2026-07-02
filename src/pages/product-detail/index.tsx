@@ -998,7 +998,7 @@ export default function ProductDetailPage() {
                   ? `${getCategoryName(product)} > ${getSubCategoryName(product)}`
                   : getCategoryName(product),
               },
-              { label: "Kho hàng", value: "Còn hàng" },
+              { label: "Kho hàng", value: isOutOfStock ? "Hết hàng" : "Còn hàng" },
               product.sku ? { label: "SKU", value: product.sku } : null,
             ]
               .filter((item): item is { label: string; value: string } => !!item && !!item.value)
