@@ -1345,7 +1345,7 @@ button:disabled {
   align-self: stretch;
   height: 100%;
   max-height: 100%;
-  overflow: hidden;
+  overflow: clip;
   padding-right: 12px;
   padding-bottom: 20px;
 }
@@ -1361,8 +1361,10 @@ button:disabled {
 }
 
 .phone-preview {
-  width: 270px;
-  height: 560px;
+  height: 520px;
+  max-height: calc(100% - 30px);
+  aspect-ratio: 270 / 560;
+  width: auto;
   border: 10px solid #1f1f21;
   border-radius: 36px;
   overflow: hidden;
@@ -1380,6 +1382,7 @@ button:disabled {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding-bottom: 8cqh;
   padding-top: 5.5cqh;
   background: #f6f6f9;
