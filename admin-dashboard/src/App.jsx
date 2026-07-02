@@ -931,7 +931,7 @@ function InventoryDashboard({
             widthCm: 0,
             lengthCm: 0,
             heightCm: 0,
-            categoryId: "vietnamese",
+            categoryId: "all",
             subCategoryId: "",
             sku: "",
             shippingExpress: true,
@@ -1106,77 +1106,75 @@ function normalizeVariantGroupsForEdit(product) {
 
 const EXISTING_CATEGORIES = [
   {
-    id: "vietnamese",
+    id: "all",
     name: "Tất cả sản phẩm",
     subCategories: [
-      { id: "vietnamese-drinks", name: "Trà túi zip" },
-      { id: "vietnamese-food", name: "Trà hộp 25 gói" },
-      { id: "vietnamese-breakfast", name: "Trà hộp 20 gói" },
-      { id: "vietnamese-soup", name: "Trà hoa thảo mộc" },
-      { id: "vietnamese-dessert", name: "Trà hoa đơn" },
-      { id: "vietnamese-snack", name: "Thảo dược trị liệu" },
-      { id: "vietnamese-vegetarian", name: "Bộ quà" },
-      { id: "vietnamese-fastfood", name: "Ăn nhanh" },
+      { id: "tra-tui-zip", name: "Trà túi zip" },
+      { id: "tra-hop-25", name: "Trà hộp 25 gói" },
+      { id: "tra-hop-20", name: "Trà hộp 20 gói" },
+      { id: "tra-hoa-thao-moc", name: "Trà hoa thảo mộc" },
+      { id: "tra-hoa-don", name: "Trà hoa đơn" },
+      { id: "thao-duoc-tri-lieu", name: "Thảo dược trị liệu" },
+      { id: "bo-qua", name: "Bộ quà" },
     ]
   },
   {
-    id: "western",
+    id: "tra-tui-loc",
     name: "Trà túi lọc",
     subCategories: [
-      { id: "vietnamese-drinks", name: "Trà túi zip" },
-      { id: "vietnamese-food", name: "Trà hộp 25 gói" },
-      { id: "vietnamese-breakfast", name: "Trà hộp 20 gói" },
+      { id: "tra-tui-zip", name: "Trà túi zip" },
+      { id: "tra-hop-25", name: "Trà hộp 25 gói" },
+      { id: "tra-hop-20", name: "Trà hộp 20 gói" },
     ]
   },
   {
-    id: "thailand",
+    id: "tra-hoa-thao-moc",
     name: "Trà hoa thảo mộc",
     subCategories: [
-      { id: "vietnamese-soup", name: "Trà hoa thảo mộc" }
+      { id: "tra-hoa-thao-moc", name: "Trà hoa thảo mộc" }
     ]
   },
   {
-    id: "japanese",
+    id: "tra-hoa-don",
     name: "Trà hoa đơn",
     subCategories: [
-      { id: "vietnamese-dessert", name: "Trà hoa đơn" }
+      { id: "tra-hoa-don", name: "Trà hoa đơn" }
     ]
   },
   {
-    id: "gift-set",
+    id: "bo-qua",
     name: "Bộ quà",
     subCategories: [
-      { id: "vietnamese-vegetarian", name: "Bộ quà" }
+      { id: "bo-qua", name: "Bộ quà" }
     ]
   },
   {
-    id: "herbal-therapy",
+    id: "thao-duoc-tri-lieu",
     name: "Thảo dược trị liệu",
     subCategories: [
-      { id: "vietnamese-snack", name: "Thảo dược trị liệu" }
+      { id: "thao-duoc-tri-lieu", name: "Thảo dược trị liệu" }
     ]
   }
 ];
 
 function getMockCategoryName(catId) {
-  if (catId === "vietnamese") return "Tất cả sản phẩm";
-  if (catId === "western") return "Trà túi lọc";
-  if (catId === "thailand") return "Trà hoa thảo mộc";
-  if (catId === "japanese") return "Trà hoa đơn";
-  if (catId === "gift-set") return "Bộ quà";
-  if (catId === "herbal-therapy") return "Thảo dược trị liệu";
+  if (catId === "all") return "Tất cả sản phẩm";
+  if (catId === "tra-tui-loc") return "Trà túi lọc";
+  if (catId === "tra-hoa-thao-moc") return "Trà hoa thảo mộc";
+  if (catId === "tra-hoa-don") return "Trà hoa đơn";
+  if (catId === "bo-qua") return "Bộ quà";
+  if (catId === "thao-duoc-tri-lieu") return "Thảo dược trị liệu";
   return "";
 }
 
 function getMockSubCategoryName(subId) {
-  if (subId === "vietnamese-drinks") return "Trà túi zip";
-  if (subId === "vietnamese-food") return "Trà hộp 25 gói";
-  if (subId === "vietnamese-breakfast") return "Trà hộp 20 gói";
-  if (subId === "vietnamese-soup") return "Trà hoa thảo mộc";
-  if (subId === "vietnamese-dessert") return "Trà hoa đơn";
-  if (subId === "vietnamese-snack") return "Thảo dược trị liệu";
-  if (subId === "vietnamese-vegetarian") return "Bộ quà";
-  if (subId === "vietnamese-fastfood") return "Ăn nhanh";
+  if (subId === "tra-tui-zip") return "Trà túi zip";
+  if (subId === "tra-hop-25") return "Trà hộp 25 gói";
+  if (subId === "tra-hop-20") return "Trà hộp 20 gói";
+  if (subId === "tra-hoa-thao-moc") return "Trà hoa thảo mộc";
+  if (subId === "tra-hoa-don") return "Trà hoa đơn";
+  if (subId === "thao-duoc-tri-lieu") return "Thảo dược trị liệu";
+  if (subId === "bo-qua") return "Bộ quà";
   return "";
 }
 
@@ -1215,8 +1213,8 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
       product.listPrice ??
       (product.price ? Math.round(product.price * 0.4) : "")
     ),
-    categoryId: override.categoryId || product.categoryId || "vietnamese",
-    categoryName: override.categoryName || getMockCategoryName(override.categoryId || product.categoryId || "vietnamese"),
+    categoryId: override.categoryId || product.categoryId || "all",
+    categoryName: override.categoryName || getMockCategoryName(override.categoryId || product.categoryId || "all"),
     subCategoryId: override.subCategoryId || product.subCategoryId || "",
     subCategoryName: override.subCategoryName || getMockSubCategoryName(override.subCategoryId || product.subCategoryId || ""),
     sku: override.sku || product.sku || "",

@@ -386,7 +386,7 @@ export default function HomePage() {
       selectedCategory?.id || "",
       selectedProductFeature?.id || "",
     );
-  const { data: searchableProducts } = useProducts("vietnamese", "");
+  const { data: searchableProducts } = useProducts("all", "");
 
   const visibleSubCategoryIds = useMemo(
     () =>

@@ -115,7 +115,7 @@ async function getAllProductsMerged() {
         videoPoster: override.videoPoster || "",
         sku: override.sku || "",
         variantGroups: override.variantGroups || [],
-        categoryId: override.categoryId || "vietnamese",
+        categoryId: override.categoryId || "all",
         subCategoryId: override.subCategoryId || "",
         price: Number(override.price || 0),
         listPrice: override.listPrice ? Number(override.listPrice) : undefined,
@@ -147,7 +147,7 @@ export const productService = {
     const all = await getAllProductsMerged();
     return all.filter(
       (product) =>
-        (categoryId === "vietnamese" || product.categoryId === categoryId) &&
+        (categoryId === "all" || product.categoryId === categoryId) &&
         (featureId ? product.features?.includes(featureId) : true),
     );
   },
@@ -173,7 +173,7 @@ export const productService = {
     const all = await getAllProductsMerged();
     const filtered = all.filter(
       (product) =>
-        (categoryId === "vietnamese" || product.categoryId === categoryId) &&
+        (categoryId === "all" || product.categoryId === categoryId) &&
         (featureId ? product.features?.includes(featureId) : true),
     );
 

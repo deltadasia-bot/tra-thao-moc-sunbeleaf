@@ -28,8 +28,8 @@ const rawMockListOfProduct: Product[] = [
   // Vietnamese - Drinks
   {
     id: 1,
-    categoryId: "vietnamese",
-    subCategoryId: "vietnamese-drinks",
+    categoryId: "all",
+    subCategoryId: "tra-tui-zip",
     // image: "https://h5.zadn.vn/static/zaui-templates/zaui-coffee-and-food/product-1.png",
     name: "Trà Xạ Đen Túi Zip - Phòng Ngừa Ung Thư, Hỗ Trợ Chức Năng Gan",
     description:
@@ -86,8 +86,8 @@ const rawMockListOfProduct: Product[] = [
   },
   {
     id: 2,
-    categoryId: "vietnamese",
-    subCategoryId: "vietnamese-drinks",
+    categoryId: "all",
+    subCategoryId: "tra-tui-zip",
     //image: "https://h5.zadn.vn/static/zaui-templates/zaui-coffee-and-food/product-2.png",
     name: "Trà Cà Gai leo Túi Zip - Mát Gan, Giải Độc Gan, Thanh Lọc Cơ Thể",
     description:
@@ -144,8 +144,8 @@ const rawMockListOfProduct: Product[] = [
   },
   {
     id: 3,
-    categoryId: "vietnamese",
-    subCategoryId: "vietnamese-drinks",
+    categoryId: "all",
+    subCategoryId: "tra-tui-zip",
     //image: "https://h5.zadn.vn/static/zaui-templates/zaui-coffee-and-food/product-2.png",
     name: "Trà Dây Túi Zip - Diệt Vi Khuẩn HP, Giảm Viêm Loét Dạ Dày",
     description:
@@ -202,8 +202,8 @@ const rawMockListOfProduct: Product[] = [
   },
   {
     id: 4,
-    categoryId: "vietnamese",
-    subCategoryId: "vietnamese-drinks",
+    categoryId: "all",
+    subCategoryId: "tra-tui-zip",
     //image: "https://h5.zadn.vn/static/zaui-templates/zaui-coffee-and-food/product-2.png",
     name: "Trà Chùm Ngây Túi Zip - Chống Lão Hóa, Bổ Sung Dưỡng Chất",
     description:
@@ -260,8 +260,8 @@ const rawMockListOfProduct: Product[] = [
   },
   {
     id: 5,
-    categoryId: "vietnamese",
-    subCategoryId: "vietnamese-drinks",
+    categoryId: "all",
+    subCategoryId: "tra-tui-zip",
     //image: "https://h5.zadn.vn/static/zaui-templates/zaui-coffee-and-food/product-2.png",
     name: "Trà Đinh Lăng Túi Zip - Hoạt Huyết Dưỡng Não, Giúp Ngủ Ngon",
     description:
@@ -318,8 +318,8 @@ const rawMockListOfProduct: Product[] = [
   },
   {
     id: 6,
-    categoryId: "vietnamese",
-    subCategoryId: "vietnamese-drinks",
+    categoryId: "all",
+    subCategoryId: "tra-tui-zip",
     //image: "https://h5.zadn.vn/static/zaui-templates/zaui-coffee-and-food/product-2.png",
     name: "Trà Nhàu Túi Zip - Giúp Giảm Viêm, Giảm Đau Nhức Xương Khớp",
     description:
@@ -377,8 +377,8 @@ const rawMockListOfProduct: Product[] = [
   // Vietnamese - Food (Món chính)
   {
     id: 7,
-    categoryId: "vietnamese",
-    subCategoryId: "vietnamese-food",
+    categoryId: "all",
+    subCategoryId: "tra-hop-25",
     // image: "https://h5.zadn.vn/static/zaui-templates/zaui-coffee-and-food/product-2.png",
     name: "Trà Xạ Đen H25 - Phòng Ngừa Ung Thư, Hỗ Trợ Chức Năng Gan",
     description:
@@ -411,8 +411,8 @@ const rawMockListOfProduct: Product[] = [
   },
   {
     id: 8,
-    categoryId: "vietnamese",
-    subCategoryId: "vietnamese-food",
+    categoryId: "all",
+    subCategoryId: "tra-hop-25",
     // image: "https://h5.zadn.vn/static/zaui-templates/zaui-coffee-and-food/product-2.png",
     name: "Trà Cà Gai Leo Hộp 25 Gói - Mát Gan, Giải Độc Gan, Thanh Lọc Cơ Thể",
     description:
@@ -442,8 +442,8 @@ const rawMockListOfProduct: Product[] = [
   },
   {
     id: 9,
-    categoryId: "vietnamese",
-    subCategoryId: "vietnamese-food",
+    categoryId: "all",
+    subCategoryId: "tra-hop-25",
     // image: "https://h5.zadn.vn/static/zaui-templates/zaui-coffee-and-food/product-2.png",
     name: "Trà Dây Hộp 25 Gói - Diệt Vi Khuẩn HP, Giảm Viêm Loét Dạ Dày",
     description:
@@ -473,8 +473,8 @@ const rawMockListOfProduct: Product[] = [
   },
   {
     id: 10,
-    categoryId: "vietnamese",
-    subCategoryId: "vietnamese-food",
+    categoryId: "all",
+    subCategoryId: "tra-hop-25",
     // image: "https://h5.zadn.vn/static/zaui-templates/zaui-coffee-and-food/product-2.png",
     name: "Trà Chùm Ngây Hộp 25 Gói - Chống Lão Hóa, Bổ Sung Dưỡng Chất",
     description:
@@ -504,8 +504,8 @@ const rawMockListOfProduct: Product[] = [
   },
   {
     id: 11,
-    categoryId: "vietnamese",
-    subCategoryId: "vietnamese-food",
+    categoryId: "all",
+    subCategoryId: "tra-hop-25",
     // image: "https://h5.zadn.vn/static/zaui-templates/zaui-coffee-and-food/product-2.png",
     name: "Trà Đinh Lăng Hộp 25 Gói - Hoạt Huyết Dưỡng Não, Giúp Ngủ Ngon",
     description:
@@ -535,8 +535,8 @@ const rawMockListOfProduct: Product[] = [
   },
   {
     id: 12,
-    categoryId: "vietnamese",
-    subCategoryId: "vietnamese-food",
+    categoryId: "all",
+    subCategoryId: "tra-hop-25",
     // image: "https://h5.zadn.vn/static/zaui-templates/zaui-coffee-and-food/product-2.png",
     name: "Trà Nhàu Hộp 25 Gói - Giúp Giảm Viêm, Giảm Đau Nhức Xương Khớp",
     description:
@@ -567,8 +567,8 @@ const rawMockListOfProduct: Product[] = [
   // Trà thảo mộc hộp 20 gói
   {
     id: 13,
-    categoryId: "vietnamese",
-    subCategoryId: "vietnamese-breakfast",
+    categoryId: "all",
+    subCategoryId: "tra-hop-20",
     // image: "https://h5.zadn.vn/static/zaui-templates/zaui-coffee-and-food/product-2.png",
     name: "Trà Xạ Đen Hộp 20 Gói - Phòng Ngừa Ung Thư, Hỗ Trợ Chức Năng Gan",
     description:
@@ -598,8 +598,8 @@ const rawMockListOfProduct: Product[] = [
   },
   {
     id: 14,
-    categoryId: "vietnamese",
-    subCategoryId: "vietnamese-breakfast",
+    categoryId: "all",
+    subCategoryId: "tra-hop-20",
     // image: "https://h5.zadn.vn/static/zaui-templates/zaui-coffee-and-food/product-2.png",
     name: "Trà Chùm Ngây Hộp 20 Gói - Chống Lão Hóa, Bổ Sung Dưỡng Chất",
     description:
@@ -629,8 +629,8 @@ const rawMockListOfProduct: Product[] = [
   },
   {
     id: 15,
-    categoryId: "vietnamese",
-    subCategoryId: "vietnamese-breakfast",
+    categoryId: "all",
+    subCategoryId: "tra-hop-20",
     // image: "https://h5.zadn.vn/static/zaui-templates/zaui-coffee-and-food/product-2.png",
     name: "Trà Đinh Lăng Hộp 20 Gói - Hoạt Huyết Dưỡng Não, Giúp Ngủ Ngon",
     description:
@@ -660,8 +660,8 @@ const rawMockListOfProduct: Product[] = [
   },
   {
     id: 16,
-    categoryId: "vietnamese",
-    subCategoryId: "vietnamese-breakfast",
+    categoryId: "all",
+    subCategoryId: "tra-hop-20",
     // image: "https://h5.zadn.vn/static/zaui-templates/zaui-coffee-and-food/product-2.png",
     name: "Trà Tim Sen Hộp 20 Gói - An Thần, Giúp Ngủ Ngon, Bảo Vệ Tim Mạch",
     description:
@@ -691,8 +691,8 @@ const rawMockListOfProduct: Product[] = [
   },
   {
     id: 17,
-    categoryId: "vietnamese",
-    subCategoryId: "vietnamese-breakfast",
+    categoryId: "all",
+    subCategoryId: "tra-hop-20",
     // image: "https://h5.zadn.vn/static/zaui-templates/zaui-coffee-and-food/product-2.png",
     name: "Trà Nhàu Hộp 20 Gói - Giúp Giảm Viêm, Giảm Đau Nhức Xương Khớp",
     description:
@@ -722,8 +722,8 @@ const rawMockListOfProduct: Product[] = [
   },
   {
     id: 18,
-    categoryId: "vietnamese",
-    subCategoryId: "vietnamese-breakfast",
+    categoryId: "all",
+    subCategoryId: "tra-hop-20",
     // image: "https://h5.zadn.vn/static/zaui-templates/zaui-coffee-and-food/product-2.png",
     name: "Trà Lục Trà Hoa Nhài Hộp 20 Gói - Thanh Nhiệt, Thư Giãn Đầu Óc",
     description:
@@ -753,8 +753,8 @@ const rawMockListOfProduct: Product[] = [
   },
   {
     id: 19,
-    categoryId: "vietnamese",
-    subCategoryId: "vietnamese-breakfast",
+    categoryId: "all",
+    subCategoryId: "tra-hop-20",
     // image: "https://h5.zadn.vn/static/zaui-templates/zaui-coffee-and-food/product-2.png",
     name: "Hồng Trà Hộp 20 Gói - Hỗ Trợ Tim Mạch, Giúp Tỉnh Táo",
     description:
@@ -784,8 +784,8 @@ const rawMockListOfProduct: Product[] = [
   },
   {
     id: 20,
-    categoryId: "vietnamese",
-    subCategoryId: "vietnamese-breakfast",
+    categoryId: "all",
+    subCategoryId: "tra-hop-20",
     // image: "https://h5.zadn.vn/static/zaui-templates/zaui-coffee-and-food/product-2.png",
     name: "Trà Sâm Tiên Mao Hộp 20 Gói - Bồi Bổ Sức Khỏe, Tăng Cường Sinh Lực",
     description:
@@ -816,8 +816,8 @@ const rawMockListOfProduct: Product[] = [
   // Trà Hoa Mix
   {
     id: 21,
-    categoryId: "vietnamese",
-    subCategoryId: "vietnamese-soup",
+    categoryId: "all",
+    subCategoryId: "tra-hoa-thao-moc",
     //  image: "https://h5.zadn.vn/static/zaui-templates/zaui-coffee-and-food/product-5.png",
     name: "Đông Trùng Tứ Vị Trà - Bồi Bổ Cơ Thể, Nâng Cao Sức Đề Kháng",
     description:
@@ -874,8 +874,8 @@ const rawMockListOfProduct: Product[] = [
   },
   {
     id: 22,
-    categoryId: "vietnamese",
-    subCategoryId: "vietnamese-soup",
+    categoryId: "all",
+    subCategoryId: "tra-hoa-thao-moc",
     //  image: "https://h5.zadn.vn/static/zaui-templates/zaui-coffee-and-food/product-5.png",
     name: "Dưỡng Nhan Thất Vị Trà - Dưỡng Nhan, Làm Đẹp Da, Chống Lão Hóa",
     description:
@@ -932,8 +932,8 @@ const rawMockListOfProduct: Product[] = [
   },
   {
     id: 23,
-    categoryId: "vietnamese",
-    subCategoryId: "vietnamese-soup",
+    categoryId: "all",
+    subCategoryId: "tra-hoa-thao-moc",
     //  image: "https://h5.zadn.vn/static/zaui-templates/zaui-coffee-and-food/product-5.png",
     name: "Gạo Lứt Bát Vị Trà - Thanh Nhiệt, Giải Độc, Giảm Cân Đẹp Dáng",
     description:
@@ -990,8 +990,8 @@ const rawMockListOfProduct: Product[] = [
   },
   {
     id: 24,
-    categoryId: "vietnamese",
-    subCategoryId: "vietnamese-soup",
+    categoryId: "all",
+    subCategoryId: "tra-hoa-thao-moc",
     //  image: "https://h5.zadn.vn/static/zaui-templates/zaui-coffee-and-food/product-5.png",
     name: "Trà Giảm Cân - Đốt Cháy Mỡ Thừa, Hỗ Trợ Giảm Cân An Toàn",
     description:
@@ -1046,8 +1046,8 @@ const rawMockListOfProduct: Product[] = [
   // Trà Hoa Đơn
   {
     id: 25,
-    categoryId: "vietnamese",
-    subCategoryId: "vietnamese-dessert",
+    categoryId: "all",
+    subCategoryId: "tra-hoa-don",
     image:
       "https://deltadasia.com/wp-content/uploads/2026/06/zma-p25-shopee-01.webp",
     video:
@@ -1076,8 +1076,8 @@ const rawMockListOfProduct: Product[] = [
   },
   {
     id: 26,
-    categoryId: "vietnamese",
-    subCategoryId: "vietnamese-dessert",
+    categoryId: "all",
+    subCategoryId: "tra-hoa-don",
     image:
       "https://deltadasia.com/wp-content/uploads/2026/06/zma-p26-shopee-01.webp",
     video:
@@ -1106,8 +1106,8 @@ const rawMockListOfProduct: Product[] = [
   },
   {
     id: 27,
-    categoryId: "vietnamese",
-    subCategoryId: "vietnamese-dessert",
+    categoryId: "all",
+    subCategoryId: "tra-hoa-don",
     image:
       "https://deltadasia.com/wp-content/uploads/2026/06/zma-p27-shopee-01.webp",
     video:
@@ -1136,8 +1136,8 @@ const rawMockListOfProduct: Product[] = [
   },
   {
     id: 28,
-    categoryId: "vietnamese",
-    subCategoryId: "vietnamese-dessert",
+    categoryId: "all",
+    subCategoryId: "tra-hoa-don",
     image:
       "https://deltadasia.com/wp-content/uploads/2026/06/zma-p28-shopee-01.webp",
     video:
@@ -1166,8 +1166,8 @@ const rawMockListOfProduct: Product[] = [
   },
   {
     id: 29,
-    categoryId: "vietnamese",
-    subCategoryId: "vietnamese-dessert",
+    categoryId: "all",
+    subCategoryId: "tra-hoa-don",
     image:
       "https://deltadasia.com/wp-content/uploads/2026/06/zma-p29-shopee-01.webp",
     video:
@@ -1196,8 +1196,8 @@ const rawMockListOfProduct: Product[] = [
   },
   {
     id: 30,
-    categoryId: "vietnamese",
-    subCategoryId: "vietnamese-dessert",
+    categoryId: "all",
+    subCategoryId: "tra-hoa-don",
     image:
       "https://deltadasia.com/wp-content/uploads/2026/06/zma-p30-shopee-01.webp",
     video:
@@ -1227,8 +1227,8 @@ const rawMockListOfProduct: Product[] = [
   // Thảo dược trị liệu
   {
     id: 31,
-    categoryId: "vietnamese",
-    subCategoryId: "vietnamese-snack",
+    categoryId: "all",
+    subCategoryId: "thao-duoc-tri-lieu",
     description:
       "Đai chườm đầu gối thảo dược có tác dụng giảm đau nhức xương khớp, hỗ trợ lưu thông khí huyết",
     image:
@@ -1243,8 +1243,8 @@ const rawMockListOfProduct: Product[] = [
   },
   {
     id: 32,
-    categoryId: "vietnamese",
-    subCategoryId: "vietnamese-snack",
+    categoryId: "all",
+    subCategoryId: "thao-duoc-tri-lieu",
     description:
       "Túi chườm mắt thảo dược có tác dụng giảm nhức mỏi mắt, hỗ trợ lưu thông khí huyết",
     image:
@@ -1271,8 +1271,8 @@ const rawMockListOfProduct: Product[] = [
   },
   {
     id: 33,
-    categoryId: "vietnamese",
-    subCategoryId: "vietnamese-snack",
+    categoryId: "all",
+    subCategoryId: "thao-duoc-tri-lieu",
     description:
       "Gối chườm thảo dược có tác dụng giảm đau nhức vùng cổ, vai, gáy, hỗ trợ lưu thông khí huyết",
     image:
@@ -1297,8 +1297,8 @@ const rawMockListOfProduct: Product[] = [
   // Bộ quà thảo dược
   {
     id: 34,
-    categoryId: "vietnamese",
-    subCategoryId: "vietnamese-vegetarian",
+    categoryId: "all",
+    subCategoryId: "bo-qua",
     description:
       "Hộp quà Trà Sức Khỏe với 3 loại trà thảo dược tốt cho sức khỏe cùng 2 hủ hạt dinh dưỡng",
     image:
@@ -1310,8 +1310,8 @@ const rawMockListOfProduct: Product[] = [
   },
   {
     id: 35,
-    categoryId: "vietnamese",
-    subCategoryId: "vietnamese-vegetarian",
+    categoryId: "all",
+    subCategoryId: "bo-qua",
     description:
       "Bộ Quà Da Cao Cấp - Báu Vật Từ Thiên Nhiên bao gồm 5 loại trà thượng hạng thuộc dòng Trà Cổ Việt, thu hái ở dãy Tây Côn Lĩnh, tỉnh Hà Giang",
     image:
@@ -1336,8 +1336,8 @@ const rawMockListOfProduct: Product[] = [
   },
   {
     id: 36,
-    categoryId: "vietnamese",
-    subCategoryId: "vietnamese-snack",
+    categoryId: "all",
+    subCategoryId: "thao-duoc-tri-lieu",
     name: "Lá Xông Giải Cảm Sunbeleaf - Thảo Dược Xông Hơi, Tắm Hoặc Xông Đều Được",
     description:
       "Lá xông giải cảm Sunbeleaf dạng túi zip 25g, phù hợp để xông hơi, tắm hoặc sử dụng theo hướng dẫn trên bao bì.",
@@ -1384,8 +1384,8 @@ const rawMockListOfProduct: Product[] = [
   {
     // TEMP TEST PRODUCT: remove after checkout verification is finished.
     id: 999001,
-    categoryId: "vietnamese",
-    subCategoryId: "vietnamese-food",
+    categoryId: "all",
+    subCategoryId: "tra-hop-25",
     image: "/temp/test-product.svg",
     images: ["/temp/test-product.svg"],
     description:
@@ -1401,13 +1401,13 @@ const rawMockListOfProduct: Product[] = [
 ];
 
 const categoryBySubCategory: Record<string, string> = {
-  "vietnamese-drinks": "western",
-  "vietnamese-food": "western",
-  "vietnamese-breakfast": "western",
-  "vietnamese-soup": "thailand",
-  "vietnamese-dessert": "japanese",
-  "vietnamese-snack": "herbal-therapy",
-  "vietnamese-vegetarian": "gift-set",
+  "tra-tui-zip": "tra-tui-loc",
+  "tra-hop-25": "tra-tui-loc",
+  "tra-hop-20": "tra-tui-loc",
+  "tra-hoa-thao-moc": "tra-hoa-thao-moc",
+  "tra-hoa-don": "tra-hoa-don",
+  "thao-duoc-tri-lieu": "thao-duoc-tri-lieu",
+  "bo-qua": "bo-qua",
 };
 
 const reviewAuthors = [
@@ -1451,16 +1451,16 @@ function createProductReviews(productId: number) {
 
 function createDescriptionSections(product: Product) {
   const formatDescription =
-    product.subCategoryId === "vietnamese-drinks"
+    product.subCategoryId === "tra-tui-zip"
       ? "Túi zip tiện bảo quản, có lựa chọn quy cách theo phân loại."
-      : product.subCategoryId === "vietnamese-food" ||
-          product.subCategoryId === "vietnamese-breakfast"
+      : product.subCategoryId === "tra-hop-25" ||
+          product.subCategoryId === "tra-hop-20"
         ? "Trà túi lọc đóng hộp, thuận tiện pha và sử dụng hằng ngày."
-        : product.subCategoryId === "vietnamese-dessert"
+        : product.subCategoryId === "tra-hoa-don"
           ? "Hoa trà được chọn lọc và đóng gói để giữ hương thơm tự nhiên."
-          : product.subCategoryId === "vietnamese-snack"
+          : product.subCategoryId === "thao-duoc-tri-lieu"
             ? "Sản phẩm thảo dược trị liệu dùng theo hướng dẫn trên bao bì."
-            : product.subCategoryId === "vietnamese-vegetarian"
+            : product.subCategoryId === "bo-qua"
               ? "Bộ quà được phối hợp và đóng gói trang trọng."
               : "Sản phẩm trà thảo mộc phối hợp nhiều nguyên liệu.";
 
