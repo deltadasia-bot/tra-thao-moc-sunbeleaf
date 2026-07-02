@@ -27,6 +27,10 @@ type ProductOverride = Partial<{
   lengthCm: number;
   heightCm: number;
   variantGroups: unknown[];
+  categoryId: string;
+  subCategoryId: string;
+  shippingExpress: boolean;
+  shippingInstant: boolean;
 }>;
 
 let inventoryCache:
@@ -71,9 +75,11 @@ async function getProductRemoteConfig() {
   }
 }
 
-async function attachInventory<T extends { id: number }>(products: T[]) {
+async function getAllProductsMerged() {
   const { inventory, productOverrides } = await getProductRemoteConfig();
-  return products.map((product) => {
+
+  // Map base mock catalog
+  const mappedBase = mockListOfProduct.map((product) => {
     const entry = inventory[String(product.id)];
     const override = productOverrides[String(product.id)] || {};
     const mergedProduct = {
@@ -88,51 +94,83 @@ async function attachInventory<T extends { id: number }>(products: T[]) {
       hidden: entry.visible === false,
       lowStockThreshold: entry.lowStockThreshold ?? 5,
     };
-  }).filter((product) => (product as T & { hidden?: boolean }).hidden !== true);
+  });
+
+  const baseIds = new Set(mappedBase.map((p) => String(p.id)));
+  const extraProducts: any[] = [];
+
+  Object.keys(productOverrides).forEach((productId) => {
+    if (!baseIds.has(productId)) {
+      const override = productOverrides[productId];
+      const entry = inventory[productId] || {};
+      extraProducts.push({
+        id: Number(productId),
+        name: override.name || `Sản phẩm #${productId}`,
+        description: override.description || "",
+        image: override.image || "",
+        images: override.images || [],
+        descriptionImages: override.descriptionImages || [],
+        video: override.video || "",
+        videoPoster: override.videoPoster || "",
+        sku: override.sku || "",
+        variantGroups: override.variantGroups || [],
+        categoryId: override.categoryId || "vietnamese",
+        subCategoryId: override.subCategoryId || "",
+        price: Number(override.price || 0),
+        listPrice: override.listPrice ? Number(override.listPrice) : undefined,
+        shippingExpress: override.shippingExpress !== false,
+        shippingInstant: override.shippingInstant === true,
+        stock: entry.stock ?? null,
+        stockEnabled: entry.enabled !== false,
+        hidden: entry.visible === false,
+        lowStockThreshold: entry.lowStockThreshold ?? 5,
+        features: [],
+      });
+    }
+  });
+
+  const all = [...mappedBase, ...extraProducts];
+  return all.filter((product) => product.hidden !== true);
 }
 
 export const productService = {
   getProducts: async (categoryId: string, featureId: string) => {
-    const filteredProducts = mockListOfProduct.filter(
+    const all = await getAllProductsMerged();
+    return all.filter(
       (product) =>
         (categoryId === "vietnamese" || product.categoryId === categoryId) &&
-        (featureId ? product.features.includes(featureId) : true),
+        (featureId ? product.features?.includes(featureId) : true),
     );
-    return attachInventory(filteredProducts);
   },
 
   getProductById: async (productId: string | number) => {
-    const product = mockListOfProduct.find(
-      (product) => product.id === Number(productId),
-    );
+    const all = await getAllProductsMerged();
+    const product = all.find((p) => p.id === Number(productId));
     if (!product) {
       throw new Error(`Product with id ${productId} not found`);
     }
-    const [productWithInventory] = await attachInventory([product]);
-    return productWithInventory;
+    return product;
   },
 
   getProductsBySubCategory: async (subCategoryId: string) => {
-    const filteredProducts = mockListOfProduct.filter(
-      (product) => product.subCategoryId === subCategoryId,
-    );
-    return attachInventory(filteredProducts);
+    const all = await getAllProductsMerged();
+    return all.filter((product) => product.subCategoryId === subCategoryId);
   },
 
   getProductsGroupBySubCategory: async (
     categoryId: string,
     featureId: string,
   ) => {
-    const filteredProducts = mockListOfProduct.filter(
+    const all = await getAllProductsMerged();
+    const filtered = all.filter(
       (product) =>
         (categoryId === "vietnamese" || product.categoryId === categoryId) &&
-        (featureId ? product.features.includes(featureId) : true),
+        (featureId ? product.features?.includes(featureId) : true),
     );
 
-    const productsWithInventory = await attachInventory(filteredProducts);
     const groupedProducts = mockListOfSubCategory.map((subCategory) => ({
       ...subCategory,
-      products: productsWithInventory.filter(
+      products: filtered.filter(
         (product) => product.subCategoryId === subCategory.id,
       ),
     }));

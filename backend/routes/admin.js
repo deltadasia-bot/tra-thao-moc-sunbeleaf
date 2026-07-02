@@ -893,6 +893,87 @@ router.put("/inventory", async (req, res) => {
   });
 });
 
+router.post("/products", (req, res) => {
+  const products = getManagedProducts();
+  const maxId = products.reduce((max, prod) => Math.max(max, Number(prod.id)), 0);
+  const newId = maxId > 0 ? maxId + 1 : 10001;
+
+  const allowed = {};
+  [
+    "name",
+    "description",
+    "image",
+    "video",
+    "videoPoster",
+    "sku",
+    "brand",
+    "origin",
+    "expiry",
+    "responsibleOrg",
+    "responsibleOrgAddress",
+    "volume",
+    "expiryDate",
+    "manufactureDate",
+    "flavor",
+    "ingredients",
+    "packageSize",
+  ].forEach((key) => {
+    if (typeof req.body?.[key] === "string") {
+      allowed[key] = req.body[key].trim();
+    }
+  });
+
+  ["price", "listPrice", "weightGram", "widthCm", "lengthCm", "heightCm"].forEach((key) => {
+    if (typeof req.body?.[key] !== "undefined") {
+      allowed[key] = req.body[key];
+    }
+  });
+
+  ["images", "descriptionImages"].forEach((key) => {
+    if (Array.isArray(req.body?.[key]) || typeof req.body?.[key] === "string") {
+      allowed[key] = req.body[key];
+    }
+  });
+
+  ["descriptionBlocks", "variantGroups"].forEach((key) => {
+    if (Array.isArray(req.body?.[key])) {
+      allowed[key] = req.body[key];
+    }
+  });
+
+  ["shippingExpress", "shippingInstant"].forEach((key) => {
+    if (typeof req.body?.[key] === "boolean") {
+      allowed[key] = req.body[key];
+    }
+  });
+
+  // Ensure default categories and details are set
+  allowed.categoryId = req.body.categoryId || "vietnamese";
+  allowed.subCategoryId = req.body.subCategoryId || "";
+
+  const override = db.setProductOverride(newId, allowed);
+
+  // Set default stock in inventory so the product is visible and buyable
+  db.setInventoryBulk([{
+    productId: String(newId),
+    stock: 100,
+    enabled: true,
+    visible: true,
+    lowStockThreshold: 5,
+  }]);
+
+  const product = getManagedProducts().find(
+    (item) => String(item.id) === String(newId),
+  );
+
+  return res.json({
+    success: true,
+    product,
+    override,
+    productOverrides: db.getProductOverrides(),
+  });
+});
+
 router.patch("/products/:productId", (req, res) => {
   const allowed = {};
   [

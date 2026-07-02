@@ -637,6 +637,7 @@ function paymentStatusLabel(status) {
   return labels[status] || status || "-";
 }
 
+
 function sapoSyncInfo(order) {
   if (order?.sapoOrderId) {
     return {
@@ -679,11 +680,13 @@ function InventoryDashboard({
   onSave,
   onBulkSave,
   onProductSave,
+  onProductCreate,
   onProductMediaUpload,
   savingId,
   bulkSaving,
-  }) {
+}) {
   const [selectedIds, setSelectedIds] = useState([]);
+  const [isCreatingProduct, setIsCreatingProduct] = useState(false);
   const [bulkDraft, setBulkDraft] = useState({
     stock: "",
     lowStockThreshold: "",
@@ -782,18 +785,27 @@ function InventoryDashboard({
         </div>
       </div>
 
-      <div className="inventory-toolbar">
-        <label>
-          Tìm sản phẩm
-          <input
-            value={search}
-            onChange={(event) => onSearchChange(event.target.value)}
-            placeholder="Nhập tên sản phẩm hoặc ID"
-          />
-        </label>
-        <div className="inventory-note">
-          Để trống ô tồn kho nếu chưa muốn quản lý tồn của sản phẩm đó.
+      <div className="inventory-toolbar" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: "16px" }}>
+        <div style={{ display: "flex", gap: "16px", alignItems: "flex-end", flex: 1 }}>
+          <label style={{ flex: 1, maxWidth: "300px", marginBottom: 0 }}>
+            Tìm sản phẩm
+            <input
+              value={search}
+              onChange={(event) => onSearchChange(event.target.value)}
+              placeholder="Nhập tên sản phẩm hoặc ID"
+            />
+          </label>
+          <div className="inventory-note" style={{ marginBottom: "6px" }}>
+            Để trống ô tồn kho nếu chưa muốn quản lý tồn của sản phẩm đó.
+          </div>
         </div>
+        <button
+          type="button"
+          style={{ height: "36px", padding: "0 16px", background: "#f1492d", color: "#fff", border: "none", borderRadius: "6px", fontWeight: "600", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}
+          onClick={() => setIsCreatingProduct(true)}
+        >
+          ➕ Thêm sản phẩm mới
+        </button>
       </div>
 
       <div className="inventory-bulk-panel">
@@ -899,6 +911,38 @@ function InventoryDashboard({
           onSave={async (patch) => {
             const saved = await onProductSave(editingProduct.id, patch);
             setEditingProduct(null);
+            return saved;
+          }}
+        />
+      ) : null}
+      {isCreatingProduct ? (
+        <ProductEditModal
+          product={{
+            id: "new",
+            name: "",
+            description: "",
+            price: 0,
+            listPrice: 0,
+            image: "",
+            images: [],
+            descriptionImages: [],
+            variantGroups: [],
+            weightGram: 0,
+            widthCm: 0,
+            lengthCm: 0,
+            heightCm: 0,
+            categoryId: "vietnamese",
+            subCategoryId: "",
+            sku: "",
+            shippingExpress: true,
+            shippingInstant: false,
+            productOverride: {}
+          }}
+          onClose={() => setIsCreatingProduct(false)}
+          onUpload={onProductMediaUpload}
+          onSave={async (patch) => {
+            const saved = await onProductCreate(patch);
+            setIsCreatingProduct(false);
             return saved;
           }}
         />
@@ -2225,6 +2269,15 @@ export default function App() {
     return data.product;
   }
 
+  async function createProduct(productForm) {
+    const data = await apiFetch("/api/admin/products", {
+      method: "POST",
+      body: JSON.stringify(productForm),
+    });
+    await loadInventory();
+    return data.product;
+  }
+
   async function saveKpi() {
     setSavingKpi(true);
     try {
@@ -2688,6 +2741,7 @@ export default function App() {
             onSave={saveInventory}
             onBulkSave={saveInventoryBulk}
             onProductSave={saveProductOverride}
+            onProductCreate={createProduct}
             onProductMediaUpload={uploadProductMedia}
             savingId={savingInventoryId}
             bulkSaving={bulkSavingInventory}
