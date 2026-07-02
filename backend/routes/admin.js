@@ -740,17 +740,6 @@ router.post("/auth/reset-password", (req, res) => {
   });
 });
 
-router.get("/temp-update-product-37", (req, res) => {
-  const current = db.getProductOverride("37") || {};
-  const allowed = {
-    ...current,
-    expiryDate: "2027-07-02",
-    manufactureDate: "2026-07-02",
-  };
-  const override = db.setProductOverride("37", allowed);
-  return res.json({ success: true, override });
-});
-
 router.use(requireAdminAuth);
 
 router.post("/product-media/upload", upload.single("file"), async (req, res) => {
