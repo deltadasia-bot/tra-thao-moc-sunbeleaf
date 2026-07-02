@@ -741,20 +741,11 @@ router.post("/auth/reset-password", (req, res) => {
 });
 
 router.get("/temp-remove-dates-37", (req, res) => {
-  const fs = require("fs");
-  const path = require("path");
-  const DATA_DIR = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path.join(__dirname, "data");
-  const PRODUCT_OVERRIDES_FILE = path.join(DATA_DIR, "product_overrides.json");
-  if (fs.existsSync(PRODUCT_OVERRIDES_FILE)) {
-    const raw = fs.readFileSync(PRODUCT_OVERRIDES_FILE, "utf8");
-    const json = JSON.parse(raw);
-    if (json["37"]) {
-      delete json["37"].expiryDate;
-      delete json["37"].manufactureDate;
-      fs.writeFileSync(PRODUCT_OVERRIDES_FILE, JSON.stringify(json, null, 2), "utf8");
-    }
-  }
-  return res.json({ success: true, override: db.getProductOverride("37") });
+  const override = db.setProductOverride("37", {
+    expiryDate: "",
+    manufactureDate: "",
+  });
+  return res.json({ success: true, override });
 });
 
 router.use(requireAdminAuth);
