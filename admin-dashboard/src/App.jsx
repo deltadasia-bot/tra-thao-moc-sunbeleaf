@@ -2103,6 +2103,15 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
           <aside className="product-preview-panel">
             <div className="preview-label">Xem trước</div>
             <div className="phone-preview">
+              <div className="phone-status-bar">
+                <span className="status-time">09:41</span>
+                <div className="dynamic-island"></div>
+                <div className="status-icons">
+                  <span>📶</span>
+                  <span>5G</span>
+                  <span>🔋</span>
+                </div>
+              </div>
               <div className="phone-screen-container">
                 
                 {/* Media preview */}
@@ -2209,6 +2218,7 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
                 </div>
 
               </div>
+              <div className="home-indicator"></div>
             </div>
             <div className="preview-footer-note">Hình ảnh có tính chất tham khảo, không phải hình ảnh cuối cùng Người mua thấy.</div>
           </aside>
