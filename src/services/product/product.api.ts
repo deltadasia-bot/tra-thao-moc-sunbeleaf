@@ -134,6 +134,13 @@ async function getAllProductsMerged() {
         origin: override.origin || "",
         expiry: override.expiry || "",
         responsibleOrg: override.responsibleOrg || "",
+        responsibleOrgAddress: override.responsibleOrgAddress || "",
+        volume: override.volume || "",
+        expiryDate: override.expiryDate || "",
+        manufactureDate: override.manufactureDate || "",
+        flavor: override.flavor || "",
+        ingredients: override.ingredients || "",
+        packageSize: override.packageSize || "",
       });
     }
   });
