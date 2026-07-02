@@ -110,6 +110,7 @@ async function getAllProductsMerged() {
         image: override.image || "",
         images: override.images || [],
         descriptionImages: override.descriptionImages || [],
+        descriptionBlocks: override.descriptionBlocks || [],
         video: override.video || "",
         videoPoster: override.videoPoster || "",
         sku: override.sku || "",
@@ -125,6 +126,14 @@ async function getAllProductsMerged() {
         hidden: entry.visible === false,
         lowStockThreshold: entry.lowStockThreshold ?? 5,
         features: [],
+        weightGram: typeof override.weightGram === "number" ? override.weightGram : undefined,
+        widthCm: typeof override.widthCm === "number" ? override.widthCm : undefined,
+        lengthCm: typeof override.lengthCm === "number" ? override.lengthCm : undefined,
+        heightCm: typeof override.heightCm === "number" ? override.heightCm : undefined,
+        brand: override.brand || "",
+        origin: override.origin || "",
+        expiry: override.expiry || "",
+        responsibleOrg: override.responsibleOrg || "",
       });
     }
   });
