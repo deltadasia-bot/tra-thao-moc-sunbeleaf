@@ -1252,6 +1252,23 @@ button:disabled {
   margin-bottom: 10px;
 }
 
+.wysiwyg-editor ul {
+  list-style-type: disc !important;
+  padding-left: 20px !important;
+  margin-bottom: 10px !important;
+}
+
+.wysiwyg-editor ol {
+  list-style-type: decimal !important;
+  padding-left: 20px !important;
+  margin-bottom: 10px !important;
+}
+
+.wysiwyg-editor li {
+  margin-bottom: 4px !important;
+  display: list-item !important;
+}
+
 .wysiwyg-editor img {
   max-width: 100%;
   display: block;

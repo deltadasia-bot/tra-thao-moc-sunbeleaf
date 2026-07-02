@@ -1013,20 +1013,30 @@ export default function ProductDetailPage() {
                   ) : block.text && block.text.startsWith("• ") ? (
                     <ul
                       key={block.id || `${block.text}-${index}`}
-                      className="list-disc pl-5 space-y-1 text-sm text-gray-700 leading-6 whitespace-pre-line"
+                      className="space-y-1.5 text-sm text-gray-700 leading-6 whitespace-pre-line pl-1"
                     >
                       {block.text.split("\n").map((line, idx) => (
-                        <li key={idx}>{line.replace(/^•\s*/, "")}</li>
+                        <li key={idx} className="flex items-start gap-2">
+                          <span className="mt-2 h-1.5 w-1.5 rounded-full bg-gray-400 flex-shrink-0" />
+                          <span className="flex-1">{line.replace(/^•\s*/, "")}</span>
+                        </li>
                       ))}
                     </ul>
                   ) : block.text && /^\d+\.\s*/.test(block.text) ? (
                     <ol
                       key={block.id || `${block.text}-${index}`}
-                      className="list-decimal pl-5 space-y-1 text-sm text-gray-700 leading-6 whitespace-pre-line"
+                      className="space-y-1.5 text-sm text-gray-700 leading-6 whitespace-pre-line pl-1"
                     >
-                      {block.text.split("\n").map((line, idx) => (
-                        <li key={idx}>{line.replace(/^\d+\.\s*/, "")}</li>
-                      ))}
+                      {block.text.split("\n").map((line, idx) => {
+                        const match = line.match(/^(\d+\.)\s*/);
+                        const num = match ? match[1] : `${idx + 1}.`;
+                        return (
+                          <li key={idx} className="flex items-start gap-2">
+                            <span className="font-semibold text-gray-400 select-none min-w-[16px] text-left flex-shrink-0">{num}</span>
+                            <span className="flex-1">{line.replace(/^\d+\.\s*/, "")}</span>
+                          </li>
+                        );
+                      })}
                     </ol>
                   ) : (
                     <p
