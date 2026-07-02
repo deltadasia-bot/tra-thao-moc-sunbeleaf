@@ -55,6 +55,29 @@ function QualityBadgeIcon({ className = "" }: { className?: string }) {
   );
 }
 
+function getCategoryName(prod: any) {
+  if (prod.categoryName) return prod.categoryName;
+  if (prod.categoryId === "all") return "Tất cả sản phẩm";
+  if (prod.categoryId === "tra-tui-loc") return "Trà túi lọc";
+  if (prod.categoryId === "tra-hoa-thao-moc") return "Trà hoa thảo mộc";
+  if (prod.categoryId === "tra-hoa-don") return "Trà hoa đơn";
+  if (prod.categoryId === "bo-qua") return "Bộ quà";
+  if (prod.categoryId === "thao-duoc-tri-lieu") return "Thảo dược trị liệu";
+  return "Trà thảo mộc";
+}
+
+function getSubCategoryName(prod: any) {
+  if (prod.subCategoryName) return prod.subCategoryName;
+  if (prod.subCategoryId === "tra-tui-zip") return "Trà túi zip";
+  if (prod.subCategoryId === "tra-hop-25") return "Trà hộp 25 gói";
+  if (prod.subCategoryId === "tra-hop-20") return "Trà hộp 20 gói";
+  if (prod.subCategoryId === "tra-hoa-thao-moc") return "Trà hoa thảo mộc";
+  if (prod.subCategoryId === "tra-hoa-don") return "Trà hoa đơn";
+  if (prod.subCategoryId === "thao-duoc-tri-lieu") return "Thảo dược trị liệu";
+  if (prod.subCategoryId === "bo-qua") return "Bộ quà";
+  return "";
+}
+
 export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [variantSelections, setVariantSelections] = useState<VariantSelections>(
@@ -969,7 +992,12 @@ export default function ProductDetailPage() {
               product.flavor ? { label: "Hương vị", value: product.flavor } : null,
               product.ingredients ? { label: "Thành phần", value: product.ingredients } : null,
               product.packageSize ? { label: "Kích cỡ", value: product.packageSize } : null,
-              { label: "Danh mục", value: "Trà thảo mộc và sản phẩm chăm sóc sức khỏe" },
+              {
+                label: "Danh mục",
+                value: getSubCategoryName(product)
+                  ? `${getCategoryName(product)} > ${getSubCategoryName(product)}`
+                  : getCategoryName(product),
+              },
               { label: "Kho hàng", value: "Còn hàng" },
               product.sku ? { label: "SKU", value: product.sku } : null,
             ]
