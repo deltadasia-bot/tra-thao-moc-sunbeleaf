@@ -24,8 +24,7 @@ export const getDisplayListPrice = (
     return amount;
   }
   if (typeof product.listPrice === "number" && product.listPrice > 0) {
-    const variantDiff = amount - product.price;
-    return product.listPrice + variantDiff;
+    return amount;
   }
   return Math.round(amount * 1.0);
 };
@@ -38,7 +37,8 @@ export const getDisplayPromotionalPrice = (
     return amount;
   }
   if (typeof product.listPrice === "number" && product.listPrice > 0) {
-    return amount;
+    const variantDiff = amount - product.price;
+    return product.listPrice + variantDiff;
   }
   return Math.round(amount * 0.4);
 };
