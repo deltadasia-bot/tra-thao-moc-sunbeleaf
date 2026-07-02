@@ -1359,8 +1359,9 @@ button:disabled {
 }
 
 .phone-preview {
-  width: 310px;
-  height: 680px;
+  height: min(640px, calc(90vh - 185px));
+  aspect-ratio: 310 / 680;
+  width: auto;
   border: 12px solid #1f1f21;
   border-radius: 40px;
   overflow: hidden;
@@ -1378,7 +1379,7 @@ button:disabled {
   flex-direction: column;
   overflow-y: auto;
   padding-bottom: 60px;
-  padding-top: 0;
+  padding-top: 36px;
   background: #f6f6f9;
 }
 
@@ -1387,17 +1388,74 @@ button:disabled {
   top: 0;
   left: 0;
   right: 0;
-  height: 44px;
+  height: 36px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 22px;
-  color: #ffffff;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  padding: 0 24px;
+  color: #000000;
   font-size: 11px;
   font-weight: 600;
   z-index: 99;
   pointer-events: none;
+  background: #ffffff;
+}
+
+.preview-zalo-header {
+  height: 40px;
+  background: #ffffff;
+  border-bottom: 1px solid #f0f0f2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+.preview-zalo-header .back-arrow {
+  font-size: 26px;
+  color: #000;
+  font-weight: 300;
+  line-height: 1;
+  cursor: pointer;
+  margin-top: -4px;
+}
+
+.preview-zalo-header .header-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #000;
+}
+
+.zalo-options-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 14px;
+  padding: 3px 8px;
+  background: rgba(255, 255, 255, 0.9);
+  font-size: 9px;
+  font-weight: 700;
+  color: #000;
+  line-height: 1;
+}
+
+.zalo-options-pill .dots {
+  letter-spacing: -1px;
+  font-size: 11px;
+}
+
+.zalo-options-pill .divider {
+  color: rgba(0, 0, 0, 0.15);
+  font-weight: 300;
+}
+
+.zalo-options-pill .close-btn {
+  font-size: 8px;
 }
 
 .dynamic-island {

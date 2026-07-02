@@ -2113,6 +2113,16 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
                 </div>
               </div>
               <div className="phone-screen-container">
+                {/* Zalo Header Mockup */}
+                <div className="preview-zalo-header">
+                  <span className="back-arrow">‹</span>
+                  <span className="header-title">Chi tiết sản phẩm</span>
+                  <div className="zalo-options-pill">
+                    <span className="dots">•••</span>
+                    <span className="divider">|</span>
+                    <span className="close-btn">✕</span>
+                  </div>
+                </div>
                 
                 {/* Media preview */}
                 <div className="preview-media">
