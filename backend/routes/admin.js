@@ -740,6 +740,14 @@ router.post("/auth/reset-password", (req, res) => {
   });
 });
 
+router.get("/temp-remove-dates-37", (req, res) => {
+  const current = db.getProductOverride("37") || {};
+  delete current.expiryDate;
+  delete current.manufactureDate;
+  const override = db.setProductOverride("37", current);
+  return res.json({ success: true, override });
+});
+
 router.use(requireAdminAuth);
 
 router.post("/product-media/upload", upload.single("file"), async (req, res) => {
