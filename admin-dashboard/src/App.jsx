@@ -1104,6 +1104,82 @@ function normalizeVariantGroupsForEdit(product) {
   }));
 }
 
+const EXISTING_CATEGORIES = [
+  {
+    id: "vietnamese",
+    name: "Tất cả sản phẩm",
+    subCategories: [
+      { id: "vietnamese-drinks", name: "Trà túi zip" },
+      { id: "vietnamese-food", name: "Trà hộp 25 gói" },
+      { id: "vietnamese-breakfast", name: "Trà hộp 20 gói" },
+      { id: "vietnamese-soup", name: "Trà hoa thảo mộc" },
+      { id: "vietnamese-dessert", name: "Trà hoa đơn" },
+      { id: "vietnamese-snack", name: "Thảo dược trị liệu" },
+      { id: "vietnamese-vegetarian", name: "Bộ quà" },
+      { id: "vietnamese-fastfood", name: "Ăn nhanh" },
+    ]
+  },
+  {
+    id: "western",
+    name: "Trà túi lọc",
+    subCategories: [
+      { id: "vietnamese-drinks", name: "Trà túi zip" },
+      { id: "vietnamese-food", name: "Trà hộp 25 gói" },
+      { id: "vietnamese-breakfast", name: "Trà hộp 20 gói" },
+    ]
+  },
+  {
+    id: "thailand",
+    name: "Trà hoa thảo mộc",
+    subCategories: [
+      { id: "vietnamese-soup", name: "Trà hoa thảo mộc" }
+    ]
+  },
+  {
+    id: "japanese",
+    name: "Trà hoa đơn",
+    subCategories: [
+      { id: "vietnamese-dessert", name: "Trà hoa đơn" }
+    ]
+  },
+  {
+    id: "gift-set",
+    name: "Bộ quà",
+    subCategories: [
+      { id: "vietnamese-vegetarian", name: "Bộ quà" }
+    ]
+  },
+  {
+    id: "herbal-therapy",
+    name: "Thảo dược trị liệu",
+    subCategories: [
+      { id: "vietnamese-snack", name: "Thảo dược trị liệu" }
+    ]
+  }
+];
+
+function getMockCategoryName(catId) {
+  if (catId === "vietnamese") return "Tất cả sản phẩm";
+  if (catId === "western") return "Trà túi lọc";
+  if (catId === "thailand") return "Trà hoa thảo mộc";
+  if (catId === "japanese") return "Trà hoa đơn";
+  if (catId === "gift-set") return "Bộ quà";
+  if (catId === "herbal-therapy") return "Thảo dược trị liệu";
+  return "";
+}
+
+function getMockSubCategoryName(subId) {
+  if (subId === "vietnamese-drinks") return "Trà túi zip";
+  if (subId === "vietnamese-food") return "Trà hộp 25 gói";
+  if (subId === "vietnamese-breakfast") return "Trà hộp 20 gói";
+  if (subId === "vietnamese-soup") return "Trà hoa thảo mộc";
+  if (subId === "vietnamese-dessert") return "Trà hoa đơn";
+  if (subId === "vietnamese-snack") return "Thảo dược trị liệu";
+  if (subId === "vietnamese-vegetarian") return "Bộ quà";
+  if (subId === "vietnamese-fastfood") return "Ăn nhanh";
+  return "";
+}
+
 function ProductEditModal({ product, onClose, onSave, onUpload }) {
   const override = product.productOverride || {};
   
@@ -1139,6 +1215,10 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
       product.listPrice ??
       (product.price ? Math.round(product.price * 0.4) : "")
     ),
+    categoryId: override.categoryId || product.categoryId || "vietnamese",
+    categoryName: override.categoryName || getMockCategoryName(override.categoryId || product.categoryId || "vietnamese"),
+    subCategoryId: override.subCategoryId || product.subCategoryId || "",
+    subCategoryName: override.subCategoryName || getMockSubCategoryName(override.subCategoryId || product.subCategoryId || ""),
     sku: override.sku || product.sku || "",
     video: override.video || product.video || "",
     videoPoster: override.videoPoster || product.videoPoster || product.image || "",
@@ -1403,11 +1483,13 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
         responsibleOrg: draft.responsibleOrg,
         responsibleOrgAddress: draft.responsibleOrgAddress,
         volume: draft.volume,
-        expiryDate: draft.expiryDate,
-        manufactureDate: draft.manufactureDate,
         flavor: draft.flavor,
         ingredients: draft.ingredients,
         packageSize: draft.packageSize,
+        categoryId: draft.categoryId,
+        categoryName: draft.categoryName,
+        subCategoryId: draft.subCategoryId,
+        subCategoryName: draft.subCategoryName,
       });
     } finally {
       setSaving(false);
@@ -1587,16 +1669,107 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
               </div>
 
               <div className="field-group">
-                <label className="field-label required-label">
-                  Ngành hàng
-                  <div className="readonly-input-wrapper">
-                    <input
-                      readOnly
-                      value="Thực phẩm và đồ uống > Đồ uống > Trà thảo mộc"
-                    />
-                    <span className="edit-icon-pencil">✏️</span>
-                  </div>
-                </label>
+                <h3 className="section-subtitle-bold" style={{ marginTop: 0, marginBottom: "8px", fontSize: "14px", color: "#374151" }}>Ngành hàng / Danh mục</h3>
+                <div className="edit-grid-2" style={{ gap: "16px" }}>
+                  <label className="field-label required-label">
+                    Danh mục chính
+                    <select
+                      value={draft.categoryId === "new" || !EXISTING_CATEGORIES.some(c => c.id === draft.categoryId) ? "new" : draft.categoryId}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === "new") {
+                          setField("categoryId", "new");
+                          setField("categoryName", "");
+                          setField("subCategoryId", "new");
+                          setField("subCategoryName", "");
+                        } else {
+                          const cat = EXISTING_CATEGORIES.find(c => c.id === val);
+                          setField("categoryId", val);
+                          setField("categoryName", cat ? cat.name : "");
+                          if (cat && cat.subCategories.length > 0) {
+                            setField("subCategoryId", cat.subCategories[0].id);
+                            setField("subCategoryName", cat.subCategories[0].name);
+                          } else {
+                            setField("subCategoryId", "");
+                            setField("subCategoryName", "");
+                          }
+                        }
+                      }}
+                      className="category-select"
+                      style={{ width: "100%", padding: "8px", borderRadius: "4px", border: "1px solid #d1d5db", height: "38px" }}
+                    >
+                      {EXISTING_CATEGORIES.map((cat) => (
+                        <option key={cat.id} value={cat.id}>{cat.name}</option>
+                      ))}
+                      <option value="new">+ Thêm danh mục mới...</option>
+                    </select>
+                  </label>
+
+                  <label className="field-label required-label">
+                    Danh mục phụ (Phân loại)
+                    <select
+                      value={draft.subCategoryId === "new" || (draft.categoryId !== "new" && !EXISTING_CATEGORIES.find(c => c.id === draft.categoryId)?.subCategories.some(s => s.id === draft.subCategoryId)) ? "new" : draft.subCategoryId}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === "new") {
+                          setField("subCategoryId", "new");
+                          setField("subCategoryName", "");
+                        } else {
+                          const cat = EXISTING_CATEGORIES.find(c => c.id === draft.categoryId);
+                          const sub = cat ? cat.subCategories.find(s => s.id === val) : null;
+                          setField("subCategoryId", val);
+                          setField("subCategoryName", sub ? sub.name : "");
+                        }
+                      }}
+                      disabled={draft.categoryId === "new"}
+                      className="category-select"
+                      style={{ width: "100%", padding: "8px", borderRadius: "4px", border: "1px solid #d1d5db", height: "38px" }}
+                    >
+                      {draft.categoryId !== "new" && EXISTING_CATEGORIES.find(c => c.id === draft.categoryId)?.subCategories.map((sub) => (
+                        <option key={sub.id} value={sub.id}>{sub.name}</option>
+                      ))}
+                      <option value="new">+ Thêm danh mục phụ mới...</option>
+                    </select>
+                  </label>
+                </div>
+
+                <div className="edit-grid-2" style={{ gap: "16px", marginTop: "12px" }}>
+                  {(draft.categoryId === "new" || !EXISTING_CATEGORIES.some(c => c.id === draft.categoryId)) ? (
+                    <label className="field-label required-label">
+                      Tên danh mục chính mới
+                      <input
+                        type="text"
+                        value={draft.categoryName}
+                        onChange={(e) => {
+                          const name = e.target.value;
+                          setField("categoryName", name);
+                          const slug = "cat-" + name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
+                          setField("categoryId", slug || "new");
+                        }}
+                        placeholder="Nhập tên danh mục chính..."
+                        style={{ width: "100%", padding: "8px", borderRadius: "4px", border: "1px solid #d1d5db", height: "38px" }}
+                      />
+                    </label>
+                  ) : null}
+
+                  {(draft.subCategoryId === "new" || draft.categoryId === "new" || (draft.categoryId !== "new" && !EXISTING_CATEGORIES.find(c => c.id === draft.categoryId)?.subCategories.some(s => s.id === draft.subCategoryId))) ? (
+                    <label className="field-label required-label">
+                      Tên danh mục phụ mới
+                      <input
+                        type="text"
+                        value={draft.subCategoryName}
+                        onChange={(e) => {
+                          const name = e.target.value;
+                          setField("subCategoryName", name);
+                          const slug = "subcat-" + name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
+                          setField("subCategoryId", slug || "new");
+                        }}
+                        placeholder="Nhập tên danh mục phụ..."
+                        style={{ width: "100%", padding: "8px", borderRadius: "4px", border: "1px solid #d1d5db", height: "38px" }}
+                      />
+                    </label>
+                  ) : null}
+                </div>
               </div>
             </section>
 

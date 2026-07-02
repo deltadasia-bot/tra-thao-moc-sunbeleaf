@@ -43,7 +43,7 @@ let inventoryCache:
     }
   | null = null;
 
-async function getProductRemoteConfig() {
+export async function getProductRemoteConfig() {
   const now = Date.now();
   if (inventoryCache && inventoryCache.expiresAt > now) {
     return inventoryCache.data;
@@ -177,7 +177,10 @@ export const productService = {
         (featureId ? product.features?.includes(featureId) : true),
     );
 
-    const groupedProducts = mockListOfSubCategory.map((subCategory) => ({
+    const { categoryService } = await import("../category/category.api");
+    const subCategories = await categoryService.getSubCategories(categoryId);
+
+    const groupedProducts = subCategories.map((subCategory) => ({
       ...subCategory,
       products: filtered.filter(
         (product) => product.subCategoryId === subCategory.id,

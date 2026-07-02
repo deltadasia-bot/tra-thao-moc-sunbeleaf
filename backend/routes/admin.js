@@ -917,6 +917,10 @@ router.post("/products", (req, res) => {
     "flavor",
     "ingredients",
     "packageSize",
+    "categoryId",
+    "categoryName",
+    "subCategoryId",
+    "subCategoryName",
   ].forEach((key) => {
     if (typeof req.body?.[key] === "string") {
       allowed[key] = req.body[key].trim();
@@ -949,7 +953,9 @@ router.post("/products", (req, res) => {
 
   // Ensure default categories and details are set
   allowed.categoryId = req.body.categoryId || "vietnamese";
+  allowed.categoryName = req.body.categoryName || "";
   allowed.subCategoryId = req.body.subCategoryId || "";
+  allowed.subCategoryName = req.body.subCategoryName || "";
 
   const override = db.setProductOverride(newId, allowed);
 
@@ -994,6 +1000,10 @@ router.patch("/products/:productId", (req, res) => {
     "flavor",
     "ingredients",
     "packageSize",
+    "categoryId",
+    "categoryName",
+    "subCategoryId",
+    "subCategoryName",
   ].forEach((key) => {
     if (typeof req.body?.[key] === "string") {
       allowed[key] = req.body[key].trim();
