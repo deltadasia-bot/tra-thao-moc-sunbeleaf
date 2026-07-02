@@ -292,6 +292,12 @@ function normalizeProductOverride(productId, entry = {}) {
   const variantGroups = normalizeVariantGroups(entry.variantGroups);
   if (variantGroups) allowed.variantGroups = variantGroups;
 
+  ["shippingExpress", "shippingInstant"].forEach((key) => {
+    if (typeof entry[key] === "boolean") {
+      allowed[key] = entry[key];
+    }
+  });
+
   return {
     productId: String(productId),
     ...allowed,

@@ -1094,6 +1094,8 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
     images: initialImages,
     descriptionBlocks: initialDescriptionBlocks.length ? initialDescriptionBlocks : fallbackDescriptionBlocks,
     variantGroups: normalizeVariantGroupsForEdit({ ...product, ...override }),
+    shippingExpress: override.shippingExpress !== false,
+    shippingInstant: override.shippingInstant === true,
     weightGram: String(override.weightGram ?? product.weightGram ?? ""),
     widthCm: String(override.widthCm ?? product.widthCm ?? ""),
     lengthCm: String(override.lengthCm ?? product.lengthCm ?? ""),
@@ -1337,6 +1339,8 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
         images: draft.images.filter(Boolean).slice(0, 9),
         descriptionBlocks: draft.descriptionBlocks,
         variantGroups: draft.variantGroups,
+        shippingExpress: draft.shippingExpress,
+        shippingInstant: draft.shippingInstant,
         weightGram: draft.weightGram === "" ? undefined : Number(draft.weightGram),
         widthCm: draft.widthCm === "" ? undefined : Number(draft.widthCm),
         lengthCm: draft.lengthCm === "" ? undefined : Number(draft.lengthCm),
@@ -1826,6 +1830,25 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
                 <label className="field-label">Dài (cm)<input type="number" min="0" value={draft.lengthCm} onChange={(event) => setField("lengthCm", event.target.value)} /></label>
                 <label className="field-label">Rộng (cm)<input type="number" min="0" value={draft.widthCm} onChange={(event) => setField("widthCm", event.target.value)} /></label>
                 <label className="field-label">Cao (cm)<input type="number" min="0" value={draft.heightCm} onChange={(event) => setField("heightCm", event.target.value)} /></label>
+              </div>
+              <h4 className="section-subtitle-bold" style={{ marginTop: '16px', marginBottom: '8px' }}>Phương thức vận chuyển khả dụng</h4>
+              <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '500' }}>
+                  <input 
+                    type="checkbox" 
+                    checked={draft.shippingExpress} 
+                    onChange={(event) => setField("shippingExpress", event.target.checked)} 
+                  />
+                  Vận chuyển nhanh (SPX Express)
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '500' }}>
+                  <input 
+                    type="checkbox" 
+                    checked={draft.shippingInstant} 
+                    onChange={(event) => setField("shippingInstant", event.target.checked)} 
+                  />
+                  Hỏa tốc (Giao 2H)
+                </label>
               </div>
             </section>
 

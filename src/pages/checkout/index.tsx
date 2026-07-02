@@ -10,6 +10,7 @@ import PaymentMethodSheet, {
 import BankTransferSheet from "@/components/common/bank-transfer-sheet";
 import { useCartStore } from "@/stores/cart.store";
 import { useCreateOrder } from "@/services/order/order.mutations";
+import { productService } from "@/services/product/product.api";
 import { Order } from "@/types/order.types";
 import { Button, Text, useSnackbar } from "zmp-ui";
 import { copy } from "@/constants/copy";
@@ -87,6 +88,40 @@ export default function CheckoutPage() {
   const { mutate: createOrder, isPending } = useCreateOrder();
 
   const [shippingCarrier, setShippingCarrier] = useState<"SPX Express" | "Giao hàng Hỏa tốc">("SPX Express");
+
+  const [cartProducts, setCartProducts] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (cartItems.length > 0) {
+      Promise.all(
+        cartItems.map((item) => productService.getProductById(item.productId))
+      )
+        .then((resolved) => {
+          setCartProducts(resolved.filter(Boolean));
+        })
+        .catch((err) => {
+          console.error("Lỗi khi load sản phẩm trong giỏ:", err);
+        });
+    } else {
+      setCartProducts([]);
+    }
+  }, [cartItems]);
+
+  const isExpressAllowed = useMemo(() => {
+    if (cartProducts.length === 0) return true;
+    return cartProducts.every((prod) => prod.shippingExpress !== false);
+  }, [cartProducts]);
+
+  const isInstantAllowed = useMemo(() => {
+    if (cartProducts.length === 0) return false;
+    return cartProducts.every((prod) => prod.shippingInstant === true);
+  }, [cartProducts]);
+
+  useEffect(() => {
+    if (!isInstantAllowed && shippingCarrier === "Giao hàng Hỏa tốc") {
+      setShippingCarrier("SPX Express");
+    }
+  }, [isInstantAllowed, shippingCarrier]);
 
   const totalItems = calculateCartTotal(cartItems);
   const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
@@ -373,40 +408,54 @@ export default function CheckoutPage() {
             <div className="text-large-m font-semibold text-gray-900">Phương thức vận chuyển</div>
             <div className="flex flex-col gap-3">
               {/* Tiêu chuẩn */}
-              <label className="flex items-start gap-3 cursor-pointer rounded-lg border border-gray-100 p-3 active:bg-gray-50">
+              <label className={`flex items-start gap-3 cursor-pointer rounded-lg border p-3 active:bg-gray-50 ${
+                isExpressAllowed ? "border-gray-100" : "border-red-100 bg-red-50/10 cursor-not-allowed opacity-60"
+              }`}>
                 <input
                   type="radio"
                   name="shippingCarrier"
+                  disabled={!isExpressAllowed}
                   checked={shippingCarrier === "SPX Express"}
-                  onChange={() => setShippingCarrier("SPX Express")}
+                  onChange={() => {
+                    if (isExpressAllowed) {
+                      setShippingCarrier("SPX Express");
+                    }
+                  }}
                   className="mt-1 accent-primary"
                 />
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <span className="text-small-m font-medium text-gray-900">Nhanh (SPX Express)</span>
                     <span className="text-small-m font-semibold text-gray-900">
-                      {formatCurrency(getShippingFee(
-                        totalQuantity,
-                        "inner_city",
-                        cartItems.map((item) => item.productId)
-                      ))}
+                      {isExpressAllowed ? (
+                        formatCurrency(getShippingFee(
+                          totalQuantity,
+                          "inner_city",
+                          cartItems.map((item) => item.productId)
+                        ))
+                      ) : "Không hỗ trợ"}
                     </span>
                   </div>
                   <div className="text-xxsmall text-text-secondary mt-1">Giao hàng tiêu chuẩn 1-3 ngày</div>
+                  {!isExpressAllowed && (
+                    <div className="text-xxsmall text-red-600 mt-1 font-medium">
+                      Có sản phẩm trong giỏ không hỗ trợ giao Nhanh
+                    </div>
+                  )}
                 </div>
               </label>
 
               {/* Hỏa tốc */}
               <label className={`flex items-start gap-3 cursor-pointer rounded-lg border p-3 active:bg-gray-50 ${
-                instantShipping.supported ? "border-gray-100" : "border-red-100 bg-red-50/10 cursor-not-allowed opacity-60"
+                (instantShipping.supported && isInstantAllowed) ? "border-gray-100" : "border-red-100 bg-red-50/10 cursor-not-allowed opacity-60"
               }`}>
                 <input
                   type="radio"
                   name="shippingCarrier"
-                  disabled={!instantShipping.supported}
+                  disabled={!instantShipping.supported || !isInstantAllowed}
                   checked={shippingCarrier === "Giao hàng Hỏa tốc"}
                   onChange={() => {
-                    if (instantShipping.supported) {
+                    if (instantShipping.supported && isInstantAllowed) {
                       setShippingCarrier("Giao hàng Hỏa tốc");
                       if (selectedPaymentMethod.method === "cash") {
                         setSelectedPaymentMethod({
@@ -427,7 +476,7 @@ export default function CheckoutPage() {
                   <div className="flex items-center justify-between">
                     <span className="text-small-m font-medium text-gray-900">Hỏa tốc (Giao 2H)</span>
                     <span className="text-small-m font-semibold text-gray-900">
-                      {instantShipping.supported 
+                      {(instantShipping.supported && isInstantAllowed) 
                         ? formatCurrency(instantShipping.fee) 
                         : "Không hỗ trợ"}
                     </span>
@@ -444,6 +493,11 @@ export default function CheckoutPage() {
                   {!instantShipping.supported && (
                     <div className="text-xxsmall text-red-600 mt-1 font-medium">
                       Chỉ hỗ trợ giao hàng hỏa tốc trong bán kính 15km
+                    </div>
+                  )}
+                  {instantShipping.supported && !isInstantAllowed && (
+                    <div className="text-xxsmall text-red-600 mt-1 font-medium">
+                      Có sản phẩm trong giỏ không hỗ trợ giao Hỏa tốc
                     </div>
                   )}
                 </div>
