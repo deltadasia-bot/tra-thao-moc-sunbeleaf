@@ -742,9 +742,9 @@ export default function ProductDetailPage() {
                     {formatCurrency(unitListPrice)}
                   </span>
                 )}
-                {!isPromotionDisabledForProduct(product) && (
+                {!isPromotionDisabledForProduct(product) && unitListPrice > 0 && (
                   <span className="rounded-sm bg-[#fff1ee] px-1.5 py-0.5 text-sm font-medium text-[#ee4d2d]">
-                    -50%
+                    -{Math.round((1 - unitPrice / unitListPrice) * 100)}%
                   </span>
                 )}
               </div>

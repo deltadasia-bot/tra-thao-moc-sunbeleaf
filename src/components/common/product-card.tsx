@@ -90,7 +90,7 @@ export default function ProductCard({
                 </span>
                 {!isPromotionDisabledForProduct(product) && (
                   <span className="rounded-sm bg-[#fff1ee] px-1 text-[10px] font-semibold text-[#ee4d2d] shimmer-sweep">
-                    -{PROMOTION_DISCOUNT_PERCENT}%
+                    -{listPrice > 0 ? Math.round((1 - promotionalPrice / listPrice) * 100) : 0}%
                   </span>
                 )}
               </div>

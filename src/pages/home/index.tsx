@@ -696,11 +696,16 @@ export default function HomePage() {
                   alt={product.name}
                   className="h-full w-full object-cover"
                 />
-                {!isPromotionDisabledForProduct(product) && (
-                  <span className="absolute bottom-0 left-0 bg-[#ee4d2d] px-2 py-1 text-[10px] text-white">
-                    -50%
-                  </span>
-                )}
+                {!isPromotionDisabledForProduct(product) && (() => {
+                  const listPrice = getDisplayListPrice(product);
+                  const promoPrice = getDisplayPromotionalPrice(product);
+                  const discountPercent = listPrice > 0 ? Math.round((1 - promoPrice / listPrice) * 100) : 0;
+                  return (
+                    <span className="absolute bottom-0 left-0 bg-[#ee4d2d] px-2 py-1 text-[10px] text-white">
+                      -{discountPercent}%
+                    </span>
+                  );
+                })()}
               </div>
               <div className="mt-2 line-clamp-2 h-8 text-xs font-medium leading-tight text-gray-900">
                 {product.name}
