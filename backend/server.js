@@ -61,9 +61,21 @@ app.use("/api/avatar",  avatarRouter);
 app.use("/api/zalo-oa", zaloOaRouter);
 app.use("/api/nhanh",   nhanhRouter);
 app.use("/api/inventory", inventoryRouter);
+
 const adminDashboardPath = path.join(__dirname, "admin-dist");
-app.use("/admin", express.static(adminDashboardPath));
+app.use("/admin", express.static(adminDashboardPath, {
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+    }
+  }
+}));
 app.get("/admin/*", (_req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
   res.sendFile(path.join(adminDashboardPath, "index.html"));
 });
 

@@ -937,6 +937,12 @@ router.patch("/products/:productId", (req, res) => {
     }
   });
 
+  ["shippingExpress", "shippingInstant"].forEach((key) => {
+    if (typeof req.body?.[key] === "boolean") {
+      allowed[key] = req.body[key];
+    }
+  });
+
   const override = db.setProductOverride(req.params.productId, allowed);
   const product = getManagedProducts().find(
     (item) => String(item.id) === String(req.params.productId),
