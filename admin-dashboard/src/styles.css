@@ -1361,10 +1361,8 @@ button:disabled {
 }
 
 .phone-preview {
+  width: 250px;
   height: 520px;
-  max-height: calc(100% - 30px);
-  aspect-ratio: 270 / 560;
-  width: auto;
   border: 10px solid #1f1f21;
   border-radius: 36px;
   overflow: hidden;
