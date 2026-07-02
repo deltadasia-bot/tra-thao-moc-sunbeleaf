@@ -1481,6 +1481,8 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
         responsibleOrg: draft.responsibleOrg,
         responsibleOrgAddress: draft.responsibleOrgAddress,
         volume: draft.volume,
+        expiryDate: draft.expiryDate,
+        manufactureDate: draft.manufactureDate,
         flavor: draft.flavor,
         ingredients: draft.ingredients,
         packageSize: draft.packageSize,
