@@ -236,6 +236,7 @@ export default function HomePage() {
   const [isScrolled, setIsScrolled] = useState(false);
   const promoPopupVisible = useCartStore((state) => state.promoPopupVisible);
   const setPromoPopupVisible = useCartStore((state) => state.setPromoPopupVisible);
+  const setReviewPromptVisible = useCartStore((state) => state.setReviewPromptVisible);
 
   // Hook to fetch customer's orders history
   const { data: orderData } = useOrders(1, 20);
@@ -265,6 +266,14 @@ export default function HomePage() {
     }
     return null;
   }, [orderData?.orders]);
+
+  const isPromptVisible = !!(unreviewedOrderItem && !promoPopupVisible && !isReviewPromptDismissed);
+  useEffect(() => {
+    setReviewPromptVisible(isPromptVisible);
+    return () => {
+      setReviewPromptVisible(false);
+    };
+  }, [isPromptVisible, setReviewPromptVisible]);
 
   // Read points dynamically from localStorage
   const [userPoints, setUserPoints] = useState(() => {

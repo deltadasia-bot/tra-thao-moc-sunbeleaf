@@ -15,6 +15,8 @@ interface CartStore {
   closeCheckoutSheet: () => void;
   promoPopupVisible: boolean;
   setPromoPopupVisible: (visible: boolean) => void;
+  reviewPromptVisible: boolean;
+  setReviewPromptVisible: (visible: boolean) => void;
 }
 
 // Helper function to generate unique ID based on product and variants
@@ -47,6 +49,8 @@ export const useCartStore = create<CartStore>((set) => ({
   checkoutSheetVisible: false,
   promoPopupVisible: false,
   setPromoPopupVisible: (visible) => set({ promoPopupVisible: visible }),
+  reviewPromptVisible: false,
+  setReviewPromptVisible: (visible) => set({ reviewPromptVisible: visible }),
 
   addToCart: (newItem) => {
     const itemId = generateCartItemId(newItem);

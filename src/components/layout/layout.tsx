@@ -80,7 +80,7 @@ export default function Layout() {
   const hideHeader = (current.handle as any)?.hideHeader;
   const headerPosition = (current.handle as any)?.headerPosition;
 
-  const { items } = useCartStore();
+  const { items, reviewPromptVisible } = useCartStore();
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
 
   if (!loggedInPhone) {
@@ -176,8 +176,8 @@ export default function Layout() {
       {!hideFooter && (
         <div className="relative shrink-0">
           <Footer />
-          {!hideCart && <CartFloatButton itemCount={totalItems} />}
-          <AdvisorChatButton />
+          {!hideCart && !reviewPromptVisible && <CartFloatButton itemCount={totalItems} />}
+          {!reviewPromptVisible && <AdvisorChatButton />}
         </div>
       )}
     </div>
