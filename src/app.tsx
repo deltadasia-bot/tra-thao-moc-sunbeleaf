@@ -1,10 +1,21 @@
 import { RouterProvider } from "react-router-dom";
 import router from "./router";
 import { ReactQueryProvider } from "./lib/react-query-provider";
-import React from "react";
+import React, { useEffect } from "react";
 import { SnackbarProvider } from "zmp-ui";
 
 export default function MiniApp() {
+  useEffect(() => {
+    try {
+      if (localStorage.getItem("sunbeleaf_reviews_cleaned_v2") !== "true") {
+        localStorage.removeItem("sunbeleaf_product_reviews");
+        localStorage.setItem("sunbeleaf_reviews_cleaned_v2", "true");
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
+
   return (
     <React.StrictMode>
       <SnackbarProvider>

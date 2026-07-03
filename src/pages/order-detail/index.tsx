@@ -216,6 +216,14 @@ export default function OrderDetailPage() {
       rating: reviewRating,
       content: reviewContent.trim(),
     });
+
+    try {
+      const currentPoints = Number(localStorage.getItem("sunbeleaf_user_points") || "100");
+      localStorage.setItem("sunbeleaf_user_points", String(currentPoints + 5000));
+    } catch (e) {
+      console.error(e);
+    }
+
     setReviewedItemIds((items) => [...items, reviewItem.id]);
     setReviewItem(null);
   };

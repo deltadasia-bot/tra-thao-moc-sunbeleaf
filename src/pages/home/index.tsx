@@ -38,7 +38,8 @@ import {
 } from "@/services/search/search-insights.storage";
 import { useSnackbar } from "zmp-ui";
 import { getZaloOfficialAccountStats } from "@/services/zalo-oa/zalo-oa.api";
-import { useProductSalesSummary } from "@/services/order/order.queries";
+import { useProductSalesSummary, useOrders } from "@/services/order/order.queries";
+import { hasReviewedOrderItem } from "@/services/review/review.storage";
 import { formatSoldCount } from "@/utils/order-sales";
 
 type ShopTab = "shop" | "products" | "categories" | "promotions";
@@ -235,6 +236,61 @@ export default function HomePage() {
   const [isScrolled, setIsScrolled] = useState(false);
   const promoPopupVisible = useCartStore((state) => state.promoPopupVisible);
   const setPromoPopupVisible = useCartStore((state) => state.setPromoPopupVisible);
+
+  // Hook to fetch customer's orders history
+  const { data: orderData } = useOrders(1, 20);
+  const [isReviewPromptDismissed, setIsReviewPromptDismissed] = useState<boolean>(() => {
+    try {
+      return sessionStorage.getItem("review_prompt_dismissed") === "true";
+    } catch {
+      return false;
+    }
+  });
+
+  const unreviewedOrderItem = useMemo(() => {
+    if (!orderData?.orders) return null;
+    
+    // Find the most recent delivered/completed order that has at least one item that hasn't been reviewed yet
+    for (const order of orderData.orders) {
+      if (order.state === "delivered" || order.state === "completed") {
+        for (const item of order.items) {
+          if (item.productId && !hasReviewedOrderItem(order.id, item.id)) {
+            return {
+              orderId: order.id,
+              item
+            };
+          }
+        }
+      }
+    }
+    return null;
+  }, [orderData?.orders]);
+
+  // Read points dynamically from localStorage
+  const [userPoints, setUserPoints] = useState(() => {
+    try {
+      return Number(localStorage.getItem("sunbeleaf_user_points") || "100");
+    } catch {
+      return 100;
+    }
+  });
+
+  // Keep points state updated if localstorage changes (like when they submit a review and return)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      try {
+        setUserPoints(Number(localStorage.getItem("sunbeleaf_user_points") || "100"));
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    window.addEventListener("storage", handleStorageChange);
+    // Also update points on component focus/mount
+    handleStorageChange();
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []);
 
   const [followerCount, setFollowerCount] = useState<number>(() => {
     try {
@@ -931,7 +987,7 @@ export default function HomePage() {
           title: "Đánh giá nhận điểm thưởng",
           rules: [
             "Khách hàng thực hiện viết đánh giá cho các sản phẩm đã mua thành công tại cửa hàng.",
-            "Mỗi lượt đánh giá thành công (bình luận kèm hình ảnh/video thực tế) sẽ được nhận ngay 1.000 điểm thưởng.",
+            "Mỗi lượt đánh giá thành công (bình luận kèm hình ảnh/video thực tế) sẽ được nhận ngay 5.000 điểm thưởng.",
             "Điểm thưởng được tự động cộng vào tài khoản tích lũy của bạn.",
             "Điểm thưởng này được dùng để đổi quà tặng hoặc quy đổi chiết khấu đơn hàng."
           ],
@@ -1068,7 +1124,7 @@ export default function HomePage() {
             </svg>
             
             <div className="ml-3.5 min-w-0">
-              <h3 className="text-sm font-bold text-gray-900 truncate">1.000 điểm khi đánh giá</h3>
+              <h3 className="text-sm font-bold text-gray-900 truncate">5.000 điểm khi đánh giá</h3>
               <p className="text-[11px] text-gray-500 mt-1 leading-relaxed line-clamp-2">
                 Đánh giá sản phẩm đã mua thành công để tích lũy điểm thưởng đổi quà...
               </p>
@@ -1293,7 +1349,7 @@ export default function HomePage() {
           </div>
           <div>
             <div className="text-[11px] text-gray-500">Điểm của bạn</div>
-            <div className="text-base font-bold text-emerald-800">100 điểm</div>
+            <div className="text-base font-bold text-emerald-800">{userPoints.toLocaleString("vi-VN")} điểm</div>
           </div>
         </div>
         <div className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 rounded-full px-3 py-1">
@@ -1781,6 +1837,89 @@ export default function HomePage() {
                 className="w-full h-auto object-contain block"
                 draggable={false}
               />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Bottom Sheet for Review Reward */}
+      {unreviewedOrderItem && !promoPopupVisible && !isReviewPromptDismissed && (
+        <div 
+          className="fixed left-4 right-4 z-40 bg-white rounded-2xl shadow-[0_-8px_30px_rgba(0,0,0,0.12),0_10px_25px_rgba(0,0,0,0.08)] border border-gray-100 p-4 transition-all duration-300 ease-out text-start"
+          style={{ 
+            bottom: 'calc(68px + env(safe-area-inset-bottom))',
+            animation: 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards'
+          }}
+        >
+          <style>{`
+            @keyframes slideUp {
+              from {
+                transform: translateY(120%);
+                opacity: 0;
+              }
+              to {
+                transform: translateY(0);
+                opacity: 1;
+              }
+            }
+          `}</style>
+          
+          <div className="flex items-start gap-3">
+            {/* Reward Badge Icon */}
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#fff1ee] text-2xl shadow-sm">
+              🎁
+            </div>
+            
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-bold text-gray-900 flex flex-wrap items-center gap-1.5">
+                  Đánh giá nhận quà
+                  <span className="inline-flex items-center rounded-full bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-800 border border-emerald-100">
+                    +5.000 điểm
+                  </span>
+                </h4>
+                <button
+                  type="button"
+                  onClick={() => {
+                    sessionStorage.setItem("review_prompt_dismissed", "true");
+                    setIsReviewPromptDismissed(true);
+                  }}
+                  className="text-gray-400 hover:text-gray-600 p-0.5"
+                  aria-label="Đóng"
+                >
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <p className="text-[11px] text-gray-500 mt-1 leading-relaxed">
+                Đơn hàng của bạn đã hoàn thành! Dành 1 phút đánh giá sản phẩm <strong>{unreviewedOrderItem.item.name}</strong> để nhận ngay <strong>5.000 điểm thưởng</strong> đổi quà nhé.
+              </p>
+              
+              <div className="mt-3 flex justify-end gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    sessionStorage.setItem("review_prompt_dismissed", "true");
+                    setIsReviewPromptDismissed(true);
+                  }}
+                  className="px-3 py-1.5 text-xs font-semibold text-gray-500 hover:text-gray-700 active:scale-95 transition"
+                >
+                  Để sau
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    sessionStorage.setItem("review_prompt_dismissed", "true");
+                    setIsReviewPromptDismissed(true);
+                    navigate(`/order/${unreviewedOrderItem.orderId}`);
+                  }}
+                  className="rounded-lg bg-[#ee4d2d] px-4 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-[#d83a1e] active:scale-95 transition"
+                >
+                  Đánh giá ngay
+                </button>
+              </div>
             </div>
           </div>
         </div>
