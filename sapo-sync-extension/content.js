@@ -542,6 +542,10 @@ async function handleCreateProductsOnSapo(backendUrl, upsert = false) {
   
   try {
     const csrfToken = await resolveSapoCsrfToken();
+    const locationId = await resolveSapoLocationId();
+    if (!locationId) {
+      console.warn("[Sapo Assistant] Không tìm thấy Location ID, tiếp tục gửi không có header location.");
+    }
     
     // 1. Tải danh sách sản phẩm từ Sapo Go hiện tại để kiểm tra trùng SKU (chỉ khi cần cập nhật/upsert)
     let sapoProducts = [];
@@ -709,6 +713,9 @@ async function handleCreateProductsOnSapo(backendUrl, upsert = false) {
                 "X-CSRF-Token": csrfToken,
                 "X-CSRFToken": csrfToken,
                 "X-XSRF-TOKEN": csrfToken
+              } : {}),
+              ...(locationId ? {
+                "X-Sapo-LocationID": String(locationId)
               } : {})
             },
             credentials: "same-origin",
@@ -724,6 +731,9 @@ async function handleCreateProductsOnSapo(backendUrl, upsert = false) {
                 "X-CSRF-Token": csrfToken,
                 "X-CSRFToken": csrfToken,
                 "X-XSRF-TOKEN": csrfToken
+              } : {}),
+              ...(locationId ? {
+                "X-Sapo-LocationID": String(locationId)
               } : {})
             },
             credentials: "same-origin",
