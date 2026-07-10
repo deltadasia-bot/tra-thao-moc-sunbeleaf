@@ -659,7 +659,7 @@ async function handleCreateProductsOnSapo(backendUrl, upsert = false) {
               ...(existingVariantId ? { id: existingVariantId } : {}),
               option1: String(opt.name || opt.value || "").trim(),
               price: sellingPrice,
-              compare_at_price: p.listPrice && Number(p.listPrice) > 0 ? originalPrice : null,
+              compare_at_price: (p.listPrice && Number(p.listPrice) > 0 && originalPrice > sellingPrice) ? originalPrice : null,
               sku: cleanSku
             };
           });
@@ -682,7 +682,7 @@ async function handleCreateProductsOnSapo(backendUrl, upsert = false) {
           variants.push({
             ...(existingVariantId ? { id: existingVariantId } : {}),
             price: basePrice,
-            compare_at_price: p.listPrice && Number(p.listPrice) > 0 ? originalPrice : null,
+            compare_at_price: (p.listPrice && Number(p.listPrice) > 0 && originalPrice > basePrice) ? originalPrice : null,
             sku: cleanSku
           });
         }
