@@ -648,8 +648,9 @@ async function handleCreateProductsOnSapo(backendUrl, upsert = false) {
             
             // Tìm variant ID cũ để cập nhật thay vì tạo trùng
             let existingVariantId = null;
+            let matchedV = null;
             if (existingSapoProduct) {
-              const matchedV = existingSapoProduct.variants?.find(v => String(v.sku || "").trim().toLowerCase() === cleanSku.toLowerCase());
+              matchedV = existingSapoProduct.variants?.find(v => String(v.sku || "").trim().toLowerCase() === cleanSku.toLowerCase());
               if (matchedV) {
                 existingVariantId = matchedV.id;
               }
@@ -657,14 +658,14 @@ async function handleCreateProductsOnSapo(backendUrl, upsert = false) {
             
             return {
               ...(existingVariantId ? { id: existingVariantId } : {}),
-              option1: String(opt.name || opt.value || "").trim(),
+              option1: matchedV && matchedV.option1 ? matchedV.option1 : String(opt.name || opt.value || "").trim(),
               price: sellingPrice,
               compare_at_price: (p.listPrice && Number(p.listPrice) > 0 && originalPrice > sellingPrice) ? originalPrice : null,
               sku: cleanSku
             };
           });
         } else {
-          // Sản phẩm thường không có phân loại -> Không truyền options và option1 để Sapo Go tự quản lý default variant
+          // Sản phẩm thường không có phân loại -> Tự hồi phục options/option1 dựa theo Sapo Go thực tế hoặc gán mặc định chuẩn
           const rawSku = p.sku ? p.sku : `sp-${p.id}`;
           const cleanSku = `${skuPrefix}${rawSku}`.trim().replace(/\s+/g, "-");
           
@@ -672,15 +673,26 @@ async function handleCreateProductsOnSapo(backendUrl, upsert = false) {
           const originalPrice = Number(p.price || 0);
           
           let existingVariantId = null;
+          let matchedV = null;
           if (existingSapoProduct) {
-            const matchedV = existingSapoProduct.variants?.find(v => String(v.sku || "").trim().toLowerCase() === cleanSku.toLowerCase());
+            matchedV = existingSapoProduct.variants?.find(v => String(v.sku || "").trim().toLowerCase() === cleanSku.toLowerCase());
             if (matchedV) {
               existingVariantId = matchedV.id;
             }
           }
+
+          // Dò tìm tên thuộc tính & giá trị thuộc tính mặc định của Sapo đang dùng
+          const currentOptionName = (existingSapoProduct?.options?.[0]?.name) || "Title";
+          const currentOptionVal = (matchedV?.option1) || (existingSapoProduct?.options?.[0]?.values?.[0]) || "Default Title";
+
+          options.push({
+            name: currentOptionName,
+            values: [currentOptionVal]
+          });
           
           variants.push({
             ...(existingVariantId ? { id: existingVariantId } : {}),
+            option1: currentOptionVal,
             price: basePrice,
             compare_at_price: (p.listPrice && Number(p.listPrice) > 0 && originalPrice > basePrice) ? originalPrice : null,
             sku: cleanSku
