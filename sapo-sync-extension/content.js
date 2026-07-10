@@ -14,7 +14,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       .catch((error) => sendResponse({ success: false, error: error.message }));
     return true;
   } else if (request.action === "createProductsOnSapo") {
-    handleCreateProductsOnSapo(request.backendUrl)
+    handleCreateProductsOnSapo(request.backendUrl, request.upsert)
       .then((result) => sendResponse(result))
       .catch((error) => sendResponse({ success: false, error: error.message }));
     return true;
@@ -534,15 +534,30 @@ function showToastNotification(message, isError = false) {
   }, 4000);
 }
 
-// 3. Đồng bộ tạo hàng loạt sản phẩm từ Zalo sang Sapo Go
-async function handleCreateProductsOnSapo(backendUrl) {
-  addLogToStorage("Bắt đầu tạo sản phẩm từ Zalo -> Sapo...");
-  showToastNotification("Bắt đầu đồng bộ danh mục sản phẩm sang Sapo...");
+// 3. Đồng bộ tạo hoặc cập nhật hàng loạt sản phẩm từ Zalo sang Sapo Go
+async function handleCreateProductsOnSapo(backendUrl, upsert = false) {
+  const actionName = upsert ? "Cập nhật" : "Tạo mới";
+  addLogToStorage(`Bắt đầu ${actionName.toLowerCase()} sản phẩm từ Zalo -> Sapo...`);
+  showToastNotification(`Bắt đầu ${actionName.toLowerCase()} danh mục sản phẩm...`);
   
   try {
     const csrfToken = await resolveSapoCsrfToken();
     
-    // 1. Tải toàn bộ danh mục sản phẩm từ Zalo backend
+    // 1. Tải danh sách sản phẩm từ Sapo Go hiện tại để kiểm tra trùng SKU (chỉ khi cần cập nhật/upsert)
+    let sapoProducts = [];
+    if (upsert) {
+      try {
+        const sapoProductsRes = await fetch("/admin/products.json?limit=250");
+        if (sapoProductsRes.ok) {
+          const sapoProductsData = await sapoProductsRes.json();
+          sapoProducts = sapoProductsData.products || [];
+        }
+      } catch (err) {
+        console.warn("[Sapo Assistant] Không tải được danh mục Sapo để đối chiếu:", err.message);
+      }
+    }
+    
+    // 2. Tải toàn bộ danh mục sản phẩm từ Zalo backend
     const res = await fetch(`${backendUrl}/api/inventory/products`);
     if (!res.ok) {
       throw new Error(`Không tải được danh mục từ Zalo Backend (Mã lỗi ${res.status})`);
@@ -553,16 +568,40 @@ async function handleCreateProductsOnSapo(backendUrl) {
       throw new Error("Không có sản phẩm nào trên danh mục Zalo.");
     }
     
-    addLogToStorage(`Quét thấy ${zaloProducts.length} SP Zalo. Tiến hành đồng bộ...`);
+    addLogToStorage(`Quét thấy ${zaloProducts.length} SP Zalo. Tiến hành xử lý...`);
     
-    let successCount = 0;
+    let createdCount = 0;
+    let updatedCount = 0;
     let failCount = 0;
     
     for (const p of zaloProducts) {
       try {
         const skuPrefix = "zalominiapp-";
         
-        // 2. Chuyển đổi mô tả sản phẩm sang HTML
+        // A. Kiểm tra xem sản phẩm đã tồn tại trên Sapo chưa (chỉ khi upsert = true)
+        let existingSapoProduct = null;
+        let mainZaloSku = "";
+        
+        if (Array.isArray(p.variantGroups) && p.variantGroups.length > 0 && p.variantGroups[0].options?.length > 0) {
+          const opt = p.variantGroups[0].options[0];
+          const rawSku = opt.sku ? opt.sku : `${p.sku || 'sp-' + p.id}-${opt.id || opt.name}`;
+          mainZaloSku = `${skuPrefix}${rawSku}`.trim().toLowerCase().replace(/\s+/g, "-");
+        } else {
+          const rawSku = p.sku ? p.sku : `sp-${p.id}`;
+          mainZaloSku = `${skuPrefix}${rawSku}`.trim().toLowerCase().replace(/\s+/g, "-");
+        }
+        
+        if (upsert && sapoProducts.length > 0) {
+          for (const sp of sapoProducts) {
+            const matchedVariant = sp.variants?.find(v => String(v.sku || "").trim().toLowerCase() === mainZaloSku);
+            if (matchedVariant) {
+              existingSapoProduct = sp;
+              break;
+            }
+          }
+        }
+        
+        // B. Chuyển đổi mô tả sản phẩm sang HTML
         let htmlContent = p.description || "";
         if (Array.isArray(p.descriptionBlocks) && p.descriptionBlocks.length > 0) {
           htmlContent = p.descriptionBlocks.map(block => {
@@ -572,7 +611,7 @@ async function handleCreateProductsOnSapo(backendUrl) {
           }).join("");
         }
         
-        // 3. Chuẩn bị danh sách ảnh
+        // C. Chuẩn bị danh sách ảnh
         const images = [];
         if (p.image) images.push({ src: p.image });
         if (Array.isArray(p.images)) {
@@ -583,7 +622,7 @@ async function handleCreateProductsOnSapo(backendUrl) {
           });
         }
         
-        // 4. Chuẩn bị Options và Variants
+        // D. Chuẩn bị Options và Variants
         let options = [];
         let variants = [];
         
@@ -603,7 +642,17 @@ async function handleCreateProductsOnSapo(backendUrl) {
             const rawSku = opt.sku ? opt.sku : `${p.sku || 'sp-' + p.id}-${opt.id || opt.name}`;
             const cleanSku = `${skuPrefix}${rawSku}`.trim().replace(/\s+/g, "-");
             
+            // Tìm variant ID cũ để cập nhật thay vì tạo trùng
+            let existingVariantId = null;
+            if (existingSapoProduct) {
+              const matchedV = existingSapoProduct.variants?.find(v => String(v.sku || "").trim().toLowerCase() === cleanSku.toLowerCase());
+              if (matchedV) {
+                existingVariantId = matchedV.id;
+              }
+            }
+            
             return {
+              ...(existingVariantId ? { id: existingVariantId } : {}),
               option1: String(opt.name || opt.value || "").trim(),
               price: sellingPrice,
               compare_at_price: p.listPrice && Number(p.listPrice) > 0 ? originalPrice : null,
@@ -621,7 +670,16 @@ async function handleCreateProductsOnSapo(backendUrl) {
           const basePrice = p.listPrice && Number(p.listPrice) > 0 ? Number(p.listPrice) : Number(p.price || 0);
           const originalPrice = Number(p.price || 0);
           
+          let existingVariantId = null;
+          if (existingSapoProduct) {
+            const matchedV = existingSapoProduct.variants?.find(v => String(v.sku || "").trim().toLowerCase() === cleanSku.toLowerCase());
+            if (matchedV) {
+              existingVariantId = matchedV.id;
+            }
+          }
+          
           variants.push({
+            ...(existingVariantId ? { id: existingVariantId } : {}),
             title: "Default Title",
             price: basePrice,
             compare_at_price: p.listPrice && Number(p.listPrice) > 0 ? originalPrice : null,
@@ -632,9 +690,10 @@ async function handleCreateProductsOnSapo(backendUrl) {
           });
         }
         
-        // 5. Build Sapo Product Payload
+        // E. Build Sapo Product Payload
         const sapoPayload = {
           product: {
+            ...(existingSapoProduct ? { id: existingSapoProduct.id } : {}),
             name: p.name,
             content: htmlContent,
             images: images,
@@ -645,21 +704,38 @@ async function handleCreateProductsOnSapo(backendUrl) {
           }
         };
         
-        // 6. Gửi lệnh tạo sản phẩm trực tiếp lên Sapo Go bằng session cookie trình duyệt
-        const sapoRes = await fetch("/admin/products.json", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-            ...(csrfToken ? {
-              "X-CSRF-Token": csrfToken,
-              "X-CSRFToken": csrfToken,
-              "X-XSRF-TOKEN": csrfToken
-            } : {})
-          },
-          credentials: "same-origin",
-          body: JSON.stringify(sapoPayload)
-        });
+        let sapoRes;
+        if (existingSapoProduct) {
+          sapoRes = await fetch(`/admin/products/${existingSapoProduct.id}.json`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              "Accept": "application/json",
+              ...(csrfToken ? {
+                "X-CSRF-Token": csrfToken,
+                "X-CSRFToken": csrfToken,
+                "X-XSRF-TOKEN": csrfToken
+              } : {})
+            },
+            credentials: "same-origin",
+            body: JSON.stringify(sapoPayload)
+          });
+        } else {
+          sapoRes = await fetch("/admin/products.json", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Accept": "application/json",
+              ...(csrfToken ? {
+                "X-CSRF-Token": csrfToken,
+                "X-CSRFToken": csrfToken,
+                "X-XSRF-TOKEN": csrfToken
+              } : {})
+            },
+            credentials: "same-origin",
+            body: JSON.stringify(sapoPayload)
+          });
+        }
         
         const resText = await sapoRes.text();
         let resData;
@@ -673,22 +749,30 @@ async function handleCreateProductsOnSapo(backendUrl) {
           throw new Error(JSON.stringify(resData.errors || resData));
         }
         
-        successCount++;
-        addLogToStorage(`Tạo thành công SP: ${p.name} (Sapo ID #${resData.product.id})`);
-        console.log(`[Sapo Assistant] Created Sapo product ID #${resData.product.id}`);
+        if (existingSapoProduct) {
+          updatedCount++;
+          addLogToStorage(`Cập nhật thành công SP: ${p.name} (Sapo ID #${resData.product.id})`);
+        } else {
+          createdCount++;
+          addLogToStorage(`Tạo thành công SP: ${p.name} (Sapo ID #${resData.product.id})`);
+        }
       } catch (err) {
         failCount++;
-        addLogToStorage(`Lỗi tạo SP "${p.name.slice(0, 15)}...": ${err.message.slice(0, 50)}`);
-        console.error(`[Sapo Assistant] Failed to create product "${p.name}":`, err.message);
+        addLogToStorage(`Lỗi SP "${p.name.slice(0, 15)}...": ${err.message.slice(0, 50)}`);
+        console.error(`[Sapo Assistant] Failed to process product "${p.name}":`, err.message);
       }
     }
     
-    addLogToStorage(`Đã hoàn tất! Thành công: ${successCount}, Thất bại: ${failCount}`);
-    showToastNotification(`Đồng bộ danh mục thành công! (+${successCount} SP)`);
-    return { success: true, successCount, failCount };
+    const finalMsg = upsert 
+      ? `Đã hoàn tất! Cập nhật: ${updatedCount}, Tạo mới: ${createdCount}, Thất bại: ${failCount}`
+      : `Đã hoàn tất! Tạo mới thành công: ${createdCount}, Thất bại: ${failCount}`;
+      
+    addLogToStorage(finalMsg);
+    showToastNotification(upsert ? `Cập nhật danh mục thành công! (+${updatedCount} SP cập nhật, +${createdCount} SP mới)` : `Đồng bộ danh mục thành công! (+${createdCount} SP)`);
+    return { success: true, successCount: createdCount + updatedCount, createdCount, updatedCount, failCount };
   } catch (error) {
-    addLogToStorage(`Lỗi tạo danh mục sản phẩm: ${error.message}`);
-    showToastNotification(`Lỗi đồng bộ danh mục: ${error.message}`, true);
+    addLogToStorage(`Lỗi xử lý danh mục sản phẩm: ${error.message}`);
+    showToastNotification(`Lỗi xử lý danh mục: ${error.message}`, true);
     return { success: false, error: error.message };
   }
 }

@@ -4,17 +4,41 @@ const backendUrlInput = document.getElementById("backendUrl");
 const syncIntervalSelect = document.getElementById("syncInterval");
 const saveBtn = document.getElementById("saveBtn");
 const syncBtn = document.getElementById("syncBtn");
+const pauseBtn = document.getElementById("pauseBtn");
+const syncProductsBtn = document.getElementById("syncProductsBtn");
+const updateProductsBtn = document.getElementById("updateProductsBtn");
 const statusDot = document.getElementById("statusDot");
 const logList = document.getElementById("logList");
 const btnShowCatalog = document.getElementById("btnShowCatalog");
 const txtSapoCatalog = document.getElementById("txtSapoCatalog");
 
+let isSyncPaused = false;
+
+function updatePauseButtonUI() {
+  if (isSyncPaused) {
+    pauseBtn.innerText = "Tiếp tục đồng bộ đơn";
+    pauseBtn.style.backgroundColor = "rgba(16, 185, 129, 0.15)";
+    pauseBtn.style.borderColor = "rgba(16, 185, 129, 0.3)";
+    pauseBtn.style.color = "#a7f3d0";
+    statusDot.className = "status-dot error";
+  } else {
+    pauseBtn.innerText = "Tạm dừng đồng bộ đơn";
+    pauseBtn.style.backgroundColor = "rgba(239, 68, 68, 0.15)";
+    pauseBtn.style.borderColor = "rgba(239, 68, 68, 0.3)";
+    pauseBtn.style.color = "#fecaca";
+    statusDot.className = "status-dot";
+  }
+}
+
 // Load các cấu hình đã lưu
 chrome.storage.local.get(
-  ["backendUrl", "syncInterval", "logs", "sapoCatalogText"],
+  ["backendUrl", "syncInterval", "logs", "sapoCatalogText", "isSyncPaused"],
   (result) => {
     backendUrlInput.value = result.backendUrl || "https://tra-thao-moc-sunbeleaf-production.up.railway.app";
     syncIntervalSelect.value = result.syncInterval || "15";
+    isSyncPaused = !!result.isSyncPaused;
+    
+    updatePauseButtonUI();
     
     if (result.logs && Array.isArray(result.logs)) {
       updateLogsUI(result.logs);
@@ -59,7 +83,8 @@ saveBtn.addEventListener("click", () => {
     chrome.runtime.sendMessage({
       action: "updateSettings",
       backendUrl,
-      syncInterval
+      syncInterval,
+      isSyncPaused
     }, (response) => {
       saveBtn.innerText = "Lưu thành công! ✓";
       saveBtn.style.backgroundColor = "#10b981";
@@ -76,6 +101,22 @@ saveBtn.addEventListener("click", () => {
   });
 });
 
+// Nút tạm dừng / tiếp tục đồng bộ
+pauseBtn.addEventListener("click", () => {
+  isSyncPaused = !isSyncPaused;
+  chrome.storage.local.set({ isSyncPaused }, () => {
+    chrome.runtime.sendMessage({
+      action: "updateSettings",
+      backendUrl: backendUrlInput.value.trim(),
+      syncInterval: syncIntervalSelect.value,
+      isSyncPaused: isSyncPaused
+    }, (response) => {
+      updatePauseButtonUI();
+      addLog(isSyncPaused ? "Đã tạm dừng đồng bộ đơn hàng." : "Đã tiếp tục đồng bộ đơn hàng.");
+    });
+  });
+});
+
 // Nút kích hoạt đồng bộ thủ công ngay lập tức
 syncBtn.addEventListener("click", () => {
   syncBtn.innerText = "Đang kiểm tra đơn...";
@@ -87,7 +128,6 @@ syncBtn.addEventListener("click", () => {
   });
 });
 
-const syncProductsBtn = document.getElementById("syncProductsBtn");
 syncProductsBtn.addEventListener("click", () => {
   if (!confirm("Hệ thống sẽ tạo mới tất cả các sản phẩm từ Zalo Mini App sang Sapo Go của bạn (mã SKU bắt đầu bằng 'zalominiapp-'). Bạn có chắc chắn muốn thực hiện?")) {
     return;
@@ -104,6 +144,26 @@ syncProductsBtn.addEventListener("click", () => {
       alert(`Đã hoàn thành! Thành công: ${response.successCount}, Thất bại: ${response.failCount}. Hãy kiểm tra nhật ký hoạt động để xem chi tiết.`);
     } else {
       alert(`Lỗi đồng bộ sản phẩm: ${response ? response.error : "Không có phản hồi từ Extension"}`);
+    }
+  });
+});
+
+updateProductsBtn.addEventListener("click", () => {
+  if (!confirm("Hệ thống sẽ cập nhật thông tin tất cả sản phẩm Zalo trùng SKU (tiền tố 'zalominiapp-') trên Sapo Go. Sản phẩm nào chưa có sẽ được tạo mới. Bạn có chắc chắn muốn thực hiện?")) {
+    return;
+  }
+  
+  updateProductsBtn.innerText = "Đang cập nhật...";
+  updateProductsBtn.disabled = true;
+  
+  chrome.runtime.sendMessage({ action: "updateProductsToSapo" }, (response) => {
+    updateProductsBtn.disabled = false;
+    updateProductsBtn.innerText = "Cập nhật sản phẩm Zalo -> Sapo";
+    
+    if (response && response.success) {
+      alert(`Đã hoàn thành! Đã cập nhật: ${response.updatedCount}, Tạo mới: ${response.createdCount}, Thất bại: ${response.failCount}. Hãy kiểm tra nhật ký hoạt động để xem chi tiết.`);
+    } else {
+      alert(`Lỗi cập nhật sản phẩm: ${response ? response.error : "Không có phản hồi từ Extension"}`);
     }
   });
 });

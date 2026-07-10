@@ -2,11 +2,19 @@
 
 let backendUrl = "https://tra-thao-moc-sunbeleaf-production.up.railway.app";
 let syncInterval = 15; // seconds
+let isSyncPaused = false; // Trạng thái tạm dừng đồng bộ đơn
 
 // Load configurations
-chrome.storage.local.get(["backendUrl", "syncInterval"], (result) => {
+chrome.storage.local.get(["backendUrl", "syncInterval", "isSyncPaused"], (result) => {
   if (result.backendUrl) backendUrl = result.backendUrl;
   if (result.syncInterval) syncInterval = result.syncInterval;
+  isSyncPaused = !!result.isSyncPaused;
+  
+  if (isSyncPaused) {
+    chrome.action.setBadgeText({ text: "II" });
+    chrome.action.setBadgeBackgroundColor({ color: "#6b7280" });
+  }
+  
   setupAlarm();
 });
 
@@ -30,6 +38,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "updateSettings") {
     backendUrl = request.backendUrl || backendUrl;
     syncInterval = parseInt(request.syncInterval) || syncInterval;
+    isSyncPaused = request.isSyncPaused !== undefined ? request.isSyncPaused : isSyncPaused;
+    
+    if (isSyncPaused) {
+      chrome.action.setBadgeText({ text: "II" });
+      chrome.action.setBadgeBackgroundColor({ color: "#6b7280" });
+    } else {
+      chrome.action.setBadgeText({ text: "" });
+    }
+    
     setupAlarm();
     sendResponse({ success: true });
   } else if (request.action === "triggerSync") {
@@ -37,7 +54,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     checkAndUpdateTracking();
     sendResponse({ success: true });
   } else if (request.action === "syncProductsToSapo") {
-    syncProductsToSapo()
+    syncProductsToSapo(false)
+      .then((result) => sendResponse(result))
+      .catch((error) => sendResponse({ success: false, error: error.message }));
+    return true;
+  } else if (request.action === "updateProductsToSapo") {
+    syncProductsToSapo(true)
       .then((result) => sendResponse(result))
       .catch((error) => sendResponse({ success: false, error: error.message }));
     return true;
@@ -100,6 +122,7 @@ async function reportSapoFailure(order, error) {
 
 // 1. Tạo đơn hàng tự động
 async function checkAndSyncOrders() {
+  if (isSyncPaused) return;
   try {
     const response = await fetch(`${backendUrl}/api/sapo/extension/pending`);
     if (!response.ok) {
@@ -163,6 +186,7 @@ async function checkAndSyncOrders() {
 
 // 2. Đồng bộ ngược mã vận đơn từ Sapo về Zalo
 async function checkAndUpdateTracking() {
+  if (isSyncPaused) return;
   try {
     const response = await fetch(`${backendUrl}/api/sapo/extension/pending-tracking`);
     if (!response.ok) return;
@@ -193,7 +217,7 @@ async function checkAndUpdateTracking() {
   }
 }
 
-async function syncProductsToSapo() {
+async function syncProductsToSapo(upsert = false) {
   const tabs = await chrome.tabs.query({ url: "https://*.mysapogo.com/admin*" });
   if (tabs.length === 0) {
     throw new Error("Không tìm thấy tab Sapo Go đang mở để đồng bộ. Hãy mở trang Sapo Go và đăng nhập trước.");
@@ -207,7 +231,8 @@ async function syncProductsToSapo() {
   
   return await sendMessageToTab(activeTab.id, {
     action: "createProductsOnSapo",
-    backendUrl: backendUrl
+    backendUrl: backendUrl,
+    upsert: upsert
   });
 }
 
