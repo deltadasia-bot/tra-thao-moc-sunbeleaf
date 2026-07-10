@@ -656,10 +656,7 @@ async function handleCreateProductsOnSapo(backendUrl, upsert = false) {
               option1: String(opt.name || opt.value || "").trim(),
               price: sellingPrice,
               compare_at_price: p.listPrice && Number(p.listPrice) > 0 ? originalPrice : null,
-              sku: cleanSku,
-              inventory_management: "sapo",
-              inventory_policy: "deny",
-              fulfillment_service: "manual"
+              sku: cleanSku
             };
           });
         } else {
@@ -680,22 +677,20 @@ async function handleCreateProductsOnSapo(backendUrl, upsert = false) {
           
           variants.push({
             ...(existingVariantId ? { id: existingVariantId } : {}),
-            title: "Default Title",
             price: basePrice,
             compare_at_price: p.listPrice && Number(p.listPrice) > 0 ? originalPrice : null,
-            sku: cleanSku,
-            inventory_management: "sapo",
-            inventory_policy: "deny",
-            fulfillment_service: "manual"
+            sku: cleanSku
           });
         }
         
-        // E. Build Sapo Product Payload
+        // E. Build Sapo Product Payload (Tương thích chéo cả Shopify API và Sapo Custom fields)
         const sapoPayload = {
           product: {
             ...(existingSapoProduct ? { id: existingSapoProduct.id } : {}),
+            title: p.name,
             name: p.name,
             content: htmlContent,
+            body_html: htmlContent,
             images: images,
             variants: variants,
             ...(options.length > 0 ? { options } : {}),

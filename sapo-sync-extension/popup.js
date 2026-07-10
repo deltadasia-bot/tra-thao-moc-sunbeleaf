@@ -194,3 +194,10 @@ function addLog(message) {
     });
   });
 }
+
+// Lắng nghe thay đổi nhật ký hoạt động từ content script trong tab Sapo gửi về
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName === "local" && changes.logs) {
+    updateLogsUI(changes.logs.newValue || []);
+  }
+});
