@@ -21,7 +21,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 // Khóa chống đồng bộ lặp lại
 let isSyncing = false;
 
-function buildSapoLineItems(order) {
+function buildSapoLineItems(order, sapoProducts = [], zaloSkuMap = {}) {
   const sourceItems = Array.isArray(order.items) ? order.items : [];
   const lineItems = sourceItems
     .map((item) => {
@@ -29,6 +29,43 @@ function buildSapoLineItems(order) {
       const quantity = Number.parseInt(item.quantity || 1, 10);
       const price = Number(item.price || 0);
       if (!name || !Number.isFinite(price) || price <= 0) return null;
+
+      let matchedVariantId = null;
+      let matchedProductId = null;
+      let matchedSku = null;
+
+      // 1. Đối chiếu bằng SKU (ưu tiên nếu Zalo sản phẩm có SKU)
+      const zaloSku = item.productId ? zaloSkuMap[item.productId] : null;
+      if (zaloSku && Array.isArray(sapoProducts)) {
+        for (const p of sapoProducts) {
+          const variant = p.variants?.find(v => String(v.sku || "").trim().toLowerCase() === zaloSku.toLowerCase());
+          if (variant) {
+            matchedVariantId = variant.id;
+            matchedProductId = p.id;
+            matchedSku = variant.sku;
+            console.log(`[Sapo Assistant] Khớp SKU: Zalo SP #${item.productId} (SKU: ${zaloSku}) -> Sapo Variant #${variant.id}`);
+            break;
+          }
+        }
+      }
+
+      // 2. Nếu không khớp SKU, thử đối chiếu bằng Tên sản phẩm (không phân biệt hoa thường, khoảng trắng thừa)
+      if (!matchedVariantId && Array.isArray(sapoProducts)) {
+        const cleanName = name.toLowerCase().replace(/\s+/g, " ").trim();
+        for (const p of sapoProducts) {
+          const cleanSapoName = String(p.name || "").toLowerCase().replace(/\s+/g, " ").trim();
+          if (cleanSapoName === cleanName || cleanSapoName.includes(cleanName) || cleanName.includes(cleanSapoName)) {
+            const variant = p.variants?.[0];
+            if (variant) {
+              matchedVariantId = variant.id;
+              matchedProductId = p.id;
+              matchedSku = variant.sku;
+              console.log(`[Sapo Assistant] Khớp Tên: Zalo SP "${name}" -> Sapo Variant #${variant.id}`);
+              break;
+            }
+          }
+        }
+      }
 
       return {
         name,
@@ -38,10 +75,13 @@ function buildSapoLineItems(order) {
         grams: 300,
         requires_shipping: order.deliveryType === "delivery",
         taxable: false,
+        ...(matchedVariantId ? { variant_id: matchedVariantId } : {}),
+        ...(matchedProductId ? { product_id: matchedProductId } : {}),
+        ...(matchedSku ? { sku: matchedSku } : {}),
         properties: Array.isArray(item.options)
           ? item.options
               .map((option) => ({
-                name: option.name || "Quy cach",
+                name: option.name || "Quy cách",
                 value: option.value || option.name || ""
               }))
               .filter((option) => option.value)
@@ -54,12 +94,12 @@ function buildSapoLineItems(order) {
 
   const fallbackAmount = Number(order.totalAmount || order.amount || 0);
   if (!Number.isFinite(fallbackAmount) || fallbackAmount <= 0) {
-    throw new Error("Don hang khong co san pham hop le de dong bo sang Sapo.");
+    throw new Error("Đơn hàng không có sản phẩm hợp lệ để đồng bộ sang Sapo.");
   }
 
   return [{
-    name: `Don hang ${order.orderCode}`,
-    title: `Don hang ${order.orderCode}`,
+    name: `Đơn hàng ${order.orderCode}`,
+    title: `Đơn hàng ${order.orderCode}`,
     quantity: 1,
     price: fallbackAmount,
     grams: 300,
@@ -67,6 +107,26 @@ function buildSapoLineItems(order) {
     taxable: false,
     properties: []
   }];
+}
+
+async function fetchZaloProductSkus(backendUrl) {
+  try {
+    const res = await fetch(`${backendUrl}/api/inventory`);
+    if (res.ok) {
+      const data = await res.json();
+      const overrides = data.productOverrides || {};
+      const mapping = {};
+      Object.keys(overrides).forEach(productId => {
+        if (overrides[productId]?.sku) {
+          mapping[productId] = String(overrides[productId].sku).trim();
+        }
+      });
+      return mapping;
+    }
+  } catch (error) {
+    console.error("[Sapo Assistant] Error fetching Zalo inventory SKUs:", error);
+  }
+  return {};
 }
 
 const CSRF_META_SELECTORS = [
@@ -258,10 +318,10 @@ async function handleSyncOrder(order, backendUrl) {
       console.warn("[Sapo Assistant] Khong tim thay Location ID, tiep tuc gui ma khong co location header.");
     }
 
-    // Thử tải và log danh sách sản phẩm để debug
-    await fetchSapoProductsAndLog();
+    // Tải danh sách sản phẩm từ Sapo và danh sách SKU từ Zalo
+    const sapoProducts = await fetchSapoProductsAndLog();
+    const zaloSkuMap = await fetchZaloProductSkus(backendUrl);
 
-    
     // Chuyển đổi phương thức thanh toán sang nhãn hiển thị tiếng Việt
     const paymentMap = {
       bank_transfer: "Chuyển khoản ngân hàng (ACB)",
@@ -270,29 +330,9 @@ async function handleSyncOrder(order, backendUrl) {
       momo: "MoMo"
     };
     const paymentMethodLabel = paymentMap[order.paymentMethod] || order.paymentMethod;
-    
-    // Định dạng danh sách mặt hàng
-    const lineItems = Array.isArray(order.items) && order.items.length > 0
-      ? order.items.map((item) => ({
-          name: item.name,
-          quantity: parseInt(item.quantity || 1),
-          price: String(item.price),
-          grams: 300,
-          requires_shipping: order.deliveryType === "delivery",
-          taxable: false
-        }))
-      : [
-          {
-            name: `Đơn hàng ${order.orderCode}`,
-            quantity: 1,
-            price: String(order.amount),
-            taxable: false
-          }
-        ];
 
-    const sapoLineItems = buildSapoLineItems(order);
+    const sapoLineItems = buildSapoLineItems(order, sapoProducts, zaloSkuMap);
 
-    // Chuẩn bị dữ liệu gửi lên API nội bộ của Sapo
     const payload = {
       order: {
         source_name: "Zalo Mini App Sunbeleaf",
