@@ -36,6 +36,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     checkAndSyncOrders();
     checkAndUpdateTracking();
     sendResponse({ success: true });
+  } else if (request.action === "syncProductsToSapo") {
+    syncProductsToSapo()
+      .then((result) => sendResponse(result))
+      .catch((error) => sendResponse({ success: false, error: error.message }));
+    return true;
   }
 });
 
@@ -187,3 +192,22 @@ async function checkAndUpdateTracking() {
     console.error("[Sapo Sync background] Lỗi checkAndUpdateTracking:", error.message);
   }
 }
+
+async function syncProductsToSapo() {
+  const tabs = await chrome.tabs.query({ url: "https://*.mysapogo.com/admin*" });
+  if (tabs.length === 0) {
+    throw new Error("Không tìm thấy tab Sapo Go đang mở để đồng bộ. Hãy mở trang Sapo Go và đăng nhập trước.");
+  }
+  
+  const activeTab = tabs[0];
+  const contentReady = await ensureContentScript(activeTab.id);
+  if (!contentReady) {
+    throw new Error("Không thể kích hoạt script trên tab Sapo Go.");
+  }
+  
+  return await sendMessageToTab(activeTab.id, {
+    action: "createProductsOnSapo",
+    backendUrl: backendUrl
+  });
+}
+

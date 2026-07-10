@@ -13,6 +13,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       .then((result) => sendResponse(result || { success: true }))
       .catch((error) => sendResponse({ success: false, error: error.message }));
     return true;
+  } else if (request.action === "createProductsOnSapo") {
+    handleCreateProductsOnSapo(request.backendUrl)
+      .then((result) => sendResponse(result))
+      .catch((error) => sendResponse({ success: false, error: error.message }));
+    return true;
   } else if (request.action === "ping") {
     sendResponse({ success: true, url: location.href });
   }
@@ -527,4 +532,163 @@ function showToastNotification(message, isError = false) {
     toast.style.transform = "translateY(50px)";
     toast.style.opacity = "0";
   }, 4000);
+}
+
+// 3. Đồng bộ tạo hàng loạt sản phẩm từ Zalo sang Sapo Go
+async function handleCreateProductsOnSapo(backendUrl) {
+  addLogToStorage("Bắt đầu tạo sản phẩm từ Zalo -> Sapo...");
+  showToastNotification("Bắt đầu đồng bộ danh mục sản phẩm sang Sapo...");
+  
+  try {
+    const csrfToken = await resolveSapoCsrfToken();
+    
+    // 1. Tải toàn bộ danh mục sản phẩm từ Zalo backend
+    const res = await fetch(`${backendUrl}/api/inventory/products`);
+    if (!res.ok) {
+      throw new Error(`Không tải được danh mục từ Zalo Backend (Mã lỗi ${res.status})`);
+    }
+    const data = await res.json();
+    const zaloProducts = data.products || [];
+    if (zaloProducts.length === 0) {
+      throw new Error("Không có sản phẩm nào trên danh mục Zalo.");
+    }
+    
+    addLogToStorage(`Quét thấy ${zaloProducts.length} SP Zalo. Tiến hành đồng bộ...`);
+    
+    let successCount = 0;
+    let failCount = 0;
+    
+    for (const p of zaloProducts) {
+      try {
+        const skuPrefix = "zalominiapp-";
+        
+        // 2. Chuyển đổi mô tả sản phẩm sang HTML
+        let htmlContent = p.description || "";
+        if (Array.isArray(p.descriptionBlocks) && p.descriptionBlocks.length > 0) {
+          htmlContent = p.descriptionBlocks.map(block => {
+            if (block.type === "text") return `<p>${block.text}</p>`;
+            if (block.type === "image") return `<p style="text-align:center;"><img src="${block.url}" style="max-width:100%; border-radius:8px;" /></p>`;
+            return "";
+          }).join("");
+        }
+        
+        // 3. Chuẩn bị danh sách ảnh
+        const images = [];
+        if (p.image) images.push({ src: p.image });
+        if (Array.isArray(p.images)) {
+          p.images.forEach(img => {
+            if (img && img !== p.image) {
+              images.push({ src: img });
+            }
+          });
+        }
+        
+        // 4. Chuẩn bị Options và Variants
+        let options = [];
+        let variants = [];
+        
+        if (Array.isArray(p.variantGroups) && p.variantGroups.length > 0 && p.variantGroups[0].options?.length > 0) {
+          const group = p.variantGroups[0];
+          options.push({
+            name: group.title || "Phân loại",
+            values: group.options.map(opt => String(opt.name || opt.value || "").trim()).filter(Boolean)
+          });
+          
+          variants = group.options.map(opt => {
+            const extraPrice = Number(opt.extraPrice || 0);
+            const basePrice = p.listPrice && Number(p.listPrice) > 0 ? Number(p.listPrice) : Number(p.price || 0);
+            const sellingPrice = basePrice + extraPrice;
+            const originalPrice = Number(p.price || 0) + extraPrice;
+            
+            const rawSku = opt.sku ? opt.sku : `${p.sku || 'sp-' + p.id}-${opt.id || opt.name}`;
+            const cleanSku = `${skuPrefix}${rawSku}`.trim().replace(/\s+/g, "-");
+            
+            return {
+              option1: String(opt.name || opt.value || "").trim(),
+              price: sellingPrice,
+              compare_at_price: p.listPrice && Number(p.listPrice) > 0 ? originalPrice : null,
+              sku: cleanSku,
+              inventory_management: "sapo",
+              inventory_policy: "deny",
+              fulfillment_service: "manual"
+            };
+          });
+        } else {
+          // Sản phẩm thường không có phân loại
+          const rawSku = p.sku ? p.sku : `sp-${p.id}`;
+          const cleanSku = `${skuPrefix}${rawSku}`.trim().replace(/\s+/g, "-");
+          
+          const basePrice = p.listPrice && Number(p.listPrice) > 0 ? Number(p.listPrice) : Number(p.price || 0);
+          const originalPrice = Number(p.price || 0);
+          
+          variants.push({
+            title: "Default Title",
+            price: basePrice,
+            compare_at_price: p.listPrice && Number(p.listPrice) > 0 ? originalPrice : null,
+            sku: cleanSku,
+            inventory_management: "sapo",
+            inventory_policy: "deny",
+            fulfillment_service: "manual"
+          });
+        }
+        
+        // 5. Build Sapo Product Payload
+        const sapoPayload = {
+          product: {
+            name: p.name,
+            content: htmlContent,
+            images: images,
+            variants: variants,
+            ...(options.length > 0 ? { options } : {}),
+            product_type: p.categoryName || p.categoryId || "Trà thảo mộc",
+            vendor: p.brand || "Sunbeleaf"
+          }
+        };
+        
+        // 6. Gửi lệnh tạo sản phẩm trực tiếp lên Sapo Go bằng session cookie trình duyệt
+        const sapoRes = await fetch("/admin/products.json", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            ...(csrfToken ? {
+              "X-CSRF-Token": csrfToken,
+              "X-CSRFToken": csrfToken,
+              "X-XSRF-TOKEN": csrfToken
+            } : {})
+          },
+          credentials: "same-origin",
+          body: JSON.stringify(sapoPayload)
+        });
+        
+        const resText = await sapoRes.text();
+        let resData;
+        try {
+          resData = resText ? JSON.parse(resText) : {};
+        } catch {
+          resData = { raw: resText };
+        }
+        
+        if (!sapoRes.ok || !resData.product) {
+          throw new Error(JSON.stringify(resData.errors || resData));
+        }
+        
+        successCount++;
+        addLogToStorage(`Tạo thành công SP: ${p.name} (Sapo ID #${resData.product.id})`);
+        console.log(`[Sapo Assistant] Created Sapo product ID #${resData.product.id}`);
+      } catch (err) {
+        failCount++;
+        addLogToStorage(`Lỗi tạo SP "${p.name.slice(0, 15)}...": ${err.message.slice(0, 50)}`);
+        console.error(`[Sapo Assistant] Failed to create product "${p.name}":`, err.message);
+      }
+    }
+    
+    addLogToStorage(`Đã hoàn tất! Thành công: ${successCount}, Thất bại: ${failCount}`);
+    showToastNotification(`Đồng bộ danh mục thành công! (+${successCount} SP)`);
+    return { success: true, successCount, failCount };
+  } catch (error) {
+    addLogToStorage(`Lỗi tạo danh mục sản phẩm: ${error.message}`);
+    showToastNotification(`Lỗi đồng bộ danh mục: ${error.message}`, true);
+    return { success: false, error: error.message };
+  }
 }

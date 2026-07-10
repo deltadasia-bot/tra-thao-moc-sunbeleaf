@@ -87,6 +87,27 @@ syncBtn.addEventListener("click", () => {
   });
 });
 
+const syncProductsBtn = document.getElementById("syncProductsBtn");
+syncProductsBtn.addEventListener("click", () => {
+  if (!confirm("Hệ thống sẽ tạo mới tất cả các sản phẩm từ Zalo Mini App sang Sapo Go của bạn (mã SKU bắt đầu bằng 'zalominiapp-'). Bạn có chắc chắn muốn thực hiện?")) {
+    return;
+  }
+  
+  syncProductsBtn.innerText = "Đang tạo SP...";
+  syncProductsBtn.disabled = true;
+  
+  chrome.runtime.sendMessage({ action: "syncProductsToSapo" }, (response) => {
+    syncProductsBtn.disabled = false;
+    syncProductsBtn.innerText = "Tạo sản phẩm Zalo -> Sapo";
+    
+    if (response && response.success) {
+      alert(`Đã hoàn thành! Thành công: ${response.successCount}, Thất bại: ${response.failCount}. Hãy kiểm tra nhật ký hoạt động để xem chi tiết.`);
+    } else {
+      alert(`Lỗi đồng bộ sản phẩm: ${response ? response.error : "Không có phản hồi từ Extension"}`);
+    }
+  });
+});
+
 function updateLogsUI(logs) {
   logList.innerHTML = "";
   if (logs.length === 0) {
