@@ -664,10 +664,10 @@ async function handleCreateProductsOnSapo(backendUrl, upsert = false) {
             };
           });
         } else {
-          // Sản phẩm thường không có phân loại -> Tạo option mặc định để thỏa mãn ràng buộc Sapo
+          // Sản phẩm thường không có phân loại -> Tạo option mặc định theo đặc tả Shopify/Sapo
           options.push({
-            name: "Tiêu đề",
-            values: ["Mặc định"]
+            name: "Title",
+            values: ["Default Title"]
           });
 
           const rawSku = p.sku ? p.sku : `sp-${p.id}`;
@@ -686,7 +686,7 @@ async function handleCreateProductsOnSapo(backendUrl, upsert = false) {
           
           variants.push({
             ...(existingVariantId ? { id: existingVariantId } : {}),
-            option1: "Mặc định",
+            option1: "Default Title",
             price: basePrice,
             compare_at_price: (p.listPrice && Number(p.listPrice) > 0 && originalPrice > basePrice) ? originalPrice : null,
             sku: cleanSku
