@@ -694,7 +694,6 @@ async function handleCreateProductsOnSapo(backendUrl, upsert = false) {
             images: images,
             variants: variants,
             ...(options.length > 0 ? { options } : {}),
-            product_type: p.categoryName || p.categoryId || "Trà thảo mộc",
             vendor: p.brand || "Sunbeleaf"
           }
         };
