@@ -18,45 +18,13 @@ function isConfigured() {
 }
 
 /**
- * Sinh mã vận đơn SPX ngẫu nhiên phục vụ chế độ chạy thử
- */
-function generateMockTrackingNumber() {
-  const chars = "0123456789";
-  let randomPart = "";
-  for (let i = 0; i < 11; i++) {
-    randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return `SPXVN${randomPart}`;
-}
-
-/**
  * Tạo vận đơn trên hệ thống SPX Express khi khách đặt hàng thành công
  * @param {object} order Đơn hàng cần giao
  * @returns {Promise<{trackingNumber: string, shippingCarrier: string, trackingUrl: string, milestones: Array}>}
  */
 async function createSPXOrder(order) {
   if (!isConfigured()) {
-    console.log(
-      `[SPX Express] Chưa cấu hình đầy đủ biến môi trường. Chạy đơn hàng ${order.orderCode} ở chế độ mô phỏng Sandbox.`
-    );
-
-    const trackingNumber = generateMockTrackingNumber();
-    const trackingUrl = `https://spx.vn/detail?t=${trackingNumber}`;
-    const initialMilestones = [
-      {
-        status: "created",
-        statusLabel: "Đã tạo vận đơn trên hệ thống SPX Express",
-        location: "Hệ thống SPX",
-        time: new Date().toISOString(),
-      },
-    ];
-
-    return {
-      trackingNumber,
-      shippingCarrier: "SPX Express",
-      trackingUrl,
-      milestones: initialMilestones,
-    };
+    throw new Error("SPX chưa được cấu hình. Không tạo mã vận đơn mô phỏng.");
   }
 
   try {
@@ -136,23 +104,8 @@ async function createSPXOrder(order) {
       ],
     };
   } catch (error) {
-    console.error("[SPX Express] Lỗi kết nối API thật, tự động fallback sang mô phỏng:", error.message);
-    
-    // Tự động fallback sang mô phỏng vận đơn khi kết nối thật bị lỗi
-    const trackingNumber = generateMockTrackingNumber();
-    return {
-      trackingNumber,
-      shippingCarrier: "SPX Express",
-      trackingUrl: `https://spx.vn/detail?t=${trackingNumber}`,
-      milestones: [
-        {
-          status: "created",
-          statusLabel: "Đã tạo vận đơn trên hệ thống SPX Express (Mô phỏng do lỗi API)",
-          location: "Hệ thống SPX",
-          time: new Date().toISOString(),
-        },
-      ],
-    };
+    console.error("[SPX Express] Lỗi kết nối API thật:", error.message);
+    throw error;
   }
 }
 

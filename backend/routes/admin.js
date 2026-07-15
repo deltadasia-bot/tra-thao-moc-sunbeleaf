@@ -349,6 +349,7 @@ function mergeProductOverride(product, overrides) {
 function getManagedProducts() {
   const inventory = db.getInventory();
   const overrides = db.getProductOverrides();
+  const baseCatalogIds = new Set(getProductCatalog().map((product) => String(product.id)));
   const catalog = getProductCatalog().map((product) => mergeProductOverride(product, overrides));
   const catalogById = new Map(catalog.map((product) => [String(product.id), product]));
 
@@ -391,6 +392,9 @@ function getManagedProducts() {
         lowStockAlertedStock: entry.lowStockAlertedStock,
         updatedAt: entry.updatedAt,
         inventory: entry,
+        // Chỉ sản phẩm tạo thêm qua Admin (ngoài danh mục gốc của mini app)
+        // mới có thể xóa vĩnh viễn; sản phẩm gốc chỉ có thể ẩn.
+        isCustomProduct: !baseCatalogIds.has(String(product.id)),
       };
     });
 }
@@ -774,19 +778,26 @@ router.get("/me", (req, res) => {
 
 router.get("/stats", (_req, res) => {
   const orders = db.getAllOrders();
+  const isCancelledOrError = (order) => order.state === "cancelled" || Boolean(order.sapoSyncError);
 
   const stats = {
     totalOrders: orders.length,
-    pendingPayment: orders.filter((order) => order.paymentStatus === "pending").length,
-    paidOrders: orders.filter((order) => order.paymentStatus === "paid").length,
-    processingOrders: orders.filter((order) =>
-      ["pending", "confirmed", "preparing", "ready", "delivering"].includes(order.state),
+    pendingPayment: orders.filter(
+      (order) => order.paymentStatus === "pending" && !isCancelledOrError(order),
     ).length,
-    completedOrders: orders.filter((order) =>
-      ["delivered", "completed"].includes(order.state),
+    paidOrders: orders.filter((order) => order.paymentStatus === "paid" && !isCancelledOrError(order)).length,
+    processingOrders: orders.filter(
+      (order) =>
+        !isCancelledOrError(order) &&
+        ["pending", "confirmed", "preparing", "ready", "delivering"].includes(order.state),
     ).length,
+    completedOrders: orders.filter(
+      (order) => !isCancelledOrError(order) && ["delivered", "completed"].includes(order.state),
+    ).length,
+    cancelledOrders: orders.filter(isCancelledOrError).length,
     returnOrders: orders.filter((order) =>
-      order.state === "returned" || order.paymentStatus === "refunded",
+      !isCancelledOrError(order) &&
+      (order.state === "returned" || order.paymentStatus === "refunded"),
     ).length,
   };
 
@@ -1051,6 +1062,36 @@ router.patch("/products/:productId", (req, res) => {
   });
 });
 
+router.delete("/products/:productId", (req, res) => {
+  const productId = String(req.params.productId || "").trim();
+  if (!productId) {
+    return res.status(400).json({ error: "Thiếu productId" });
+  }
+
+  // Sản phẩm thuộc catalog gốc của mini app không thể xóa (sẽ tự xuất hiện lại),
+  // chỉ có thể ẩn bằng cách tắt Hiển thị trong phần tồn kho.
+  const isCatalogProduct = getProductCatalog().some(
+    (product) => String(product.id) === productId,
+  );
+  if (isCatalogProduct) {
+    return res.status(400).json({
+      error:
+        "Sản phẩm thuộc danh mục gốc của app, không thể xóa. Hãy tắt 'Hiển thị' để ẩn sản phẩm khỏi mini app.",
+    });
+  }
+
+  const removed = db.deleteProduct(productId);
+  if (!removed) {
+    return res.status(404).json({ error: "Không tìm thấy sản phẩm" });
+  }
+
+  return res.json({
+    success: true,
+    productId,
+    productOverrides: db.getProductOverrides(),
+  });
+});
+
 router.get("/reports/sales", (_req, res) => {
   const orders = db.getAllOrders();
   const now = new Date();
@@ -1290,19 +1331,30 @@ router.get("/orders", (req, res) => {
   if (state) {
     orders = orders.filter((order) => order.state === state);
   } else if (stateGroup) {
+    const isCancelledOrError = (order) => order.state === "cancelled" || Boolean(order.sapoSyncError);
     if (stateGroup === "returns") {
       orders = orders.filter(
-        (order) => order.state === "returned" || order.paymentStatus === "refunded",
+        (order) =>
+          !isCancelledOrError(order) &&
+          (order.state === "returned" || order.paymentStatus === "refunded"),
       );
+    } else if (stateGroup === "unpaid") {
+      orders = orders.filter(
+        (order) => order.paymentStatus === "pending" && !isCancelledOrError(order),
+      );
+    } else if (stateGroup === "cancelled") {
+      orders = orders.filter(isCancelledOrError);
     } else {
-    const stateGroups = {
-      processing: ["pending", "confirmed", "preparing", "ready", "delivering"],
-      completed: ["delivered", "completed"],
-    };
-    const allowedStates = stateGroups[stateGroup] || [];
-    if (allowedStates.length) {
-      orders = orders.filter((order) => allowedStates.includes(order.state));
-    }
+      const stateGroups = {
+        processing: ["pending", "confirmed", "preparing", "ready", "delivering"],
+        completed: ["delivered", "completed"],
+      };
+      const allowedStates = stateGroups[stateGroup] || [];
+      if (allowedStates.length) {
+        orders = orders.filter(
+          (order) => allowedStates.includes(order.state) && !isCancelledOrError(order),
+        );
+      }
     }
   }
 

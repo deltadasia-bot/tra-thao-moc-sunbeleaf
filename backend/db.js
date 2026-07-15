@@ -680,6 +680,23 @@ module.exports = {
     return overrides[normalizedProductId] || normalizeProductOverride(normalizedProductId, {});
   },
 
+  deleteProduct(productId) {
+    const normalizedProductId = String(productId || "").trim();
+    if (!normalizedProductId) return false;
+
+    const overrides = readProductOverrides();
+    const inventory = readInventory();
+    const existed =
+      Boolean(overrides[normalizedProductId]) || Boolean(inventory[normalizedProductId]);
+
+    delete overrides[normalizedProductId];
+    delete inventory[normalizedProductId];
+    writeProductOverrides(overrides);
+    writeInventory(inventory);
+
+    return existed;
+  },
+
   setInventoryEntry(productId, patch) {
     const normalizedProductId = String(productId || "").trim();
     if (!normalizedProductId) return null;

@@ -1505,11 +1505,15 @@ export default function HomePage() {
     );
   }
 
+  const isShopSearchOverlayOpen =
+    isShopSearchFocused || Boolean(shopSearchQuery.trim());
+
   return (
     <div className="liquid-glass-page relative">
       <section
-        className={`relative overflow-visible text-white ${shopSearchQuery.trim() ? "z-50" : "z-0"
-          }`}
+        className={`relative overflow-visible text-white ${
+          isShopSearchOverlayOpen ? "z-50" : "z-0"
+        }`}
       >
         <div className="relative">
           <img

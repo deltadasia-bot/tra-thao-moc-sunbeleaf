@@ -4,7 +4,6 @@ const db       = require("../db");
 const { pushOrderToSapo, createSapoReturn }  = require("../services/sapo");
 const { syncOrderToNhanh } = require("../services/nhanh");
 const { notifyNewOrder, notifyLowStock }   = require("../services/notifier");
-const { createSPXOrder }   = require("../services/spx");
 
 /**
  * GET /api/orders
@@ -98,7 +97,6 @@ router.post("/", async (req, res) => {
     return res.status(400).json({ error: "Giao hàng hỏa tốc không áp dụng với thanh toán khi nhận hàng" });
   }
 
-  // Tự động tạo đơn giao hàng trên SPX Express nếu chọn hình thức Giao hàng tận nơi
   const inventory = db.getInventory();
   const outOfStockItem = (Array.isArray(items) ? items : []).find((item) => {
     const productId = String(item?.productId || "").trim();
@@ -116,33 +114,6 @@ router.post("/", async (req, res) => {
     });
   }
 
-  let trackingInfo = {
-    shippingCarrier: shippingCarrier || "SPX Express"
-  };
-
-  if (deliveryType === "delivery" && shippingCarrier !== "Giao hàng Hỏa tốc") {
-    try {
-      const spx = await createSPXOrder({
-        id,
-        orderCode,
-        amount,
-        paymentMethod,
-        items,
-        deliveryAddress: deliveryAddress || { phoneNumber: customerPhone },
-        note,
-      });
-
-      trackingInfo = {
-        trackingNumber: spx.trackingNumber,
-        shippingCarrier: spx.shippingCarrier,
-        trackingUrl: spx.trackingUrl,
-        trackingHistory: spx.milestones,
-      };
-    } catch (err) {
-      console.error("[SPX] Không tạo được đơn giao hàng:", err.message);
-    }
-  }
-
   const order = db.createOrder({
     id,
     orderCode,
@@ -154,7 +125,7 @@ router.post("/", async (req, res) => {
     shippingFee:     shippingFee || 0,
     note:            note || "",
     customerPhone:   customerPhone || "",
-    ...trackingInfo,
+    shippingCarrier: shippingCarrier || (deliveryType === "delivery" ? "SPX Express" : ""),
   });
 
   // Chạy nền – không block response trả về mini app

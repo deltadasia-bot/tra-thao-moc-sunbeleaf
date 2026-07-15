@@ -7,6 +7,14 @@
       "runtimeArgs": ["start"],
       "port": 3000,
       "autoPort": true
+    },
+    {
+      "name": "admin-backend-test",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "D:/TEMP/claude/D--Downloads-ZALO-APP-B-N-H-NG-tra-thao-moc-sunbeleaf/a09409ed-1522-45c0-af8b-8d66b2e12775/scratchpad/run-admin-test.js"
+      ],
+      "port": 3010
     }
   ]
 }

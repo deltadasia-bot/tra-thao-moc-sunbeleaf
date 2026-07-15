@@ -681,18 +681,32 @@ function InventoryDashboard({
   onBulkSave,
   onProductSave,
   onProductCreate,
+  onProductDelete,
   onProductMediaUpload,
   savingId,
   bulkSaving,
 }) {
   const [selectedIds, setSelectedIds] = useState([]);
   const [isCreatingProduct, setIsCreatingProduct] = useState(false);
+  const [deletingId, setDeletingId] = useState("");
   const [bulkDraft, setBulkDraft] = useState({
     stock: "",
     lowStockThreshold: "",
     enabled: "keep",
     visible: "keep",
   });
+
+  async function handleRowDelete(productId) {
+    setDeletingId(String(productId));
+    try {
+      await onProductDelete(productId);
+      setSelectedIds((current) => current.filter((id) => id !== String(productId)));
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setDeletingId("");
+    }
+  }
   const [editingProduct, setEditingProduct] = useState(null);
 
   const filteredProducts = products.filter((product) => {
@@ -868,6 +882,7 @@ function InventoryDashboard({
           <span>Trạng thái</span>
           <span />
           <span />
+          <span />
         </div>
         <div className="inventory-list">
           {loading ? (
@@ -893,6 +908,8 @@ function InventoryDashboard({
                   selected={selectedIds.includes(String(product.id))}
                   onToggle={() => toggleProduct(product.id)}
                   onEdit={() => setEditingProduct(product)}
+                  onDelete={product.isCustomProduct ? handleRowDelete : undefined}
+                  deleting={deletingId === String(product.id)}
                   saving={savingId === String(product.id)}
                   onSave={onSave}
                 />
@@ -913,6 +930,14 @@ function InventoryDashboard({
             setEditingProduct(null);
             return saved;
           }}
+          onDelete={
+            onProductDelete
+              ? async () => {
+                  await onProductDelete(editingProduct.id);
+                  setEditingProduct(null);
+                }
+              : undefined
+          }
         />
       ) : null}
       {isCreatingProduct ? (
@@ -951,13 +976,20 @@ function InventoryDashboard({
   );
 }
 
-function InventoryRow({ product, stock, isOut, isLow, selected, onToggle, onEdit, saving, onSave }) {
+function InventoryRow({ product, stock, isOut, isLow, selected, onToggle, onEdit, onDelete, saving, deleting, onSave }) {
   const [draft, setDraft] = useState({
     stock: stock === "" ? "" : String(stock),
     lowStockThreshold: String(product.lowStockThreshold ?? 5),
     enabled: product.enabled !== false,
     visible: product.visible !== false,
   });
+
+  function handleDeleteClick() {
+    if (!window.confirm(`Xóa vĩnh viễn sản phẩm "${product.name}"? Thao tác này không thể hoàn tác.`)) {
+      return;
+    }
+    onDelete(product.id);
+  }
 
   useEffect(() => {
     setDraft({
@@ -1069,6 +1101,16 @@ function InventoryRow({ product, stock, isOut, isLow, selected, onToggle, onEdit
       >
         Sửa
       </button>
+      {onDelete ? (
+        <button
+          type="button"
+          className="inventory-delete-button"
+          disabled={deleting}
+          onClick={handleDeleteClick}
+        >
+          {deleting ? "Đang xóa..." : "Xóa"}
+        </button>
+      ) : null}
     </div>
   );
 }
@@ -1178,7 +1220,7 @@ function getMockSubCategoryName(subId) {
   return "";
 }
 
-function ProductEditModal({ product, onClose, onSave, onUpload }) {
+function ProductEditModal({ product, onClose, onSave, onUpload, onDelete }) {
   const override = product.productOverride || {};
   
   const mockImages = asArray(product.images);
@@ -1424,7 +1466,22 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
   const [activeTab, setActiveTab] = useState("basic");
   const [uploadingSlot, setUploadingSlot] = useState("");
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [showPreviewDetails, setShowPreviewDetails] = useState(false);
+
+  async function handleDelete() {
+    const productName = draft.name || product.name || `#${product.id}`;
+    if (!window.confirm(`Xóa vĩnh viễn sản phẩm "${productName}"? Thao tác này không thể hoàn tác.`)) {
+      return;
+    }
+    setDeleting(true);
+    try {
+      await onDelete();
+    } catch (error) {
+      alert(error.message);
+      setDeleting(false);
+    }
+  }
 
   const setField = (field, value) => {
     setDraft((current) => ({ ...current, [field]: value }));
@@ -2242,6 +2299,16 @@ function ProductEditModal({ product, onClose, onSave, onUpload }) {
         {/* Footer sticky panel */}
         <div className="product-edit-footer">
           <div className="product-edit-actions">
+            {onDelete && product.id !== "new" && product.isCustomProduct ? (
+              <button
+                type="button"
+                className="ghost-button delete-product-button"
+                disabled={saving || deleting}
+                onClick={handleDelete}
+              >
+                {deleting ? "Đang xóa..." : "Xóa sản phẩm"}
+              </button>
+            ) : null}
             <button type="button" className="ghost-button" onClick={onClose}>Hủy</button>
             <button type="button" className="ghost-button" disabled={saving}>Ẩn</button>
             <button type="submit" className="submit-red-button" disabled={saving}>{saving ? "Đang lưu..." : "Cập nhật"}</button>
@@ -2312,7 +2379,11 @@ export default function App() {
     },
     unpaid: {
       title: "Chưa thanh toán",
-      description: "Các đơn đang chờ xác nhận thanh toán.",
+      description: "Các đơn đang chờ xác nhận thanh toán, không bao gồm đơn đã hủy hoặc lỗi đồng bộ.",
+    },
+    cancelled: {
+      title: "Đã hủy",
+      description: "Các đơn đã hủy hoặc gặp lỗi đồng bộ Sapo để tách khỏi luồng xử lý chính.",
     },
     returns: {
       title: "Trả hàng",
@@ -2488,6 +2559,16 @@ export default function App() {
     });
     await loadInventory();
     return data.product;
+  }
+
+  async function deleteProduct(productId) {
+    const data = await apiFetch(`/api/admin/products/${productId}`, {
+      method: "DELETE",
+    });
+    setInventoryProducts((current) =>
+      current.filter((product) => String(product.id) !== String(productId)),
+    );
+    return data;
   }
 
   async function saveKpi() {
@@ -2769,9 +2850,16 @@ export default function App() {
           <button
             className={`side-nav-item ${activeView === "unpaid" ? "active" : ""}`}
             type="button"
-            onClick={() => openOrderView("unpaid", { paymentStatus: "pending" })}
+            onClick={() => openOrderView("unpaid", { stateGroup: "unpaid" })}
           >
             Chưa thanh toán
+          </button>
+          <button
+            className={`side-nav-item ${activeView === "cancelled" ? "active" : ""}`}
+            type="button"
+            onClick={() => openOrderView("cancelled", { stateGroup: "cancelled" })}
+          >
+            Đã hủy
           </button>
           <button
             className={`side-nav-item ${activeView === "returns" ? "active" : ""}`}
@@ -2954,13 +3042,14 @@ export default function App() {
             onBulkSave={saveInventoryBulk}
             onProductSave={saveProductOverride}
             onProductCreate={createProduct}
+            onProductDelete={deleteProduct}
             onProductMediaUpload={uploadProductMedia}
             savingId={savingInventoryId}
             bulkSaving={bulkSavingInventory}
           />
         ) : null}
 
-        {["dashboard", "orders", "unpaid", "returns"].includes(activeView) ? (
+        {["dashboard", "orders", "unpaid", "cancelled", "returns"].includes(activeView) ? (
           <>
         <section className="stats-grid">
           <StatCard
@@ -2972,8 +3061,8 @@ export default function App() {
           <StatCard
             label="Chưa thanh toán"
             value={stats?.pendingPayment ?? "-"}
-            active={filters.paymentStatus === "pending" && !filters.state && !filters.stateGroup}
-            onClick={() => openOrderView("unpaid", { paymentStatus: "pending" })}
+            active={filters.stateGroup === "unpaid" && !filters.paymentStatus}
+            onClick={() => openOrderView("unpaid", { stateGroup: "unpaid" })}
           />
           <StatCard
             label="Đã thanh toán"
@@ -2992,6 +3081,12 @@ export default function App() {
             value={stats?.completedOrders ?? "-"}
             active={filters.stateGroup === "completed" && !filters.paymentStatus}
             onClick={() => openOrderView("orders", { stateGroup: "completed" })}
+          />
+          <StatCard
+            label="Đã hủy"
+            value={stats?.cancelledOrders ?? "-"}
+            active={filters.stateGroup === "cancelled" && !filters.paymentStatus}
+            onClick={() => openOrderView("cancelled", { stateGroup: "cancelled" })}
           />
           <StatCard
             label="Trả hàng"

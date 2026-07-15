@@ -616,7 +616,7 @@ button:disabled {
 .inventory-table-head,
 .inventory-row {
   display: grid;
-  grid-template-columns: 34px minmax(300px, 1.6fr) 120px 130px 140px minmax(170px, 0.8fr) 92px 82px;
+  grid-template-columns: 34px minmax(300px, 1.6fr) 120px 130px 140px minmax(170px, 0.8fr) 92px 82px 82px;
   align-items: center;
   gap: 14px;
 }
@@ -755,6 +755,23 @@ button:disabled {
   color: #173b25;
   background: rgba(255, 255, 255, 0.76);
   border: 1px solid rgba(46, 113, 69, 0.16);
+}
+
+.inventory-delete-button {
+  min-height: 44px;
+  border-radius: 14px;
+  color: #b5382d;
+  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid rgba(181, 56, 45, 0.25);
+}
+
+.inventory-delete-button:hover:not(:disabled) {
+  background: #fff0ef;
+}
+
+.inventory-delete-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .product-edit-backdrop {
@@ -1871,6 +1888,21 @@ button:disabled {
   cursor: pointer;
 }
 
+.delete-product-button {
+  border-color: #f1492d;
+  color: #f1492d;
+  margin-right: auto;
+}
+
+.delete-product-button:hover:not(:disabled) {
+  background: #fff1ee;
+}
+
+.delete-product-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .submit-red-button {
   padding: 6px 16px;
   border-radius: 6px;
@@ -2880,7 +2912,7 @@ textarea:focus {
 }
 
 .stats-grid {
-  grid-template-columns: repeat(6, minmax(130px, 1fr));
+  grid-template-columns: repeat(7, minmax(118px, 1fr));
   gap: 12px;
 }
 
@@ -2912,6 +2944,10 @@ textarea:focus {
 
 .stat-card:nth-child(6) {
   border-top: 5px solid var(--red);
+}
+
+.stat-card:nth-child(7) {
+  border-top: 5px solid #f97316;
 }
 
 .stat-card.active {

@@ -18,57 +18,10 @@ const DEFAULT_GC_TIME = 5 * 60 * 1000;
 const MAX_RETRIES = 3;
 
 // ─── localStorage cache persister ────────────────────────────────────────────
-// Saves successful query results so returning users get instant data on reload.
+// Disabled to prevent stale pricing and out-of-sync product display.
+// Cleans up any existing localStorage cache to free space and avoid stale hits.
 
 const CACHE_KEY = "sunbeleaf_qc_v2";
-const CACHE_MAX_AGE = 2 * 60 * 60 * 1000; // 2 hours
-
-interface PersistedEntry {
-  queryKey: unknown[];
-  data: unknown;
-}
-
-function restoreCache(client: QueryClient): void {
-  if (import.meta.env.DEV) {
-    try {
-      localStorage.removeItem(CACHE_KEY);
-    } catch {}
-    return;
-  }
-  try {
-    const raw = localStorage.getItem(CACHE_KEY);
-    if (!raw) return;
-    const { timestamp, entries }: { timestamp: number; entries: PersistedEntry[] } =
-      JSON.parse(raw);
-    if (Date.now() - timestamp > CACHE_MAX_AGE) {
-      localStorage.removeItem(CACHE_KEY);
-      return;
-    }
-    entries.forEach(({ queryKey, data }) => client.setQueryData(queryKey, data));
-  } catch {
-    // localStorage unavailable (e.g. private browsing) — silently skip
-  }
-}
-
-function subscribeAndPersist(client: QueryClient): void {
-  if (import.meta.env.DEV) return;
-  client.getQueryCache().subscribe(() => {
-    try {
-      const entries: PersistedEntry[] = client
-        .getQueryCache()
-        .getAll()
-        .filter((q) => q.state.status === "success" && q.state.data !== undefined)
-        .map((q) => ({ queryKey: q.queryKey as unknown[], data: q.state.data }));
-      if (entries.length === 0) return;
-      localStorage.setItem(
-        CACHE_KEY,
-        JSON.stringify({ timestamp: Date.now(), entries })
-      );
-    } catch {
-      // Quota exceeded or unavailable — silently skip
-    }
-  });
-}
 
 class QueryClientProvider {
   private static instance: QueryClientProvider;
@@ -103,10 +56,12 @@ class QueryClientProvider {
       }),
     });
 
-    // Restore persisted cache synchronously so first render has data
-    restoreCache(this.client);
-    // Keep cache in sync with localStorage for future visits
-    subscribeAndPersist(this.client);
+    // Clear old localStorage cache to prevent any potential stale product/price display
+    try {
+      localStorage.removeItem(CACHE_KEY);
+    } catch {
+      // localStorage unavailable (e.g. private browsing) — silently skip
+    }
   }
 
   public static getInstance(
