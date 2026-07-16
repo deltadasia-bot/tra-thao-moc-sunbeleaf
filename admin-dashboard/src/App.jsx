@@ -880,9 +880,7 @@ function InventoryDashboard({
           <span>Tồn kho</span>
           <span>Ngưỡng cảnh báo</span>
           <span>Trạng thái</span>
-          <span />
-          <span />
-          <span />
+          <span>Thao tác</span>
         </div>
         <div className="inventory-list">
           {loading ? (
@@ -1079,38 +1077,40 @@ function InventoryRow({ product, stock, isOut, isLow, selected, onToggle, onEdit
                 : "Còn hàng"}
         </span>
       </div>
-      <button
-        type="button"
-        className="inventory-save-button"
-        disabled={saving}
-        onClick={() =>
-          onSave(product.id, {
-            stock: draft.stock === "" ? null : Number(draft.stock),
-            enabled: draft.enabled,
-            visible: draft.visible !== false,
-            lowStockThreshold: Number(draft.lowStockThreshold || 5),
-          })
-        }
-      >
-        {saving ? "Đang lưu..." : "Lưu"}
-      </button>
-      <button
-        type="button"
-        className="inventory-edit-button"
-        onClick={onEdit}
-      >
-        Sửa
-      </button>
-      {onDelete ? (
+      <div className="inventory-row-actions">
         <button
           type="button"
-          className="inventory-delete-button"
-          disabled={deleting}
-          onClick={handleDeleteClick}
+          className="inventory-save-button"
+          disabled={saving}
+          onClick={() =>
+            onSave(product.id, {
+              stock: draft.stock === "" ? null : Number(draft.stock),
+              enabled: draft.enabled,
+              visible: draft.visible !== false,
+              lowStockThreshold: Number(draft.lowStockThreshold || 5),
+            })
+          }
         >
-          {deleting ? "Đang xóa..." : "Xóa"}
+          {saving ? "Đang lưu..." : "Lưu"}
         </button>
-      ) : null}
+        <button
+          type="button"
+          className="inventory-edit-button"
+          onClick={onEdit}
+        >
+          Sửa
+        </button>
+        {onDelete ? (
+          <button
+            type="button"
+            className="inventory-delete-button"
+            disabled={deleting}
+            onClick={handleDeleteClick}
+          >
+            {deleting ? "Đang xóa..." : "Xóa"}
+          </button>
+        ) : null}
+      </div>
     </div>
   );
 }
