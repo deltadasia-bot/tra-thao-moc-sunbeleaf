@@ -4,9 +4,15 @@ import { useOrderById } from "@/services/order/order.queries";
 import { Button, Sheet, Spinner, Text, useSnackbar, Modal } from "zmp-ui";
 import { copy } from "@/constants/copy";
 import { formatCurrency } from "@/utils/format";
-import { formatOrderDate, getPaymentMethodLabel } from "@/utils/order";
+import {
+  formatOrderDate,
+  getPaymentMethodLabel,
+  canCancelOrder,
+  canRequestReturn,
+} from "@/utils/order";
 import { OrderItem } from "@/types/order.types";
 import { orderService } from "@/services/order/order.api";
+import { useCancelOrder } from "@/services/order/order.mutations";
 import { getOrderItemThumbnail } from "@/utils/product-image";
 import {
   hasReviewedOrderItem,
@@ -22,8 +28,12 @@ export default function OrderDetailPage() {
   const [reviewContent, setReviewContent] = useState("");
   const [reviewedItemIds, setReviewedItemIds] = useState<string[]>([]);
   const [isConfirmReturnOpen, setIsConfirmReturnOpen] = useState(false);
+  const [isConfirmCancelOpen, setIsConfirmCancelOpen] = useState(false);
 
   const { data: order, isLoading, error } = useOrderById(orderId || "");
+  const cancelOrderMutation = useCancelOrder();
+  const showCancelButton = canCancelOrder(order);
+  const showReturnButton = canRequestReturn(order);
   const constIsLoading = isLoading; // to keep original imports logic stable
   const canReviewOrder =
     order?.state === "delivered" || order?.state === "completed";
@@ -569,18 +579,75 @@ export default function OrderDetailPage() {
           </div>
         </div>
 
-        {order && (order.state === "delivered" || order.state === "completed") && (
-          <div className="mx-3.5 mt-3 mb-6">
-            <button
-              type="button"
-              onClick={() => setIsConfirmReturnOpen(true)}
-              className="w-full py-3 bg-white border border-[#ee4d2d] text-[#ee4d2d] font-semibold rounded-xl text-sm active:bg-[#fff1ee] transition shadow-sm"
-            >
-              Yêu cầu Trả hàng/Hoàn tiền (Đổi trả)
-            </button>
+        {order && (showCancelButton || showReturnButton) && (
+          <div className="mx-3.5 mt-3 mb-6 flex flex-col gap-2.5">
+            {showCancelButton && (
+              <button
+                type="button"
+                onClick={() => setIsConfirmCancelOpen(true)}
+                className="w-full py-3 bg-white border border-[#ee4d2d] text-[#ee4d2d] font-semibold rounded-xl text-sm active:bg-[#fff1ee] transition shadow-sm"
+              >
+                Hủy đơn hàng
+              </button>
+            )}
+            {showReturnButton && (
+              <button
+                type="button"
+                onClick={() => setIsConfirmReturnOpen(true)}
+                className="w-full py-3 bg-white border border-[#ee4d2d] text-[#ee4d2d] font-semibold rounded-xl text-sm active:bg-[#fff1ee] transition shadow-sm"
+              >
+                Yêu cầu Trả hàng/Hoàn tiền (Đổi trả)
+              </button>
+            )}
           </div>
         )}
       </div>
+
+      <Modal
+        visible={isConfirmCancelOpen}
+        title="Hủy đơn hàng"
+        onClose={() => setIsConfirmCancelOpen(false)}
+        verticalActions
+      >
+        <div className="py-2 flex flex-col gap-2.5">
+          <p className="text-xxsmall leading-normal text-gray-500">
+            Bạn có chắc chắn muốn hủy đơn hàng này không? Đơn chỉ hủy được khi đơn vị vận chuyển chưa tới lấy hàng.
+          </p>
+          <div className="flex gap-2 mt-4">
+            <button
+              onClick={() => setIsConfirmCancelOpen(false)}
+              className="flex-1 py-2.5 border border-gray-300 rounded-xl text-xs font-semibold text-gray-600 active:bg-gray-100"
+            >
+              Không hủy
+            </button>
+            <button
+              disabled={cancelOrderMutation.isPending}
+              onClick={async () => {
+                try {
+                  await cancelOrderMutation.mutateAsync(order!.id);
+                  setIsConfirmCancelOpen(false);
+                  openSnackbar({
+                    text: "Đã hủy đơn hàng thành công!",
+                    type: "success",
+                  });
+                } catch (err) {
+                  setIsConfirmCancelOpen(false);
+                  openSnackbar({
+                    text:
+                      err instanceof Error
+                        ? err.message
+                        : "Không hủy được đơn hàng.",
+                    type: "error",
+                  });
+                }
+              }}
+              className="flex-1 py-2.5 bg-[#ee4d2d] text-white rounded-xl text-xs font-semibold active:opacity-90 disabled:opacity-60"
+            >
+              {cancelOrderMutation.isPending ? "Đang hủy..." : "Xác nhận hủy"}
+            </button>
+          </div>
+        </div>
+      </Modal>
 
       <Modal
         visible={isConfirmReturnOpen}

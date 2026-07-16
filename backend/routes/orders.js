@@ -202,8 +202,14 @@ router.patch("/:id/cancel", (req, res) => {
     return res.status(404).json({ error: "Không tìm thấy đơn hàng" });
   }
 
-  if (["completed", "delivered", "cancelled"].includes(order.state)) {
-    return res.status(400).json({ error: "Không thể hủy đơn hàng ở trạng thái này" });
+  // Chỉ cho hủy khi đơn vị vận chuyển CHƯA lấy hàng. Đơn có thể đã tạo mã SPX
+  // (trạng thái "ready" - chờ lấy hàng) vẫn hủy được; khi đã chuyển sang
+  // "delivering" (đang giao) trở đi thì không hủy được nữa.
+  const NON_CANCELLABLE = ["delivering", "delivered", "completed", "cancelled", "returned"];
+  if (NON_CANCELLABLE.includes(order.state)) {
+    return res.status(400).json({
+      error: "Đơn hàng đã được lấy/đang giao hoặc đã hoàn tất nên không thể hủy.",
+    });
   }
 
   const updated = db.updateOrder(req.params.id, { state: "cancelled" });
@@ -240,6 +246,20 @@ router.post("/:id/return", async (req, res) => {
 
   if (order.state === "returned") {
     return res.status(400).json({ error: "Đơn hàng đã được yêu cầu trả hàng trước đó" });
+  }
+
+  // Chỉ cho yêu cầu trả hàng/hoàn tiền với đơn ĐÃ GIAO THÀNH CÔNG và ĐÃ THANH TOÁN.
+  const isDelivered = order.state === "delivered" || order.state === "completed";
+  const isPaid = order.paymentStatus === "paid" || order.payment?.status === "paid";
+  if (!isDelivered) {
+    return res.status(400).json({
+      error: "Chỉ có thể yêu cầu trả hàng/hoàn tiền với đơn đã giao thành công.",
+    });
+  }
+  if (!isPaid) {
+    return res.status(400).json({
+      error: "Chỉ đơn đã thanh toán mới có thể yêu cầu trả hàng/hoàn tiền.",
+    });
   }
 
   // Cập nhật trạng thái đơn hàng thành returned
