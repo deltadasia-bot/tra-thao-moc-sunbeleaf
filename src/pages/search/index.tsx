@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import ProductGrid from "@/components/common/product-grid";
 import SearchBar from "@/components/common/search-bar";
-import { mockListOfProduct } from "@/services/product/product.mock";
+import { useProducts } from "@/services/product/product.queries";
 import {
   getTrendingKeywords,
   recordProductInterest,
@@ -26,6 +26,10 @@ export default function SearchPage() {
   const [isFocused, setIsFocused] = useState(true);
   const lastRecordedQueryRef = useRef("");
 
+  // Dùng danh sách sản phẩm đã merge tồn kho (đã ẩn sản phẩm bị ẩn/xóa),
+  // thay cho danh sách tĩnh mockListOfProduct.
+  const { data: allProducts = [] } = useProducts("all", "");
+
   useEffect(() => {
     if (searchQuery.trim()) {
       setSearchParams({ q: searchQuery.trim() });
@@ -36,20 +40,20 @@ export default function SearchPage() {
 
   const filteredProducts = useMemo(() => {
     if (!searchQuery.trim()) {
-      return mockListOfProduct;
+      return allProducts;
     }
 
     const query = searchQuery.toLowerCase();
-    return mockListOfProduct.filter(
+    return allProducts.filter(
       (product) =>
         product.name.toLowerCase().includes(query) ||
         product.description.toLowerCase().includes(query),
     );
-  }, [searchQuery]);
+  }, [searchQuery, allProducts]);
 
   const trendingKeywords = useMemo(
-    () => getTrendingKeywords(mockListOfProduct, 8),
-    [searchQuery],
+    () => getTrendingKeywords(allProducts, 8),
+    [allProducts],
   );
 
   useEffect(() => {
@@ -105,7 +109,7 @@ export default function SearchPage() {
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => {
                   setSearchQuery(keyword);
-                  const matchedProducts = mockListOfProduct.filter(
+                  const matchedProducts = allProducts.filter(
                     (product) =>
                       product.name
                         .toLowerCase()
