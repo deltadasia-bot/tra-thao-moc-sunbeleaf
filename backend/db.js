@@ -12,6 +12,7 @@ const ADMIN_AUTH_FILE = path.join(DATA_DIR, "admin_auth.json");
 const ADMIN_KPI_FILE = path.join(DATA_DIR, "admin_kpi.json");
 const INVENTORY_FILE = path.join(DATA_DIR, "inventory.json");
 const PRODUCT_OVERRIDES_FILE = path.join(DATA_DIR, "product_overrides.json");
+const DELETED_PRODUCTS_FILE = path.join(DATA_DIR, "deleted_products.json");
 
 console.log(`[DB] Thư mục lưu đơn hàng: ${DATA_DIR}`);
 
@@ -156,6 +157,30 @@ function readProductOverrides() {
 function writeProductOverrides(overrides) {
   ensureStore();
   fs.writeFileSync(PRODUCT_OVERRIDES_FILE, JSON.stringify(overrides, null, 2), "utf8");
+}
+
+// Danh sách ID sản phẩm đã bị xóa (tombstone). Dùng để ẩn sản phẩm gốc
+// (nằm cứng trong catalog mini app) khỏi cả Admin lẫn mini app.
+function readDeletedProductIds() {
+  ensureStore();
+  if (!fs.existsSync(DELETED_PRODUCTS_FILE)) {
+    fs.writeFileSync(DELETED_PRODUCTS_FILE, "[]", "utf8");
+  }
+  try {
+    const raw = fs.readFileSync(DELETED_PRODUCTS_FILE, "utf8");
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.map((id) => String(id)) : [];
+  } catch (err) {
+    console.error("[DB] Khong doc duoc deleted_products.json:", err.message);
+    return [];
+  }
+}
+
+function writeDeletedProductIds(ids) {
+  ensureStore();
+  const unique = [...new Set((ids || []).map((id) => String(id)))];
+  fs.writeFileSync(DELETED_PRODUCTS_FILE, JSON.stringify(unique, null, 2), "utf8");
+  return unique;
 }
 
 function normalizeStringArray(value) {
@@ -680,21 +705,71 @@ module.exports = {
     return overrides[normalizedProductId] || normalizeProductOverride(normalizedProductId, {});
   },
 
-  deleteProduct(productId) {
+  getDeletedProductIds() {
+    return readDeletedProductIds();
+  },
+
+  isProductDeleted(productId) {
+    return readDeletedProductIds().includes(String(productId || "").trim());
+  },
+
+  restoreProduct(productId) {
+    const normalizedProductId = String(productId || "").trim();
+    if (!normalizedProductId) return false;
+    const deleted = readDeletedProductIds();
+    if (!deleted.includes(normalizedProductId)) return false;
+    writeDeletedProductIds(deleted.filter((id) => id !== normalizedProductId));
+
+    // Bỏ ẩn: nếu còn entry inventory bị tắt hiển thị do xóa thì bật lại hiển thị.
+    const inventory = readInventory();
+    const entry = inventory[normalizedProductId];
+    if (entry && entry.deletedHidden) {
+      delete inventory[normalizedProductId];
+      writeInventory(inventory);
+    }
+    return true;
+  },
+
+  /**
+   * Xóa sản phẩm. Hỗ trợ cả sản phẩm gốc (nằm trong catalog mini app) lẫn sản
+   * phẩm tự thêm:
+   *  - Ghi ID vào tombstone để ẩn khỏi Admin và mini app.
+   *  - Xóa override đang có.
+   *  - Với sản phẩm gốc: ghi entry inventory visible=false để mini app hiện
+   *    tại (đã deploy) cũng ẩn ngay mà không cần build lại; với sản phẩm tự
+   *    thêm thì xóa hẳn entry inventory.
+   */
+  deleteProduct(productId, { isBaseCatalog = false } = {}) {
     const normalizedProductId = String(productId || "").trim();
     if (!normalizedProductId) return false;
 
     const overrides = readProductOverrides();
     const inventory = readInventory();
-    const existed =
-      Boolean(overrides[normalizedProductId]) || Boolean(inventory[normalizedProductId]);
 
     delete overrides[normalizedProductId];
-    delete inventory[normalizedProductId];
     writeProductOverrides(overrides);
+
+    if (isBaseCatalog) {
+      inventory[normalizedProductId] = {
+        ...normalizeStockEntry(normalizedProductId, inventory[normalizedProductId]),
+        stock: 0,
+        enabled: false,
+        visible: false,
+        deletedHidden: true,
+        updatedAt: new Date().toISOString(),
+      };
+    } else {
+      delete inventory[normalizedProductId];
+    }
     writeInventory(inventory);
 
-    return existed;
+    const deleted = readDeletedProductIds();
+    if (!deleted.includes(normalizedProductId)) {
+      deleted.push(normalizedProductId);
+      writeDeletedProductIds(deleted);
+    }
+
+    return true;
   },
 
   setInventoryEntry(productId, patch) {

@@ -906,7 +906,7 @@ function InventoryDashboard({
                   selected={selectedIds.includes(String(product.id))}
                   onToggle={() => toggleProduct(product.id)}
                   onEdit={() => setEditingProduct(product)}
-                  onDelete={product.isCustomProduct ? handleRowDelete : undefined}
+                  onDelete={handleRowDelete}
                   deleting={deletingId === String(product.id)}
                   saving={savingId === String(product.id)}
                   onSave={onSave}
@@ -2299,7 +2299,7 @@ function ProductEditModal({ product, onClose, onSave, onUpload, onDelete }) {
         {/* Footer sticky panel */}
         <div className="product-edit-footer">
           <div className="product-edit-actions">
-            {onDelete && product.id !== "new" && product.isCustomProduct ? (
+            {onDelete && product.id !== "new" ? (
               <button
                 type="button"
                 className="ghost-button delete-product-button"

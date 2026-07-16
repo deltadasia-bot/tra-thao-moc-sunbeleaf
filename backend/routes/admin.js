@@ -276,27 +276,30 @@ function extractLooseNumber(block, key) {
 }
 
 function getProductCatalog() {
+  // Nguồn chuẩn: product-catalog.json được sinh trực tiếp từ product.mock.ts
+  // (xem backend/scripts/generate-product-catalog.js) nên chứa đầy đủ ảnh, video,
+  // mô tả, variantGroups... khớp 100% với mini app.
   const bundledCatalogPath = path.resolve(__dirname, "../product-catalog.json");
+  if (fs.existsSync(bundledCatalogPath)) {
+    try {
+      const rawCatalog = fs.readFileSync(bundledCatalogPath, "utf8");
+      const catalog = JSON.parse(rawCatalog);
+      if (Array.isArray(catalog) && catalog.length > 0) {
+        return catalog
+          .filter((product) => Number.isFinite(Number(product.id)))
+          .sort((a, b) => Number(a.id) - Number(b.id));
+      }
+    } catch (err) {
+      console.error("[Admin] Khong doc duoc product-catalog.json:", err.message);
+    }
+  }
+
+  // Dự phòng: nếu thiếu JSON, parse trực tiếp product.mock.ts (ít đầy đủ hơn).
   const productMockPath = path.resolve(
     __dirname,
     "../../src/services/product/product.mock.ts",
   );
-
-  if (!fs.existsSync(productMockPath)) {
-    if (!fs.existsSync(bundledCatalogPath)) return [];
-    try {
-      const rawCatalog = fs.readFileSync(bundledCatalogPath, "utf8");
-      const catalog = JSON.parse(rawCatalog);
-      return Array.isArray(catalog)
-        ? catalog
-            .filter((product) => Number.isFinite(Number(product.id)))
-            .sort((a, b) => Number(a.id) - Number(b.id))
-        : [];
-    } catch (err) {
-      console.error("[Admin] Khong doc duoc product-catalog.json:", err.message);
-      return [];
-    }
-  }
+  if (!fs.existsSync(productMockPath)) return [];
 
   try {
     const raw = fs.readFileSync(productMockPath, "utf8");
@@ -349,8 +352,10 @@ function mergeProductOverride(product, overrides) {
 function getManagedProducts() {
   const inventory = db.getInventory();
   const overrides = db.getProductOverrides();
-  const baseCatalogIds = new Set(getProductCatalog().map((product) => String(product.id)));
-  const catalog = getProductCatalog().map((product) => mergeProductOverride(product, overrides));
+  const deletedIds = new Set(db.getDeletedProductIds());
+  const rawCatalog = getProductCatalog();
+  const baseCatalogIds = new Set(rawCatalog.map((product) => String(product.id)));
+  const catalog = rawCatalog.map((product) => mergeProductOverride(product, overrides));
   const catalogById = new Map(catalog.map((product) => [String(product.id), product]));
 
   Object.keys(inventory).forEach((productId) => {
@@ -369,6 +374,7 @@ function getManagedProducts() {
   });
 
   return [...catalogById.values()]
+    .filter((product) => !deletedIds.has(String(product.id)))
     .sort((a, b) => Number(a.id) - Number(b.id))
     .map((product) => {
       const entry =
@@ -392,9 +398,9 @@ function getManagedProducts() {
         lowStockAlertedStock: entry.lowStockAlertedStock,
         updatedAt: entry.updatedAt,
         inventory: entry,
-        // Chỉ sản phẩm tạo thêm qua Admin (ngoài danh mục gốc của mini app)
-        // mới có thể xóa vĩnh viễn; sản phẩm gốc chỉ có thể ẩn.
-        isCustomProduct: !baseCatalogIds.has(String(product.id)),
+        // Sản phẩm gốc (nằm trong catalog mini app) hay sản phẩm tự thêm đều
+        // xóa được; cờ này chỉ để phân biệt hành vi xóa ở backend.
+        isBaseCatalog: baseCatalogIds.has(String(product.id)),
       };
     });
 }
@@ -1068,26 +1074,17 @@ router.delete("/products/:productId", (req, res) => {
     return res.status(400).json({ error: "Thiếu productId" });
   }
 
-  // Sản phẩm thuộc catalog gốc của mini app không thể xóa (sẽ tự xuất hiện lại),
-  // chỉ có thể ẩn bằng cách tắt Hiển thị trong phần tồn kho.
-  const isCatalogProduct = getProductCatalog().some(
+  const isBaseCatalog = getProductCatalog().some(
     (product) => String(product.id) === productId,
   );
-  if (isCatalogProduct) {
-    return res.status(400).json({
-      error:
-        "Sản phẩm thuộc danh mục gốc của app, không thể xóa. Hãy tắt 'Hiển thị' để ẩn sản phẩm khỏi mini app.",
-    });
-  }
 
-  const removed = db.deleteProduct(productId);
-  if (!removed) {
-    return res.status(404).json({ error: "Không tìm thấy sản phẩm" });
-  }
+  db.deleteProduct(productId, { isBaseCatalog });
 
   return res.json({
     success: true,
     productId,
+    isBaseCatalog,
+    deletedProductIds: db.getDeletedProductIds(),
     productOverrides: db.getProductOverrides(),
   });
 });

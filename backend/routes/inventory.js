@@ -20,6 +20,7 @@ router.get("/", (_req, res) => {
   return res.json({
     inventory: db.getInventory(),
     productOverrides: db.getProductOverrides(),
+    deletedProductIds: db.getDeletedProductIds(),
     updatedAt: new Date().toISOString(),
   });
 });
@@ -28,19 +29,22 @@ router.get("/products", (_req, res) => {
   try {
     const inventory = db.getInventory();
     const overrides = db.getProductOverrides();
+    const deletedIds = new Set(db.getDeletedProductIds());
     const catalog = getProductCatalog();
-    
-    const products = catalog.map((p) => {
-      const override = overrides[String(p.id)] || {};
-      const entry = inventory[String(p.id)] || {};
-      return {
-        ...p,
-        ...override,
-        stock: entry.stock ?? null,
-        enabled: entry.enabled !== false,
-        visible: entry.visible !== false,
-      };
-    });
+
+    const products = catalog
+      .filter((p) => !deletedIds.has(String(p.id)))
+      .map((p) => {
+        const override = overrides[String(p.id)] || {};
+        const entry = inventory[String(p.id)] || {};
+        return {
+          ...p,
+          ...override,
+          stock: entry.stock ?? null,
+          enabled: entry.enabled !== false,
+          visible: entry.visible !== false,
+        };
+      });
 
     return res.json({ products });
   } catch (err) {

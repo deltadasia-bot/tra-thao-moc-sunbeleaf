@@ -1,326 +1,2436 @@
 [
   {
     "id": 1,
-    "name": "Trà Xạ Đen Túi Zip - Phòng Ngừa Ung Thư, Hỗ Trợ Chức Năng Gan",
-    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-xa-den-shopee-01.webp",
-    "categoryId": "all",
+    "categoryId": "tra-tui-loc",
     "subCategoryId": "tra-tui-zip",
+    "name": "Trà Xạ Đen Túi Zip - Phòng Ngừa Ung Thư, Hỗ Trợ Chức Năng Gan",
+    "description": "Trà xạ đen được đóng túi lọc tiện lợi, phù hợp để sử dụng hằng ngày.",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-xa-den-shopee-01.webp",
+    "video": "https://deltadasia.com/wp-content/uploads/2026/06/zma-xa-den-shopee-video.mp4",
+    "videoPoster": "https://deltadasia.com/wp-content/uploads/2026/06/zma-xa-den-shopee-video-poster.webp",
+    "images": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-xa-den-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-xa-den-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-xa-den-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-xa-den-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-xa-den-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-xa-den-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-xa-den-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-xa-den-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-xa-den-shopee-09.webp"
+    ],
+    "descriptionImages": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-xa-den-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-xa-den-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-xa-den-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-xa-den-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-xa-den-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-xa-den-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-xa-den-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-xa-den-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-xa-den-shopee-09.webp"
+    ],
+    "descriptionSections": [
+      {
+        "title": "Thông tin sản phẩm",
+        "content": "Trà xạ đen được đóng túi lọc tiện lợi, phù hợp để sử dụng hằng ngày. Túi zip tiện bảo quản, có lựa chọn quy cách theo phân loại."
+      },
+      {
+        "title": "Thương hiệu và xuất xứ",
+        "content": "Thương hiệu Sunbeleaf. Sản phẩm được đóng gói tại Việt Nam, thông tin lô sản xuất và hạn dùng thể hiện trên bao bì."
+      },
+      {
+        "title": "Hướng dẫn sử dụng",
+        "content": "Sử dụng theo hướng dẫn in trên bao bì. Điều chỉnh lượng nước và thời gian pha theo khẩu vị cá nhân."
+      },
+      {
+        "title": "Bảo quản",
+        "content": "Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp. Đóng kín bao bì sau khi mở."
+      },
+      {
+        "title": "Lưu ý",
+        "content": "Thông tin về công dụng chỉ mang tính tham khảo. Sản phẩm không phải là thuốc và không có tác dụng thay thế thuốc chữa bệnh."
+      }
+    ],
     "price": 167900,
-    "listPrice": 0
+    "listPrice": 0,
+    "sku": "",
+    "variantGroups": [
+      {
+        "id": "package-size",
+        "title": "Quy cách sản phẩm",
+        "description": "Chọn số lượng gói trà",
+        "type": "SINGLE",
+        "isRequired": true,
+        "options": [
+          {
+            "id": "package-25",
+            "name": "Túi 25 gói",
+            "extraPrice": 0,
+            "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-xa-den-shopee-25-goi.webp"
+          },
+          {
+            "id": "package-50",
+            "name": "Túi 50 gói",
+            "extraPrice": 122000,
+            "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-xa-den-shopee-50-goi.webp"
+          }
+        ]
+      }
+    ],
+    "features": [
+      "cancer-prevention",
+      "bestseller"
+    ]
   },
   {
     "id": 2,
-    "name": "Trà Cà Gai leo Túi Zip - Mát Gan, Giải Độc Gan, Thanh Lọc Cơ Thể",
-    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p02-shopee-01.webp",
-    "categoryId": "all",
+    "categoryId": "tra-tui-loc",
     "subCategoryId": "tra-tui-zip",
+    "name": "Trà Cà Gai leo Túi Zip - Mát Gan, Giải Độc Gan, Thanh Lọc Cơ Thể",
+    "description": "Trà cà gai leo được đóng túi lọc tiện lợi, phù hợp để sử dụng hằng ngày.",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p02-shopee-01.webp",
+    "video": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p02-shopee-video.mp4",
+    "videoPoster": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p02-shopee-video-poster.webp",
+    "images": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p02-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p02-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p02-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p02-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p02-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p02-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p02-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p02-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p02-shopee-09.webp"
+    ],
+    "descriptionImages": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p02-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p02-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p02-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p02-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p02-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p02-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p02-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p02-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p02-shopee-09.webp"
+    ],
+    "descriptionSections": [
+      {
+        "title": "Thông tin sản phẩm",
+        "content": "Trà cà gai leo được đóng túi lọc tiện lợi, phù hợp để sử dụng hằng ngày. Túi zip tiện bảo quản, có lựa chọn quy cách theo phân loại."
+      },
+      {
+        "title": "Thương hiệu và xuất xứ",
+        "content": "Thương hiệu Sunbeleaf. Sản phẩm được đóng gói tại Việt Nam, thông tin lô sản xuất và hạn dùng thể hiện trên bao bì."
+      },
+      {
+        "title": "Hướng dẫn sử dụng",
+        "content": "Sử dụng theo hướng dẫn in trên bao bì. Điều chỉnh lượng nước và thời gian pha theo khẩu vị cá nhân."
+      },
+      {
+        "title": "Bảo quản",
+        "content": "Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp. Đóng kín bao bì sau khi mở."
+      },
+      {
+        "title": "Lưu ý",
+        "content": "Thông tin về công dụng chỉ mang tính tham khảo. Sản phẩm không phải là thuốc và không có tác dụng thay thế thuốc chữa bệnh."
+      }
+    ],
     "price": 167900,
-    "listPrice": 0
+    "listPrice": 0,
+    "sku": "",
+    "variantGroups": [
+      {
+        "id": "package-size",
+        "title": "Quy cách sản phẩm",
+        "description": "Chọn số lượng gói trà",
+        "type": "SINGLE",
+        "isRequired": true,
+        "options": [
+          {
+            "id": "package-25",
+            "name": "Túi 25 gói",
+            "extraPrice": 0,
+            "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p02-shopee-variant-01-01.webp"
+          },
+          {
+            "id": "package-50",
+            "name": "Túi 50 gói",
+            "extraPrice": 122000,
+            "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p02-shopee-variant-01-02.webp"
+          }
+        ]
+      }
+    ],
+    "features": [
+      "liver-support",
+      "bestseller"
+    ]
   },
   {
     "id": 3,
-    "name": "Trà Dây Túi Zip - Diệt Vi Khuẩn HP, Giảm Viêm Loét Dạ Dày",
-    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p03-shopee-01.webp",
-    "categoryId": "all",
+    "categoryId": "tra-tui-loc",
     "subCategoryId": "tra-tui-zip",
+    "name": "Trà Dây Túi Zip - Diệt Vi Khuẩn HP, Giảm Viêm Loét Dạ Dày",
+    "description": "Trà dây được đóng túi lọc tiện lợi, phù hợp để sử dụng hằng ngày.",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p03-shopee-01.webp",
+    "video": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p03-shopee-video.mp4",
+    "videoPoster": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p03-shopee-video-poster.webp",
+    "images": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p03-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p03-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p03-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p03-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p03-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p03-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p03-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p03-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p03-shopee-09.webp"
+    ],
+    "descriptionImages": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p03-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p03-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p03-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p03-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p03-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p03-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p03-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p03-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p03-shopee-09.webp"
+    ],
+    "descriptionSections": [
+      {
+        "title": "Thông tin sản phẩm",
+        "content": "Trà dây được đóng túi lọc tiện lợi, phù hợp để sử dụng hằng ngày. Túi zip tiện bảo quản, có lựa chọn quy cách theo phân loại."
+      },
+      {
+        "title": "Thương hiệu và xuất xứ",
+        "content": "Thương hiệu Sunbeleaf. Sản phẩm được đóng gói tại Việt Nam, thông tin lô sản xuất và hạn dùng thể hiện trên bao bì."
+      },
+      {
+        "title": "Hướng dẫn sử dụng",
+        "content": "Sử dụng theo hướng dẫn in trên bao bì. Điều chỉnh lượng nước và thời gian pha theo khẩu vị cá nhân."
+      },
+      {
+        "title": "Bảo quản",
+        "content": "Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp. Đóng kín bao bì sau khi mở."
+      },
+      {
+        "title": "Lưu ý",
+        "content": "Thông tin về công dụng chỉ mang tính tham khảo. Sản phẩm không phải là thuốc và không có tác dụng thay thế thuốc chữa bệnh."
+      }
+    ],
     "price": 167900,
-    "listPrice": 0
+    "listPrice": 0,
+    "sku": "",
+    "variantGroups": [
+      {
+        "id": "package-size",
+        "title": "Quy cách sản phẩm",
+        "description": "Chọn số lượng gói trà",
+        "type": "SINGLE",
+        "isRequired": true,
+        "options": [
+          {
+            "id": "package-25",
+            "name": "Túi 25 gói",
+            "extraPrice": 0,
+            "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p03-shopee-variant-01-01.webp"
+          },
+          {
+            "id": "package-50",
+            "name": "Túi 50 gói",
+            "extraPrice": 122000,
+            "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p03-shopee-variant-01-02.webp"
+          }
+        ]
+      }
+    ],
+    "features": [
+      "hangover-relief"
+    ]
   },
   {
     "id": 4,
-    "name": "Trà Chùm Ngây Túi Zip - Chống Lão Hóa, Bổ Sung Dưỡng Chất",
-    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p04-shopee-01.webp",
-    "categoryId": "all",
+    "categoryId": "tra-tui-loc",
     "subCategoryId": "tra-tui-zip",
+    "name": "Trà Chùm Ngây Túi Zip - Chống Lão Hóa, Bổ Sung Dưỡng Chất",
+    "description": "Trà chùm ngây được đóng túi lọc tiện lợi, phù hợp để sử dụng hằng ngày.",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p04-shopee-01.webp",
+    "video": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p04-shopee-video.mp4",
+    "videoPoster": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p04-shopee-video-poster.webp",
+    "images": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p04-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p04-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p04-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p04-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p04-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p04-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p04-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p04-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p04-shopee-09.webp"
+    ],
+    "descriptionImages": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p04-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p04-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p04-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p04-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p04-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p04-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p04-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p04-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p04-shopee-09.webp"
+    ],
+    "descriptionSections": [
+      {
+        "title": "Thông tin sản phẩm",
+        "content": "Trà chùm ngây được đóng túi lọc tiện lợi, phù hợp để sử dụng hằng ngày. Túi zip tiện bảo quản, có lựa chọn quy cách theo phân loại."
+      },
+      {
+        "title": "Thương hiệu và xuất xứ",
+        "content": "Thương hiệu Sunbeleaf. Sản phẩm được đóng gói tại Việt Nam, thông tin lô sản xuất và hạn dùng thể hiện trên bao bì."
+      },
+      {
+        "title": "Hướng dẫn sử dụng",
+        "content": "Sử dụng theo hướng dẫn in trên bao bì. Điều chỉnh lượng nước và thời gian pha theo khẩu vị cá nhân."
+      },
+      {
+        "title": "Bảo quản",
+        "content": "Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp. Đóng kín bao bì sau khi mở."
+      },
+      {
+        "title": "Lưu ý",
+        "content": "Thông tin về công dụng chỉ mang tính tham khảo. Sản phẩm không phải là thuốc và không có tác dụng thay thế thuốc chữa bệnh."
+      }
+    ],
     "price": 167900,
-    "listPrice": 0
+    "listPrice": 0,
+    "sku": "",
+    "variantGroups": [
+      {
+        "id": "package-size",
+        "title": "Quy cách sản phẩm",
+        "description": "Chọn số lượng gói trà",
+        "type": "SINGLE",
+        "isRequired": true,
+        "options": [
+          {
+            "id": "package-25",
+            "name": "Túi 25 gói",
+            "extraPrice": 0,
+            "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p04-shopee-variant-01-01.webp"
+          },
+          {
+            "id": "package-50",
+            "name": "Túi 50 gói",
+            "extraPrice": 122000,
+            "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p04-shopee-variant-01-02.webp"
+          }
+        ]
+      }
+    ],
+    "features": []
   },
   {
     "id": 5,
-    "name": "Trà Đinh Lăng Túi Zip - Hoạt Huyết Dưỡng Não, Giúp Ngủ Ngon",
-    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p05-shopee-01.webp",
-    "categoryId": "all",
+    "categoryId": "tra-tui-loc",
     "subCategoryId": "tra-tui-zip",
+    "name": "Trà Đinh Lăng Túi Zip - Hoạt Huyết Dưỡng Não, Giúp Ngủ Ngon",
+    "description": "Trà đinh lăng được đóng túi lọc tiện lợi, phù hợp để sử dụng hằng ngày.",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p05-shopee-01.webp",
+    "video": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p05-shopee-video.mp4",
+    "videoPoster": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p05-shopee-video-poster.webp",
+    "images": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p05-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p05-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p05-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p05-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p05-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p05-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p05-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p05-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p05-shopee-09.webp"
+    ],
+    "descriptionImages": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p05-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p05-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p05-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p05-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p05-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p05-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p05-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p05-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p05-shopee-09.webp"
+    ],
+    "descriptionSections": [
+      {
+        "title": "Thông tin sản phẩm",
+        "content": "Trà đinh lăng được đóng túi lọc tiện lợi, phù hợp để sử dụng hằng ngày. Túi zip tiện bảo quản, có lựa chọn quy cách theo phân loại."
+      },
+      {
+        "title": "Thương hiệu và xuất xứ",
+        "content": "Thương hiệu Sunbeleaf. Sản phẩm được đóng gói tại Việt Nam, thông tin lô sản xuất và hạn dùng thể hiện trên bao bì."
+      },
+      {
+        "title": "Hướng dẫn sử dụng",
+        "content": "Sử dụng theo hướng dẫn in trên bao bì. Điều chỉnh lượng nước và thời gian pha theo khẩu vị cá nhân."
+      },
+      {
+        "title": "Bảo quản",
+        "content": "Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp. Đóng kín bao bì sau khi mở."
+      },
+      {
+        "title": "Lưu ý",
+        "content": "Thông tin về công dụng chỉ mang tính tham khảo. Sản phẩm không phải là thuốc và không có tác dụng thay thế thuốc chữa bệnh."
+      }
+    ],
     "price": 167900,
-    "listPrice": 0
+    "listPrice": 0,
+    "sku": "",
+    "variantGroups": [
+      {
+        "id": "package-size",
+        "title": "Quy cách sản phẩm",
+        "description": "Chọn số lượng gói trà",
+        "type": "SINGLE",
+        "isRequired": true,
+        "options": [
+          {
+            "id": "package-25",
+            "name": "Túi 25 gói",
+            "extraPrice": 0,
+            "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p05-shopee-variant-01-01.webp"
+          },
+          {
+            "id": "package-50",
+            "name": "Túi 50 gói",
+            "extraPrice": 122000,
+            "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p05-shopee-variant-01-02.webp"
+          }
+        ]
+      }
+    ],
+    "features": [
+      "sleep-support"
+    ]
   },
   {
     "id": 6,
-    "name": "Trà Nhàu Túi Zip - Giúp Giảm Viêm, Giảm Đau Nhức Xương Khớp",
-    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p06-shopee-01.webp",
-    "categoryId": "all",
+    "categoryId": "tra-tui-loc",
     "subCategoryId": "tra-tui-zip",
+    "name": "Trà Nhàu Túi Zip - Giúp Giảm Viêm, Giảm Đau Nhức Xương Khớp",
+    "description": "Trà nhàu được đóng túi lọc tiện lợi, phù hợp để sử dụng hằng ngày.",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p06-shopee-01.webp",
+    "video": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p06-shopee-video.mp4",
+    "videoPoster": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p06-shopee-video-poster.webp",
+    "images": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p06-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p06-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p06-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p06-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p06-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p06-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p06-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p06-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p06-shopee-09.webp"
+    ],
+    "descriptionImages": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p06-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p06-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p06-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p06-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p06-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p06-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p06-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p06-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p06-shopee-09.webp"
+    ],
+    "descriptionSections": [
+      {
+        "title": "Thông tin sản phẩm",
+        "content": "Trà nhàu được đóng túi lọc tiện lợi, phù hợp để sử dụng hằng ngày. Túi zip tiện bảo quản, có lựa chọn quy cách theo phân loại."
+      },
+      {
+        "title": "Thương hiệu và xuất xứ",
+        "content": "Thương hiệu Sunbeleaf. Sản phẩm được đóng gói tại Việt Nam, thông tin lô sản xuất và hạn dùng thể hiện trên bao bì."
+      },
+      {
+        "title": "Hướng dẫn sử dụng",
+        "content": "Sử dụng theo hướng dẫn in trên bao bì. Điều chỉnh lượng nước và thời gian pha theo khẩu vị cá nhân."
+      },
+      {
+        "title": "Bảo quản",
+        "content": "Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp. Đóng kín bao bì sau khi mở."
+      },
+      {
+        "title": "Lưu ý",
+        "content": "Thông tin về công dụng chỉ mang tính tham khảo. Sản phẩm không phải là thuốc và không có tác dụng thay thế thuốc chữa bệnh."
+      }
+    ],
     "price": 167900,
-    "listPrice": 0
+    "listPrice": 0,
+    "sku": "",
+    "variantGroups": [
+      {
+        "id": "package-size",
+        "title": "Quy cách sản phẩm",
+        "description": "Chọn số lượng gói trà",
+        "type": "SINGLE",
+        "isRequired": true,
+        "options": [
+          {
+            "id": "package-25",
+            "name": "Túi 25 gói",
+            "extraPrice": 0,
+            "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p06-shopee-variant-01-01.webp"
+          },
+          {
+            "id": "package-50",
+            "name": "Túi 50 gói",
+            "extraPrice": 122000,
+            "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p06-shopee-variant-01-02.webp"
+          }
+        ]
+      }
+    ],
+    "features": []
   },
   {
     "id": 7,
-    "name": "Trà Xạ Đen H25 - Phòng Ngừa Ung Thư, Hỗ Trợ Chức Năng Gan",
-    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p07-shopee-01.webp",
-    "categoryId": "all",
+    "categoryId": "tra-tui-loc",
     "subCategoryId": "tra-hop-25",
+    "name": "Trà Xạ Đen H25 - Phòng Ngừa Ung Thư, Hỗ Trợ Chức Năng Gan",
+    "description": "Trà xạ đen được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày.",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p07-shopee-01.webp",
+    "video": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p07-shopee-video.mp4",
+    "videoPoster": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p07-shopee-video-poster.webp",
+    "images": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p07-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p07-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p07-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p07-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p07-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p07-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p07-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p07-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p07-shopee-09.webp"
+    ],
+    "descriptionImages": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p07-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p07-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p07-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p07-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p07-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p07-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p07-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p07-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p07-shopee-09.webp"
+    ],
+    "descriptionSections": [
+      {
+        "title": "Thông tin sản phẩm",
+        "content": "Trà xạ đen được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày. Trà túi lọc đóng hộp, thuận tiện pha và sử dụng hằng ngày."
+      },
+      {
+        "title": "Thương hiệu và xuất xứ",
+        "content": "Thương hiệu Sunbeleaf. Sản phẩm được đóng gói tại Việt Nam, thông tin lô sản xuất và hạn dùng thể hiện trên bao bì."
+      },
+      {
+        "title": "Hướng dẫn sử dụng",
+        "content": "Sử dụng theo hướng dẫn in trên bao bì. Điều chỉnh lượng nước và thời gian pha theo khẩu vị cá nhân."
+      },
+      {
+        "title": "Bảo quản",
+        "content": "Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp. Đóng kín bao bì sau khi mở."
+      },
+      {
+        "title": "Lưu ý",
+        "content": "Thông tin về công dụng chỉ mang tính tham khảo. Sản phẩm không phải là thuốc và không có tác dụng thay thế thuốc chữa bệnh."
+      }
+    ],
     "price": 213600,
-    "listPrice": 0
+    "listPrice": 0,
+    "sku": "",
+    "variantGroups": [],
+    "features": [
+      "cancer-prevention",
+      "bestseller"
+    ]
   },
   {
     "id": 8,
-    "name": "Trà Cà Gai Leo Hộp 25 Gói - Mát Gan, Giải Độc Gan, Thanh Lọc Cơ Thể",
-    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p08-shopee-01.webp",
-    "categoryId": "all",
+    "categoryId": "tra-tui-loc",
     "subCategoryId": "tra-hop-25",
+    "name": "Trà Cà Gai Leo Hộp 25 Gói - Mát Gan, Giải Độc Gan, Thanh Lọc Cơ Thể",
+    "description": "Trà cà gai leo được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày.",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p08-shopee-01.webp",
+    "video": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p08-shopee-video.mp4",
+    "videoPoster": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p08-shopee-video-poster.webp",
+    "images": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p08-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p08-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p08-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p08-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p08-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p08-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p08-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p08-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p08-shopee-09.webp"
+    ],
+    "descriptionImages": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p08-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p08-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p08-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p08-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p08-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p08-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p08-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p08-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p08-shopee-09.webp"
+    ],
+    "descriptionSections": [
+      {
+        "title": "Thông tin sản phẩm",
+        "content": "Trà cà gai leo được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày. Trà túi lọc đóng hộp, thuận tiện pha và sử dụng hằng ngày."
+      },
+      {
+        "title": "Thương hiệu và xuất xứ",
+        "content": "Thương hiệu Sunbeleaf. Sản phẩm được đóng gói tại Việt Nam, thông tin lô sản xuất và hạn dùng thể hiện trên bao bì."
+      },
+      {
+        "title": "Hướng dẫn sử dụng",
+        "content": "Sử dụng theo hướng dẫn in trên bao bì. Điều chỉnh lượng nước và thời gian pha theo khẩu vị cá nhân."
+      },
+      {
+        "title": "Bảo quản",
+        "content": "Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp. Đóng kín bao bì sau khi mở."
+      },
+      {
+        "title": "Lưu ý",
+        "content": "Thông tin về công dụng chỉ mang tính tham khảo. Sản phẩm không phải là thuốc và không có tác dụng thay thế thuốc chữa bệnh."
+      }
+    ],
     "price": 213600,
-    "listPrice": 0
+    "listPrice": 0,
+    "sku": "",
+    "variantGroups": [],
+    "features": [
+      "liver-support"
+    ]
   },
   {
     "id": 9,
-    "name": "Trà Dây Hộp 25 Gói - Diệt Vi Khuẩn HP, Giảm Viêm Loét Dạ Dày",
-    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p09-shopee-01.webp",
-    "categoryId": "all",
+    "categoryId": "tra-tui-loc",
     "subCategoryId": "tra-hop-25",
+    "name": "Trà Dây Hộp 25 Gói - Diệt Vi Khuẩn HP, Giảm Viêm Loét Dạ Dày",
+    "description": "Trà dây được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày.",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p09-shopee-01.webp",
+    "video": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p09-shopee-video.mp4",
+    "videoPoster": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p09-shopee-video-poster.webp",
+    "images": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p09-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p09-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p09-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p09-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p09-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p09-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p09-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p09-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p09-shopee-09.webp"
+    ],
+    "descriptionImages": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p09-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p09-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p09-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p09-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p09-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p09-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p09-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p09-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p09-shopee-09.webp"
+    ],
+    "descriptionSections": [
+      {
+        "title": "Thông tin sản phẩm",
+        "content": "Trà dây được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày. Trà túi lọc đóng hộp, thuận tiện pha và sử dụng hằng ngày."
+      },
+      {
+        "title": "Thương hiệu và xuất xứ",
+        "content": "Thương hiệu Sunbeleaf. Sản phẩm được đóng gói tại Việt Nam, thông tin lô sản xuất và hạn dùng thể hiện trên bao bì."
+      },
+      {
+        "title": "Hướng dẫn sử dụng",
+        "content": "Sử dụng theo hướng dẫn in trên bao bì. Điều chỉnh lượng nước và thời gian pha theo khẩu vị cá nhân."
+      },
+      {
+        "title": "Bảo quản",
+        "content": "Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp. Đóng kín bao bì sau khi mở."
+      },
+      {
+        "title": "Lưu ý",
+        "content": "Thông tin về công dụng chỉ mang tính tham khảo. Sản phẩm không phải là thuốc và không có tác dụng thay thế thuốc chữa bệnh."
+      }
+    ],
     "price": 213600,
-    "listPrice": 0
+    "listPrice": 0,
+    "sku": "",
+    "variantGroups": [],
+    "features": [
+      "hangover-relief"
+    ]
   },
   {
     "id": 10,
-    "name": "Trà Chùm Ngây Hộp 25 Gói - Chống Lão Hóa, Bổ Sung Dưỡng Chất",
-    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p10-shopee-01.webp",
-    "categoryId": "all",
+    "categoryId": "tra-tui-loc",
     "subCategoryId": "tra-hop-25",
+    "name": "Trà Chùm Ngây Hộp 25 Gói - Chống Lão Hóa, Bổ Sung Dưỡng Chất",
+    "description": "Trà chùm ngây được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày.",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p10-shopee-01.webp",
+    "video": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p10-shopee-video.mp4",
+    "videoPoster": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p10-shopee-video-poster.webp",
+    "images": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p10-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p10-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p10-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p10-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p10-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p10-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p10-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p10-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p10-shopee-09.webp"
+    ],
+    "descriptionImages": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p10-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p10-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p10-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p10-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p10-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p10-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p10-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p10-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p10-shopee-09.webp"
+    ],
+    "descriptionSections": [
+      {
+        "title": "Thông tin sản phẩm",
+        "content": "Trà chùm ngây được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày. Trà túi lọc đóng hộp, thuận tiện pha và sử dụng hằng ngày."
+      },
+      {
+        "title": "Thương hiệu và xuất xứ",
+        "content": "Thương hiệu Sunbeleaf. Sản phẩm được đóng gói tại Việt Nam, thông tin lô sản xuất và hạn dùng thể hiện trên bao bì."
+      },
+      {
+        "title": "Hướng dẫn sử dụng",
+        "content": "Sử dụng theo hướng dẫn in trên bao bì. Điều chỉnh lượng nước và thời gian pha theo khẩu vị cá nhân."
+      },
+      {
+        "title": "Bảo quản",
+        "content": "Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp. Đóng kín bao bì sau khi mở."
+      },
+      {
+        "title": "Lưu ý",
+        "content": "Thông tin về công dụng chỉ mang tính tham khảo. Sản phẩm không phải là thuốc và không có tác dụng thay thế thuốc chữa bệnh."
+      }
+    ],
     "price": 213600,
-    "listPrice": 0
+    "listPrice": 0,
+    "sku": "",
+    "variantGroups": [],
+    "features": [
+      "ice"
+    ]
   },
   {
     "id": 11,
-    "name": "Trà Đinh Lăng Hộp 25 Gói - Hoạt Huyết Dưỡng Não, Giúp Ngủ Ngon",
-    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p11-shopee-01.webp",
-    "categoryId": "all",
+    "categoryId": "tra-tui-loc",
     "subCategoryId": "tra-hop-25",
+    "name": "Trà Đinh Lăng Hộp 25 Gói - Hoạt Huyết Dưỡng Não, Giúp Ngủ Ngon",
+    "description": "Trà đinh lăng được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày.",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p11-shopee-01.webp",
+    "video": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p11-shopee-video.mp4",
+    "videoPoster": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p11-shopee-video-poster.webp",
+    "images": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p11-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p11-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p11-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p11-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p11-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p11-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p11-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p11-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p11-shopee-09.webp"
+    ],
+    "descriptionImages": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p11-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p11-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p11-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p11-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p11-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p11-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p11-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p11-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p11-shopee-09.webp"
+    ],
+    "descriptionSections": [
+      {
+        "title": "Thông tin sản phẩm",
+        "content": "Trà đinh lăng được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày. Trà túi lọc đóng hộp, thuận tiện pha và sử dụng hằng ngày."
+      },
+      {
+        "title": "Thương hiệu và xuất xứ",
+        "content": "Thương hiệu Sunbeleaf. Sản phẩm được đóng gói tại Việt Nam, thông tin lô sản xuất và hạn dùng thể hiện trên bao bì."
+      },
+      {
+        "title": "Hướng dẫn sử dụng",
+        "content": "Sử dụng theo hướng dẫn in trên bao bì. Điều chỉnh lượng nước và thời gian pha theo khẩu vị cá nhân."
+      },
+      {
+        "title": "Bảo quản",
+        "content": "Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp. Đóng kín bao bì sau khi mở."
+      },
+      {
+        "title": "Lưu ý",
+        "content": "Thông tin về công dụng chỉ mang tính tham khảo. Sản phẩm không phải là thuốc và không có tác dụng thay thế thuốc chữa bệnh."
+      }
+    ],
     "price": 213600,
-    "listPrice": 0
+    "listPrice": 0,
+    "sku": "",
+    "variantGroups": [],
+    "features": [
+      "ice"
+    ]
   },
   {
     "id": 12,
-    "name": "Trà Nhàu Hộp 25 Gói - Giúp Giảm Viêm, Giảm Đau Nhức Xương Khớp",
-    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p12-shopee-01.webp",
-    "categoryId": "all",
+    "categoryId": "tra-tui-loc",
     "subCategoryId": "tra-hop-25",
+    "name": "Trà Nhàu Hộp 25 Gói - Giúp Giảm Viêm, Giảm Đau Nhức Xương Khớp",
+    "description": "Trà nhàu được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày.",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p12-shopee-01.webp",
+    "video": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p12-shopee-video.mp4",
+    "videoPoster": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p12-shopee-video-poster.webp",
+    "images": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p12-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p12-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p12-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p12-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p12-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p12-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p12-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p12-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p12-shopee-09.webp"
+    ],
+    "descriptionImages": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p12-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p12-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p12-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p12-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p12-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p12-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p12-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p12-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p12-shopee-09.webp"
+    ],
+    "descriptionSections": [
+      {
+        "title": "Thông tin sản phẩm",
+        "content": "Trà nhàu được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày. Trà túi lọc đóng hộp, thuận tiện pha và sử dụng hằng ngày."
+      },
+      {
+        "title": "Thương hiệu và xuất xứ",
+        "content": "Thương hiệu Sunbeleaf. Sản phẩm được đóng gói tại Việt Nam, thông tin lô sản xuất và hạn dùng thể hiện trên bao bì."
+      },
+      {
+        "title": "Hướng dẫn sử dụng",
+        "content": "Sử dụng theo hướng dẫn in trên bao bì. Điều chỉnh lượng nước và thời gian pha theo khẩu vị cá nhân."
+      },
+      {
+        "title": "Bảo quản",
+        "content": "Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp. Đóng kín bao bì sau khi mở."
+      },
+      {
+        "title": "Lưu ý",
+        "content": "Thông tin về công dụng chỉ mang tính tham khảo. Sản phẩm không phải là thuốc và không có tác dụng thay thế thuốc chữa bệnh."
+      }
+    ],
     "price": 213600,
-    "listPrice": 0
+    "listPrice": 0,
+    "sku": "",
+    "variantGroups": [],
+    "features": [
+      "ice"
+    ]
   },
   {
     "id": 13,
-    "name": "Trà Xạ Đen Hộp 20 Gói - Phòng Ngừa Ung Thư, Hỗ Trợ Chức Năng Gan",
-    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p13-shopee-01.webp",
-    "categoryId": "all",
+    "categoryId": "tra-tui-loc",
     "subCategoryId": "tra-hop-20",
+    "name": "Trà Xạ Đen Hộp 20 Gói - Phòng Ngừa Ung Thư, Hỗ Trợ Chức Năng Gan",
+    "description": "Trà xạ đen hộp 20 được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày.",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p13-shopee-01.webp",
+    "video": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p13-shopee-video.mp4",
+    "videoPoster": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p13-shopee-video-poster.webp",
+    "images": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p13-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p13-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p13-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p13-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p13-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p13-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p13-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p13-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p13-shopee-09.webp"
+    ],
+    "descriptionImages": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p13-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p13-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p13-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p13-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p13-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p13-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p13-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p13-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p13-shopee-09.webp"
+    ],
+    "descriptionSections": [
+      {
+        "title": "Thông tin sản phẩm",
+        "content": "Trà xạ đen hộp 20 được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày. Trà túi lọc đóng hộp, thuận tiện pha và sử dụng hằng ngày."
+      },
+      {
+        "title": "Thương hiệu và xuất xứ",
+        "content": "Thương hiệu Sunbeleaf. Sản phẩm được đóng gói tại Việt Nam, thông tin lô sản xuất và hạn dùng thể hiện trên bao bì."
+      },
+      {
+        "title": "Hướng dẫn sử dụng",
+        "content": "Sử dụng theo hướng dẫn in trên bao bì. Điều chỉnh lượng nước và thời gian pha theo khẩu vị cá nhân."
+      },
+      {
+        "title": "Bảo quản",
+        "content": "Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp. Đóng kín bao bì sau khi mở."
+      },
+      {
+        "title": "Lưu ý",
+        "content": "Thông tin về công dụng chỉ mang tính tham khảo. Sản phẩm không phải là thuốc và không có tác dụng thay thế thuốc chữa bệnh."
+      }
+    ],
     "price": 189600,
-    "listPrice": 0
+    "listPrice": 0,
+    "sku": "",
+    "variantGroups": [],
+    "features": [
+      "cancer-prevention"
+    ]
   },
   {
     "id": 14,
-    "name": "Trà Chùm Ngây Hộp 20 Gói - Chống Lão Hóa, Bổ Sung Dưỡng Chất",
-    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p14-shopee-01.webp",
-    "categoryId": "all",
+    "categoryId": "tra-tui-loc",
     "subCategoryId": "tra-hop-20",
+    "name": "Trà Chùm Ngây Hộp 20 Gói - Chống Lão Hóa, Bổ Sung Dưỡng Chất",
+    "description": "Trà chùm ngây hộp 20 được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày.",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p14-shopee-01.webp",
+    "video": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p14-shopee-video.mp4",
+    "videoPoster": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p14-shopee-video-poster.webp",
+    "images": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p14-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p14-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p14-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p14-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p14-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p14-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p14-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p14-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p14-shopee-09.webp"
+    ],
+    "descriptionImages": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p14-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p14-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p14-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p14-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p14-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p14-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p14-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p14-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p14-shopee-09.webp"
+    ],
+    "descriptionSections": [
+      {
+        "title": "Thông tin sản phẩm",
+        "content": "Trà chùm ngây hộp 20 được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày. Trà túi lọc đóng hộp, thuận tiện pha và sử dụng hằng ngày."
+      },
+      {
+        "title": "Thương hiệu và xuất xứ",
+        "content": "Thương hiệu Sunbeleaf. Sản phẩm được đóng gói tại Việt Nam, thông tin lô sản xuất và hạn dùng thể hiện trên bao bì."
+      },
+      {
+        "title": "Hướng dẫn sử dụng",
+        "content": "Sử dụng theo hướng dẫn in trên bao bì. Điều chỉnh lượng nước và thời gian pha theo khẩu vị cá nhân."
+      },
+      {
+        "title": "Bảo quản",
+        "content": "Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp. Đóng kín bao bì sau khi mở."
+      },
+      {
+        "title": "Lưu ý",
+        "content": "Thông tin về công dụng chỉ mang tính tham khảo. Sản phẩm không phải là thuốc và không có tác dụng thay thế thuốc chữa bệnh."
+      }
+    ],
     "price": 189600,
-    "listPrice": 0
+    "listPrice": 0,
+    "sku": "",
+    "variantGroups": [],
+    "features": [
+      "ice"
+    ]
   },
   {
     "id": 15,
-    "name": "Trà Đinh Lăng Hộp 20 Gói - Hoạt Huyết Dưỡng Não, Giúp Ngủ Ngon",
-    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p15-shopee-01.webp",
-    "categoryId": "all",
+    "categoryId": "tra-tui-loc",
     "subCategoryId": "tra-hop-20",
+    "name": "Trà Đinh Lăng Hộp 20 Gói - Hoạt Huyết Dưỡng Não, Giúp Ngủ Ngon",
+    "description": "Trà đinh lăng được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày.",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p15-shopee-01.webp",
+    "video": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p15-shopee-video.mp4",
+    "videoPoster": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p15-shopee-video-poster.webp",
+    "images": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p15-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p15-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p15-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p15-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p15-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p15-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p15-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p15-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p15-shopee-09.webp"
+    ],
+    "descriptionImages": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p15-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p15-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p15-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p15-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p15-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p15-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p15-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p15-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p15-shopee-09.webp"
+    ],
+    "descriptionSections": [
+      {
+        "title": "Thông tin sản phẩm",
+        "content": "Trà đinh lăng được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày. Trà túi lọc đóng hộp, thuận tiện pha và sử dụng hằng ngày."
+      },
+      {
+        "title": "Thương hiệu và xuất xứ",
+        "content": "Thương hiệu Sunbeleaf. Sản phẩm được đóng gói tại Việt Nam, thông tin lô sản xuất và hạn dùng thể hiện trên bao bì."
+      },
+      {
+        "title": "Hướng dẫn sử dụng",
+        "content": "Sử dụng theo hướng dẫn in trên bao bì. Điều chỉnh lượng nước và thời gian pha theo khẩu vị cá nhân."
+      },
+      {
+        "title": "Bảo quản",
+        "content": "Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp. Đóng kín bao bì sau khi mở."
+      },
+      {
+        "title": "Lưu ý",
+        "content": "Thông tin về công dụng chỉ mang tính tham khảo. Sản phẩm không phải là thuốc và không có tác dụng thay thế thuốc chữa bệnh."
+      }
+    ],
     "price": 189600,
-    "listPrice": 0
+    "listPrice": 0,
+    "sku": "",
+    "variantGroups": [],
+    "features": [
+      "sleep-support"
+    ]
   },
   {
     "id": 16,
-    "name": "Trà Tim Sen Hộp 20 Gói - An Thần, Giúp Ngủ Ngon, Bảo Vệ Tim Mạch",
-    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p16-shopee-01.webp",
-    "categoryId": "all",
+    "categoryId": "tra-tui-loc",
     "subCategoryId": "tra-hop-20",
+    "name": "Trà Tim Sen Hộp 20 Gói - An Thần, Giúp Ngủ Ngon, Bảo Vệ Tim Mạch",
+    "description": "Trà tim sen shan tuyết cổ thụ được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày.",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p16-shopee-01.webp",
+    "video": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p16-shopee-video.mp4",
+    "videoPoster": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p16-shopee-video-poster.webp",
+    "images": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p16-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p16-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p16-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p16-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p16-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p16-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p16-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p16-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p16-shopee-09.webp"
+    ],
+    "descriptionImages": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p16-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p16-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p16-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p16-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p16-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p16-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p16-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p16-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p16-shopee-09.webp"
+    ],
+    "descriptionSections": [
+      {
+        "title": "Thông tin sản phẩm",
+        "content": "Trà tim sen shan tuyết cổ thụ được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày. Trà túi lọc đóng hộp, thuận tiện pha và sử dụng hằng ngày."
+      },
+      {
+        "title": "Thương hiệu và xuất xứ",
+        "content": "Thương hiệu Sunbeleaf. Sản phẩm được đóng gói tại Việt Nam, thông tin lô sản xuất và hạn dùng thể hiện trên bao bì."
+      },
+      {
+        "title": "Hướng dẫn sử dụng",
+        "content": "Sử dụng theo hướng dẫn in trên bao bì. Điều chỉnh lượng nước và thời gian pha theo khẩu vị cá nhân."
+      },
+      {
+        "title": "Bảo quản",
+        "content": "Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp. Đóng kín bao bì sau khi mở."
+      },
+      {
+        "title": "Lưu ý",
+        "content": "Thông tin về công dụng chỉ mang tính tham khảo. Sản phẩm không phải là thuốc và không có tác dụng thay thế thuốc chữa bệnh."
+      }
+    ],
     "price": 189600,
-    "listPrice": 0
+    "listPrice": 0,
+    "sku": "",
+    "variantGroups": [],
+    "features": [
+      "sleep-support",
+      "bestseller"
+    ]
   },
   {
     "id": 17,
-    "name": "Trà Nhàu Hộp 20 Gói - Giúp Giảm Viêm, Giảm Đau Nhức Xương Khớp",
-    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p17-shopee-01.webp",
-    "categoryId": "all",
+    "categoryId": "tra-tui-loc",
     "subCategoryId": "tra-hop-20",
+    "name": "Trà Nhàu Hộp 20 Gói - Giúp Giảm Viêm, Giảm Đau Nhức Xương Khớp",
+    "description": "Trà nhàu được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày.",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p17-shopee-01.webp",
+    "video": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p17-shopee-video.mp4",
+    "videoPoster": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p17-shopee-video-poster.webp",
+    "images": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p17-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p17-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p17-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p17-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p17-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p17-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p17-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p17-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p17-shopee-09.webp"
+    ],
+    "descriptionImages": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p17-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p17-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p17-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p17-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p17-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p17-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p17-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p17-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p17-shopee-09.webp"
+    ],
+    "descriptionSections": [
+      {
+        "title": "Thông tin sản phẩm",
+        "content": "Trà nhàu được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày. Trà túi lọc đóng hộp, thuận tiện pha và sử dụng hằng ngày."
+      },
+      {
+        "title": "Thương hiệu và xuất xứ",
+        "content": "Thương hiệu Sunbeleaf. Sản phẩm được đóng gói tại Việt Nam, thông tin lô sản xuất và hạn dùng thể hiện trên bao bì."
+      },
+      {
+        "title": "Hướng dẫn sử dụng",
+        "content": "Sử dụng theo hướng dẫn in trên bao bì. Điều chỉnh lượng nước và thời gian pha theo khẩu vị cá nhân."
+      },
+      {
+        "title": "Bảo quản",
+        "content": "Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp. Đóng kín bao bì sau khi mở."
+      },
+      {
+        "title": "Lưu ý",
+        "content": "Thông tin về công dụng chỉ mang tính tham khảo. Sản phẩm không phải là thuốc và không có tác dụng thay thế thuốc chữa bệnh."
+      }
+    ],
     "price": 189600,
-    "listPrice": 0
+    "listPrice": 0,
+    "sku": "",
+    "variantGroups": [],
+    "features": [
+      "ice"
+    ]
   },
   {
     "id": 18,
-    "name": "Trà Lục Trà Hoa Nhài Hộp 20 Gói - Thanh Nhiệt, Thư Giãn Đầu Óc",
-    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p18-shopee-01.webp",
-    "categoryId": "all",
+    "categoryId": "tra-tui-loc",
     "subCategoryId": "tra-hop-20",
+    "name": "Trà Lục Trà Hoa Nhài Hộp 20 Gói - Thanh Nhiệt, Thư Giãn Đầu Óc",
+    "description": "Trà lục trà hoa nhài được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày.",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p18-shopee-01.webp",
+    "video": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p18-shopee-video.mp4",
+    "videoPoster": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p18-shopee-video-poster.webp",
+    "images": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p18-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p18-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p18-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p18-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p18-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p18-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p18-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p18-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p18-shopee-09.webp"
+    ],
+    "descriptionImages": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p18-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p18-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p18-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p18-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p18-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p18-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p18-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p18-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p18-shopee-09.webp"
+    ],
+    "descriptionSections": [
+      {
+        "title": "Thông tin sản phẩm",
+        "content": "Trà lục trà hoa nhài được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày. Trà túi lọc đóng hộp, thuận tiện pha và sử dụng hằng ngày."
+      },
+      {
+        "title": "Thương hiệu và xuất xứ",
+        "content": "Thương hiệu Sunbeleaf. Sản phẩm được đóng gói tại Việt Nam, thông tin lô sản xuất và hạn dùng thể hiện trên bao bì."
+      },
+      {
+        "title": "Hướng dẫn sử dụng",
+        "content": "Sử dụng theo hướng dẫn in trên bao bì. Điều chỉnh lượng nước và thời gian pha theo khẩu vị cá nhân."
+      },
+      {
+        "title": "Bảo quản",
+        "content": "Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp. Đóng kín bao bì sau khi mở."
+      },
+      {
+        "title": "Lưu ý",
+        "content": "Thông tin về công dụng chỉ mang tính tham khảo. Sản phẩm không phải là thuốc và không có tác dụng thay thế thuốc chữa bệnh."
+      }
+    ],
     "price": 189600,
-    "listPrice": 0
+    "listPrice": 0,
+    "sku": "",
+    "variantGroups": [],
+    "features": [
+      "ice"
+    ]
   },
   {
     "id": 19,
-    "name": "Hồng Trà Hộp 20 Gói - Hỗ Trợ Tim Mạch, Giúp Tỉnh Táo",
-    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p19-shopee-01.webp",
-    "categoryId": "all",
+    "categoryId": "tra-tui-loc",
     "subCategoryId": "tra-hop-20",
+    "name": "Hồng Trà Hộp 20 Gói - Hỗ Trợ Tim Mạch, Giúp Tỉnh Táo",
+    "description": "Hồng trà được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày.",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p19-shopee-01.webp",
+    "video": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p19-shopee-video.mp4",
+    "videoPoster": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p19-shopee-video-poster.webp",
+    "images": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p19-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p19-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p19-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p19-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p19-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p19-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p19-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p19-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p19-shopee-09.webp"
+    ],
+    "descriptionImages": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p19-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p19-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p19-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p19-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p19-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p19-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p19-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p19-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p19-shopee-09.webp"
+    ],
+    "descriptionSections": [
+      {
+        "title": "Thông tin sản phẩm",
+        "content": "Hồng trà được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày. Trà túi lọc đóng hộp, thuận tiện pha và sử dụng hằng ngày."
+      },
+      {
+        "title": "Thương hiệu và xuất xứ",
+        "content": "Thương hiệu Sunbeleaf. Sản phẩm được đóng gói tại Việt Nam, thông tin lô sản xuất và hạn dùng thể hiện trên bao bì."
+      },
+      {
+        "title": "Hướng dẫn sử dụng",
+        "content": "Sử dụng theo hướng dẫn in trên bao bì. Điều chỉnh lượng nước và thời gian pha theo khẩu vị cá nhân."
+      },
+      {
+        "title": "Bảo quản",
+        "content": "Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp. Đóng kín bao bì sau khi mở."
+      },
+      {
+        "title": "Lưu ý",
+        "content": "Thông tin về công dụng chỉ mang tính tham khảo. Sản phẩm không phải là thuốc và không có tác dụng thay thế thuốc chữa bệnh."
+      }
+    ],
     "price": 189600,
-    "listPrice": 0
+    "listPrice": 0,
+    "sku": "",
+    "variantGroups": [],
+    "features": [
+      "ice"
+    ]
   },
   {
     "id": 20,
-    "name": "Trà Sâm Tiên Mao Hộp 20 Gói - Bồi Bổ Sức Khỏe, Tăng Cường Sinh Lực",
-    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p20-shopee-01.webp",
-    "categoryId": "all",
+    "categoryId": "tra-tui-loc",
     "subCategoryId": "tra-hop-20",
+    "name": "Trà Sâm Tiên Mao Hộp 20 Gói - Bồi Bổ Sức Khỏe, Tăng Cường Sinh Lực",
+    "description": "Trà Sâm Tiên Mao được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày.",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p20-shopee-01.webp",
+    "video": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p20-shopee-video.mp4",
+    "videoPoster": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p20-shopee-video-poster.webp",
+    "images": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p20-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p20-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p20-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p20-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p20-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p20-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p20-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p20-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p20-shopee-09.webp"
+    ],
+    "descriptionImages": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p20-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p20-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p20-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p20-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p20-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p20-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p20-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p20-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p20-shopee-09.webp"
+    ],
+    "descriptionSections": [
+      {
+        "title": "Thông tin sản phẩm",
+        "content": "Trà Sâm Tiên Mao được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày. Trà túi lọc đóng hộp, thuận tiện pha và sử dụng hằng ngày."
+      },
+      {
+        "title": "Thương hiệu và xuất xứ",
+        "content": "Thương hiệu Sunbeleaf. Sản phẩm được đóng gói tại Việt Nam, thông tin lô sản xuất và hạn dùng thể hiện trên bao bì."
+      },
+      {
+        "title": "Hướng dẫn sử dụng",
+        "content": "Sử dụng theo hướng dẫn in trên bao bì. Điều chỉnh lượng nước và thời gian pha theo khẩu vị cá nhân."
+      },
+      {
+        "title": "Bảo quản",
+        "content": "Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp. Đóng kín bao bì sau khi mở."
+      },
+      {
+        "title": "Lưu ý",
+        "content": "Thông tin về công dụng chỉ mang tính tham khảo. Sản phẩm không phải là thuốc và không có tác dụng thay thế thuốc chữa bệnh."
+      }
+    ],
     "price": 189600,
-    "listPrice": 0
+    "listPrice": 0,
+    "sku": "",
+    "variantGroups": [],
+    "features": [
+      "ice"
+    ]
   },
   {
     "id": 21,
-    "name": "Đông Trùng Tứ Vị Trà - Bồi Bổ Cơ Thể, Nâng Cao Sức Đề Kháng",
-    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p21-shopee-01.webp",
-    "categoryId": "all",
+    "categoryId": "tra-hoa-thao-moc",
     "subCategoryId": "tra-hoa-thao-moc",
+    "name": "Đông Trùng Tứ Vị Trà - Bồi Bổ Cơ Thể, Nâng Cao Sức Đề Kháng",
+    "description": "Đông Trùng Tứ Vị Trà được sấy lạnh giữ nguyên hương vị và công dụng của thảo dược, đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày.",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p21-shopee-01.webp",
+    "video": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p21-shopee-video.mp4",
+    "videoPoster": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p21-shopee-video-poster.webp",
+    "images": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p21-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p21-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p21-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p21-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p21-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p21-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p21-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p21-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p21-shopee-09.webp"
+    ],
+    "descriptionImages": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p21-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p21-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p21-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p21-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p21-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p21-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p21-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p21-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p21-shopee-09.webp"
+    ],
+    "descriptionSections": [
+      {
+        "title": "Thông tin sản phẩm",
+        "content": "Đông Trùng Tứ Vị Trà được sấy lạnh giữ nguyên hương vị và công dụng của thảo dược, đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày. Sản phẩm trà thảo mộc phối hợp nhiều nguyên liệu."
+      },
+      {
+        "title": "Thương hiệu và xuất xứ",
+        "content": "Thương hiệu Sunbeleaf. Sản phẩm được đóng gói tại Việt Nam, thông tin lô sản xuất và hạn dùng thể hiện trên bao bì."
+      },
+      {
+        "title": "Hướng dẫn sử dụng",
+        "content": "Sử dụng theo hướng dẫn in trên bao bì. Điều chỉnh lượng nước và thời gian pha theo khẩu vị cá nhân."
+      },
+      {
+        "title": "Bảo quản",
+        "content": "Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp. Đóng kín bao bì sau khi mở."
+      },
+      {
+        "title": "Lưu ý",
+        "content": "Thông tin về công dụng chỉ mang tính tham khảo. Sản phẩm không phải là thuốc và không có tác dụng thay thế thuốc chữa bệnh."
+      }
+    ],
     "price": 190350,
-    "listPrice": 0
+    "listPrice": 0,
+    "sku": "",
+    "variantGroups": [
+      {
+        "id": "package-size",
+        "title": "Quy cách sản phẩm",
+        "description": "Chọn số lượng gói trà",
+        "type": "SINGLE",
+        "isRequired": true,
+        "options": [
+          {
+            "id": "package-10",
+            "name": "Túi 10 gói",
+            "extraPrice": 0,
+            "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p21-shopee-variant-01-01.webp"
+          },
+          {
+            "id": "package-20",
+            "name": "Túi 20 gói",
+            "extraPrice": -41850,
+            "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p21-shopee-variant-01-02.webp"
+          }
+        ]
+      }
+    ],
+    "features": [
+      "hot"
+    ]
   },
   {
     "id": 22,
-    "name": "Dưỡng Nhan Thất Vị Trà - Dưỡng Nhan, Làm Đẹp Da, Chống Lão Hóa",
-    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p22-shopee-01.webp",
-    "categoryId": "all",
+    "categoryId": "tra-hoa-thao-moc",
     "subCategoryId": "tra-hoa-thao-moc",
+    "name": "Dưỡng Nhan Thất Vị Trà - Dưỡng Nhan, Làm Đẹp Da, Chống Lão Hóa",
+    "description": "Dưỡng Nhan Thất Vị Trà được sấy lạnh giữ nguyên hương vị và công dụng của thảo dược, đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày.",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p22-shopee-01.webp",
+    "video": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p22-shopee-video.mp4",
+    "videoPoster": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p22-shopee-video-poster.webp",
+    "images": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p22-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p22-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p22-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p22-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p22-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p22-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p22-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p22-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p22-shopee-09.webp"
+    ],
+    "descriptionImages": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p22-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p22-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p22-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p22-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p22-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p22-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p22-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p22-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p22-shopee-09.webp"
+    ],
+    "descriptionSections": [
+      {
+        "title": "Thông tin sản phẩm",
+        "content": "Dưỡng Nhan Thất Vị Trà được sấy lạnh giữ nguyên hương vị và công dụng của thảo dược, đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày. Sản phẩm trà thảo mộc phối hợp nhiều nguyên liệu."
+      },
+      {
+        "title": "Thương hiệu và xuất xứ",
+        "content": "Thương hiệu Sunbeleaf. Sản phẩm được đóng gói tại Việt Nam, thông tin lô sản xuất và hạn dùng thể hiện trên bao bì."
+      },
+      {
+        "title": "Hướng dẫn sử dụng",
+        "content": "Sử dụng theo hướng dẫn in trên bao bì. Điều chỉnh lượng nước và thời gian pha theo khẩu vị cá nhân."
+      },
+      {
+        "title": "Bảo quản",
+        "content": "Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp. Đóng kín bao bì sau khi mở."
+      },
+      {
+        "title": "Lưu ý",
+        "content": "Thông tin về công dụng chỉ mang tính tham khảo. Sản phẩm không phải là thuốc và không có tác dụng thay thế thuốc chữa bệnh."
+      }
+    ],
     "price": 99000,
-    "listPrice": 0
+    "listPrice": 0,
+    "sku": "",
+    "variantGroups": [
+      {
+        "id": "package-size",
+        "title": "Quy cách sản phẩm",
+        "description": "Chọn số lượng gói trà",
+        "type": "SINGLE",
+        "isRequired": true,
+        "options": [
+          {
+            "id": "package-10",
+            "name": "Túi 10 gói",
+            "extraPrice": 0,
+            "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p22-shopee-variant-01-01.webp"
+          },
+          {
+            "id": "package-20",
+            "name": "Túi 20 gói",
+            "extraPrice": 80000,
+            "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p22-shopee-variant-01-02.webp"
+          }
+        ]
+      }
+    ],
+    "features": [
+      "hot"
+    ]
   },
   {
     "id": 23,
-    "name": "Gạo Lứt Bát Vị Trà - Thanh Nhiệt, Giải Độc, Giảm Cân Đẹp Dáng",
-    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p23-shopee-01.webp",
-    "categoryId": "all",
+    "categoryId": "tra-hoa-thao-moc",
     "subCategoryId": "tra-hoa-thao-moc",
+    "name": "Gạo Lứt Bát Vị Trà - Thanh Nhiệt, Giải Độc, Giảm Cân Đẹp Dáng",
+    "description": "Gạo Lứt Bát Vị Trà được sấy lạnh giữ nguyên hương vị và công dụng của thảo dược, đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày.",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p23-shopee-01.webp",
+    "video": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p23-shopee-video.mp4",
+    "videoPoster": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p23-shopee-video-poster.webp",
+    "images": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p23-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p23-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p23-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p23-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p23-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p23-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p23-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p23-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p23-shopee-09.webp"
+    ],
+    "descriptionImages": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p23-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p23-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p23-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p23-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p23-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p23-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p23-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p23-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p23-shopee-09.webp"
+    ],
+    "descriptionSections": [
+      {
+        "title": "Thông tin sản phẩm",
+        "content": "Gạo Lứt Bát Vị Trà được sấy lạnh giữ nguyên hương vị và công dụng của thảo dược, đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày. Sản phẩm trà thảo mộc phối hợp nhiều nguyên liệu."
+      },
+      {
+        "title": "Thương hiệu và xuất xứ",
+        "content": "Thương hiệu Sunbeleaf. Sản phẩm được đóng gói tại Việt Nam, thông tin lô sản xuất và hạn dùng thể hiện trên bao bì."
+      },
+      {
+        "title": "Hướng dẫn sử dụng",
+        "content": "Sử dụng theo hướng dẫn in trên bao bì. Điều chỉnh lượng nước và thời gian pha theo khẩu vị cá nhân."
+      },
+      {
+        "title": "Bảo quản",
+        "content": "Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp. Đóng kín bao bì sau khi mở."
+      },
+      {
+        "title": "Lưu ý",
+        "content": "Thông tin về công dụng chỉ mang tính tham khảo. Sản phẩm không phải là thuốc và không có tác dụng thay thế thuốc chữa bệnh."
+      }
+    ],
     "price": 211500,
-    "listPrice": 0
+    "listPrice": 0,
+    "sku": "",
+    "variantGroups": [
+      {
+        "id": "package-size",
+        "title": "Quy cách sản phẩm",
+        "description": "Chọn số lượng gói trà",
+        "type": "SINGLE",
+        "isRequired": true,
+        "options": [
+          {
+            "id": "package-10",
+            "name": "Túi 10 gói",
+            "extraPrice": 0,
+            "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p23-shopee-variant-01-01.webp"
+          },
+          {
+            "id": "package-20",
+            "name": "Túi 20 gói",
+            "extraPrice": 96500,
+            "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p23-shopee-variant-01-02.webp"
+          }
+        ]
+      }
+    ],
+    "features": [
+      "hot"
+    ]
   },
   {
     "id": 24,
-    "name": "Trà Giảm Cân - Đốt Cháy Mỡ Thừa, Hỗ Trợ Giảm Cân An Toàn",
-    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p24-shopee-01.webp",
-    "categoryId": "all",
+    "categoryId": "tra-hoa-thao-moc",
     "subCategoryId": "tra-hoa-thao-moc",
+    "name": "Trà Giảm Cân - Đốt Cháy Mỡ Thừa, Hỗ Trợ Giảm Cân An Toàn",
+    "description": "Trà Giảm Cân được sấy lạnh giữ nguyên hương vị và công dụng của thảo dược, đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày.",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p24-shopee-01.webp",
+    "video": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p24-shopee-video.mp4",
+    "videoPoster": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p24-shopee-video-poster.webp",
+    "images": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p24-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p24-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p24-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p24-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p24-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p24-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p24-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p24-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p24-shopee-09.webp"
+    ],
+    "descriptionImages": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p24-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p24-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p24-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p24-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p24-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p24-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p24-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p24-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p24-shopee-09.webp"
+    ],
+    "descriptionSections": [
+      {
+        "title": "Thông tin sản phẩm",
+        "content": "Trà Giảm Cân được sấy lạnh giữ nguyên hương vị và công dụng của thảo dược, đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày. Sản phẩm trà thảo mộc phối hợp nhiều nguyên liệu."
+      },
+      {
+        "title": "Thương hiệu và xuất xứ",
+        "content": "Thương hiệu Sunbeleaf. Sản phẩm được đóng gói tại Việt Nam, thông tin lô sản xuất và hạn dùng thể hiện trên bao bì."
+      },
+      {
+        "title": "Hướng dẫn sử dụng",
+        "content": "Sử dụng theo hướng dẫn in trên bao bì. Điều chỉnh lượng nước và thời gian pha theo khẩu vị cá nhân."
+      },
+      {
+        "title": "Bảo quản",
+        "content": "Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp. Đóng kín bao bì sau khi mở."
+      },
+      {
+        "title": "Lưu ý",
+        "content": "Thông tin về công dụng chỉ mang tính tham khảo. Sản phẩm không phải là thuốc và không có tác dụng thay thế thuốc chữa bệnh."
+      }
+    ],
     "price": 197400,
-    "listPrice": 0
+    "listPrice": 0,
+    "sku": "",
+    "variantGroups": [
+      {
+        "id": "package-size",
+        "title": "Quy cách sản phẩm",
+        "description": "Chọn số lượng gói trà",
+        "type": "SINGLE",
+        "isRequired": true,
+        "options": [
+          {
+            "id": "package-10",
+            "name": "Túi 10 gói",
+            "extraPrice": 0,
+            "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p24-shopee-variant-01-01.webp"
+          },
+          {
+            "id": "package-20",
+            "name": "Túi 20 gói",
+            "extraPrice": 132600,
+            "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p24-shopee-variant-01-02.webp"
+          }
+        ]
+      }
+    ],
+    "features": [
+      "hot"
+    ]
   },
   {
     "id": 25,
-    "name": "Trà hoa Atiso Đỏ - Mát Gan, Hỗ Trợ Tiêu Hóa, Đẹp Da",
-    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p25-shopee-01.webp",
-    "categoryId": "all",
+    "categoryId": "tra-hoa-don",
     "subCategoryId": "tra-hoa-don",
+    "name": "Trà hoa Atiso Đỏ - Mát Gan, Hỗ Trợ Tiêu Hóa, Đẹp Da",
+    "description": "Trà hoa atiso đỏ được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày.",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p25-shopee-01.webp",
+    "video": "https://deltadasia.com/wp-content/uploads/2026/06/tra-hoa-atiso-do-tra-thao-moc-sunbeleaf-video-quang-ba.mp4",
+    "videoPoster": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p25-shopee-video-poster.webp",
+    "images": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p25-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p25-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p25-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p25-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p25-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p25-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p25-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p25-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p25-shopee-09.webp"
+    ],
+    "descriptionImages": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p25-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p25-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p25-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p25-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p25-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p25-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p25-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p25-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p25-shopee-09.webp"
+    ],
+    "descriptionSections": [
+      {
+        "title": "Thông tin sản phẩm",
+        "content": "Trà hoa atiso đỏ được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày. Hoa trà được chọn lọc và đóng gói để giữ hương thơm tự nhiên."
+      },
+      {
+        "title": "Thương hiệu và xuất xứ",
+        "content": "Thương hiệu Sunbeleaf. Sản phẩm được đóng gói tại Việt Nam, thông tin lô sản xuất và hạn dùng thể hiện trên bao bì."
+      },
+      {
+        "title": "Hướng dẫn sử dụng",
+        "content": "Sử dụng theo hướng dẫn in trên bao bì. Điều chỉnh lượng nước và thời gian pha theo khẩu vị cá nhân."
+      },
+      {
+        "title": "Bảo quản",
+        "content": "Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp. Đóng kín bao bì sau khi mở."
+      },
+      {
+        "title": "Lưu ý",
+        "content": "Thông tin về công dụng chỉ mang tính tham khảo. Sản phẩm không phải là thuốc và không có tác dụng thay thế thuốc chữa bệnh."
+      }
+    ],
     "price": 144000,
-    "listPrice": 0
+    "listPrice": 0,
+    "sku": "",
+    "variantGroups": [],
+    "features": [
+      "liver-support"
+    ]
   },
   {
     "id": 26,
-    "name": "Trà hoa Cúc - Thanh Nhiệt, Giải Độc, Giúp Ngủ Ngon",
-    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p26-shopee-01.webp",
-    "categoryId": "all",
+    "categoryId": "tra-hoa-don",
     "subCategoryId": "tra-hoa-don",
+    "name": "Trà hoa Cúc - Thanh Nhiệt, Giải Độc, Giúp Ngủ Ngon",
+    "description": "Trà hoa cúc được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày.",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p26-shopee-01.webp",
+    "video": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p26-shopee-video.mp4",
+    "videoPoster": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p26-shopee-video-poster.webp",
+    "images": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p26-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p26-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p26-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p26-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p26-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p26-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p26-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p26-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p26-shopee-09.webp"
+    ],
+    "descriptionImages": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p26-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p26-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p26-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p26-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p26-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p26-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p26-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p26-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p26-shopee-09.webp"
+    ],
+    "descriptionSections": [
+      {
+        "title": "Thông tin sản phẩm",
+        "content": "Trà hoa cúc được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày. Hoa trà được chọn lọc và đóng gói để giữ hương thơm tự nhiên."
+      },
+      {
+        "title": "Thương hiệu và xuất xứ",
+        "content": "Thương hiệu Sunbeleaf. Sản phẩm được đóng gói tại Việt Nam, thông tin lô sản xuất và hạn dùng thể hiện trên bao bì."
+      },
+      {
+        "title": "Hướng dẫn sử dụng",
+        "content": "Sử dụng theo hướng dẫn in trên bao bì. Điều chỉnh lượng nước và thời gian pha theo khẩu vị cá nhân."
+      },
+      {
+        "title": "Bảo quản",
+        "content": "Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp. Đóng kín bao bì sau khi mở."
+      },
+      {
+        "title": "Lưu ý",
+        "content": "Thông tin về công dụng chỉ mang tính tham khảo. Sản phẩm không phải là thuốc và không có tác dụng thay thế thuốc chữa bệnh."
+      }
+    ],
     "price": 210000,
-    "listPrice": 0
+    "listPrice": 0,
+    "sku": "",
+    "variantGroups": [],
+    "features": [
+      "sleep-support",
+      "bestseller"
+    ]
   },
   {
     "id": 27,
-    "name": "Trà hoa Nhài - Thanh Nhiệt, Thư Giãn Đầu Óc",
-    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p27-shopee-01.webp",
-    "categoryId": "all",
+    "categoryId": "tra-hoa-don",
     "subCategoryId": "tra-hoa-don",
+    "name": "Trà hoa Nhài - Thanh Nhiệt, Thư Giãn Đầu Óc",
+    "description": "Trà hoa nhài được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày.",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p27-shopee-01.webp",
+    "video": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p27-shopee-video.mp4",
+    "videoPoster": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p27-shopee-video-poster.webp",
+    "images": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p27-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p27-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p27-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p27-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p27-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p27-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p27-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p27-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p27-shopee-09.webp"
+    ],
+    "descriptionImages": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p27-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p27-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p27-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p27-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p27-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p27-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p27-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p27-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p27-shopee-09.webp"
+    ],
+    "descriptionSections": [
+      {
+        "title": "Thông tin sản phẩm",
+        "content": "Trà hoa nhài được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày. Hoa trà được chọn lọc và đóng gói để giữ hương thơm tự nhiên."
+      },
+      {
+        "title": "Thương hiệu và xuất xứ",
+        "content": "Thương hiệu Sunbeleaf. Sản phẩm được đóng gói tại Việt Nam, thông tin lô sản xuất và hạn dùng thể hiện trên bao bì."
+      },
+      {
+        "title": "Hướng dẫn sử dụng",
+        "content": "Sử dụng theo hướng dẫn in trên bao bì. Điều chỉnh lượng nước và thời gian pha theo khẩu vị cá nhân."
+      },
+      {
+        "title": "Bảo quản",
+        "content": "Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp. Đóng kín bao bì sau khi mở."
+      },
+      {
+        "title": "Lưu ý",
+        "content": "Thông tin về công dụng chỉ mang tính tham khảo. Sản phẩm không phải là thuốc và không có tác dụng thay thế thuốc chữa bệnh."
+      }
+    ],
     "price": 213400,
-    "listPrice": 0
+    "listPrice": 0,
+    "sku": "",
+    "variantGroups": [],
+    "features": [
+      "sleep-support"
+    ]
   },
   {
     "id": 28,
-    "name": "Trà hoa Hồng - Dưỡng Nhan, Đẹp Da, Giảm Căng Thẳng",
-    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p28-shopee-01.webp",
-    "categoryId": "all",
+    "categoryId": "tra-hoa-don",
     "subCategoryId": "tra-hoa-don",
+    "name": "Trà hoa Hồng - Dưỡng Nhan, Đẹp Da, Giảm Căng Thẳng",
+    "description": "Trà hoa hồng được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày.",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p28-shopee-01.webp",
+    "video": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p28-shopee-video.mp4",
+    "videoPoster": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p28-shopee-video-poster.webp",
+    "images": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p28-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p28-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p28-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p28-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p28-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p28-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p28-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p28-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p28-shopee-09.webp"
+    ],
+    "descriptionImages": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p28-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p28-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p28-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p28-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p28-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p28-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p28-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p28-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p28-shopee-09.webp"
+    ],
+    "descriptionSections": [
+      {
+        "title": "Thông tin sản phẩm",
+        "content": "Trà hoa hồng được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày. Hoa trà được chọn lọc và đóng gói để giữ hương thơm tự nhiên."
+      },
+      {
+        "title": "Thương hiệu và xuất xứ",
+        "content": "Thương hiệu Sunbeleaf. Sản phẩm được đóng gói tại Việt Nam, thông tin lô sản xuất và hạn dùng thể hiện trên bao bì."
+      },
+      {
+        "title": "Hướng dẫn sử dụng",
+        "content": "Sử dụng theo hướng dẫn in trên bao bì. Điều chỉnh lượng nước và thời gian pha theo khẩu vị cá nhân."
+      },
+      {
+        "title": "Bảo quản",
+        "content": "Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp. Đóng kín bao bì sau khi mở."
+      },
+      {
+        "title": "Lưu ý",
+        "content": "Thông tin về công dụng chỉ mang tính tham khảo. Sản phẩm không phải là thuốc và không có tác dụng thay thế thuốc chữa bệnh."
+      }
+    ],
     "price": 172800,
-    "listPrice": 0
+    "listPrice": 0,
+    "sku": "",
+    "variantGroups": [],
+    "features": [
+      "ice"
+    ]
   },
   {
     "id": 29,
-    "name": "Trà hoa Mẫu Đơn - Chống Lão Hóa, Đẹp Da, Thư Giãn",
-    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p29-shopee-01.webp",
-    "categoryId": "all",
+    "categoryId": "tra-hoa-don",
     "subCategoryId": "tra-hoa-don",
+    "name": "Trà hoa Mẫu Đơn - Chống Lão Hóa, Đẹp Da, Thư Giãn",
+    "description": "Trà hoa mẫu đơn được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày.",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p29-shopee-01.webp",
+    "video": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p29-shopee-video.mp4",
+    "videoPoster": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p29-shopee-video-poster.webp",
+    "images": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p29-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p29-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p29-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p29-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p29-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p29-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p29-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p29-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p29-shopee-09.webp"
+    ],
+    "descriptionImages": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p29-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p29-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p29-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p29-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p29-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p29-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p29-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p29-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p29-shopee-09.webp"
+    ],
+    "descriptionSections": [
+      {
+        "title": "Thông tin sản phẩm",
+        "content": "Trà hoa mẫu đơn được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày. Hoa trà được chọn lọc và đóng gói để giữ hương thơm tự nhiên."
+      },
+      {
+        "title": "Thương hiệu và xuất xứ",
+        "content": "Thương hiệu Sunbeleaf. Sản phẩm được đóng gói tại Việt Nam, thông tin lô sản xuất và hạn dùng thể hiện trên bao bì."
+      },
+      {
+        "title": "Hướng dẫn sử dụng",
+        "content": "Sử dụng theo hướng dẫn in trên bao bì. Điều chỉnh lượng nước và thời gian pha theo khẩu vị cá nhân."
+      },
+      {
+        "title": "Bảo quản",
+        "content": "Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp. Đóng kín bao bì sau khi mở."
+      },
+      {
+        "title": "Lưu ý",
+        "content": "Thông tin về công dụng chỉ mang tính tham khảo. Sản phẩm không phải là thuốc và không có tác dụng thay thế thuốc chữa bệnh."
+      }
+    ],
     "price": 144000,
-    "listPrice": 0
+    "listPrice": 0,
+    "sku": "",
+    "variantGroups": [],
+    "features": [
+      "ice"
+    ]
   },
   {
     "id": 30,
-    "name": "Trà hoa Đậu Biếc - Chống Lão Hóa, Đẹp Da, Sáng Mắt",
-    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p30-shopee-01.webp",
-    "categoryId": "all",
+    "categoryId": "tra-hoa-don",
     "subCategoryId": "tra-hoa-don",
+    "name": "Trà hoa Đậu Biếc - Chống Lão Hóa, Đẹp Da, Sáng Mắt",
+    "description": "Trà hoa đậu biếc được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày.",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p30-shopee-01.webp",
+    "video": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p30-shopee-video.mp4",
+    "videoPoster": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p30-shopee-video-poster.webp",
+    "images": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p30-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p30-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p30-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p30-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p30-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p30-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p30-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p30-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p30-shopee-09.webp"
+    ],
+    "descriptionImages": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p30-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p30-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p30-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p30-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p30-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p30-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p30-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p30-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p30-shopee-09.webp"
+    ],
+    "descriptionSections": [
+      {
+        "title": "Thông tin sản phẩm",
+        "content": "Trà hoa đậu biếc được đóng hộp tiện lợi, phù hợp để sử dụng hằng ngày. Hoa trà được chọn lọc và đóng gói để giữ hương thơm tự nhiên."
+      },
+      {
+        "title": "Thương hiệu và xuất xứ",
+        "content": "Thương hiệu Sunbeleaf. Sản phẩm được đóng gói tại Việt Nam, thông tin lô sản xuất và hạn dùng thể hiện trên bao bì."
+      },
+      {
+        "title": "Hướng dẫn sử dụng",
+        "content": "Sử dụng theo hướng dẫn in trên bao bì. Điều chỉnh lượng nước và thời gian pha theo khẩu vị cá nhân."
+      },
+      {
+        "title": "Bảo quản",
+        "content": "Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp. Đóng kín bao bì sau khi mở."
+      },
+      {
+        "title": "Lưu ý",
+        "content": "Thông tin về công dụng chỉ mang tính tham khảo. Sản phẩm không phải là thuốc và không có tác dụng thay thế thuốc chữa bệnh."
+      }
+    ],
     "price": 180400,
-    "listPrice": 0
+    "listPrice": 0,
+    "sku": "",
+    "variantGroups": [],
+    "features": [
+      "ice"
+    ]
   },
   {
     "id": 31,
-    "name": "Cặp Đai chườm đầu gối thảo dược - Giảm Đau Nhức, Hỗ Trợ Lưu Thông Khí Huyết",
-    "image": "https://deltadasia.com/wp-content/uploads/2026/06/tra-thao-moc-sunbeleaf-dai-chuom-dau-goi-thao-duoc-300x300.jpg?v=20260619-1",
-    "categoryId": "all",
+    "categoryId": "thao-duoc-tri-lieu",
     "subCategoryId": "thao-duoc-tri-lieu",
+    "name": "Cặp Đai chườm đầu gối thảo dược - Giảm Đau Nhức, Hỗ Trợ Lưu Thông Khí Huyết",
+    "description": "Đai chườm đầu gối thảo dược có tác dụng giảm đau nhức xương khớp, hỗ trợ lưu thông khí huyết",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/tra-thao-moc-sunbeleaf-dai-chuom-dau-goi-thao-duoc-300x300.jpg?v=20260619-1",
+    "video": "",
+    "videoPoster": "",
+    "images": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/tra-thao-moc-sunbeleaf-dai-chuom-dau-goi-thao-duoc-300x300.jpg?v=20260619-1"
+    ],
+    "descriptionImages": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/tra-thao-moc-sunbeleaf-dai-chuom-dau-goi-thao-duoc-300x300.jpg?v=20260619-1"
+    ],
+    "descriptionSections": [
+      {
+        "title": "Thông tin sản phẩm",
+        "content": "Đai chườm đầu gối thảo dược có tác dụng giảm đau nhức xương khớp, hỗ trợ lưu thông khí huyết Sản phẩm thảo dược trị liệu dùng theo hướng dẫn trên bao bì."
+      },
+      {
+        "title": "Thương hiệu và xuất xứ",
+        "content": "Thương hiệu Sunbeleaf. Sản phẩm được đóng gói tại Việt Nam, thông tin lô sản xuất và hạn dùng thể hiện trên bao bì."
+      },
+      {
+        "title": "Hướng dẫn sử dụng",
+        "content": "Sử dụng theo hướng dẫn in trên bao bì. Điều chỉnh lượng nước và thời gian pha theo khẩu vị cá nhân."
+      },
+      {
+        "title": "Bảo quản",
+        "content": "Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp. Đóng kín bao bì sau khi mở."
+      },
+      {
+        "title": "Lưu ý",
+        "content": "Thông tin về công dụng chỉ mang tính tham khảo. Sản phẩm không phải là thuốc và không có tác dụng thay thế thuốc chữa bệnh."
+      }
+    ],
     "price": 420000,
-    "listPrice": 0
+    "listPrice": 0,
+    "sku": "",
+    "variantGroups": [],
+    "features": [
+      "hot"
+    ]
   },
   {
     "id": 32,
-    "name": "Túi chườm mắt thảo dược - Giảm Nhức Mỏi Mắt, Hỗ Trợ Lưu Thông Khí Huyết",
-    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p32-shopee-01.webp",
-    "categoryId": "all",
+    "categoryId": "thao-duoc-tri-lieu",
     "subCategoryId": "thao-duoc-tri-lieu",
+    "name": "Túi chườm mắt thảo dược - Giảm Nhức Mỏi Mắt, Hỗ Trợ Lưu Thông Khí Huyết",
+    "description": "Túi chườm mắt thảo dược có tác dụng giảm nhức mỏi mắt, hỗ trợ lưu thông khí huyết",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p32-shopee-01.webp",
+    "video": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p32-shopee-video.mp4",
+    "videoPoster": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p32-shopee-video-poster.webp",
+    "images": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p32-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p32-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p32-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p32-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p32-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p32-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p32-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p32-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p32-shopee-09.webp"
+    ],
+    "descriptionImages": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p32-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p32-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p32-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p32-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p32-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p32-shopee-06.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p32-shopee-07.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p32-shopee-08.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p32-shopee-09.webp"
+    ],
+    "descriptionSections": [
+      {
+        "title": "Thông tin sản phẩm",
+        "content": "Túi chườm mắt thảo dược có tác dụng giảm nhức mỏi mắt, hỗ trợ lưu thông khí huyết Sản phẩm thảo dược trị liệu dùng theo hướng dẫn trên bao bì."
+      },
+      {
+        "title": "Thương hiệu và xuất xứ",
+        "content": "Thương hiệu Sunbeleaf. Sản phẩm được đóng gói tại Việt Nam, thông tin lô sản xuất và hạn dùng thể hiện trên bao bì."
+      },
+      {
+        "title": "Hướng dẫn sử dụng",
+        "content": "Sử dụng theo hướng dẫn in trên bao bì. Điều chỉnh lượng nước và thời gian pha theo khẩu vị cá nhân."
+      },
+      {
+        "title": "Bảo quản",
+        "content": "Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp. Đóng kín bao bì sau khi mở."
+      },
+      {
+        "title": "Lưu ý",
+        "content": "Thông tin về công dụng chỉ mang tính tham khảo. Sản phẩm không phải là thuốc và không có tác dụng thay thế thuốc chữa bệnh."
+      }
+    ],
     "price": 220000,
-    "listPrice": 0
+    "listPrice": 0,
+    "sku": "",
+    "variantGroups": [],
+    "features": [
+      "sleep-support"
+    ]
   },
   {
     "id": 33,
-    "name": "Gối chườm thảo dược - Giảm Đau Nhức Vai Gáy, Lưu Thông Khí Huyết",
-    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p33-shopee-01.webp",
-    "categoryId": "all",
+    "categoryId": "thao-duoc-tri-lieu",
     "subCategoryId": "thao-duoc-tri-lieu",
+    "name": "Gối chườm thảo dược - Giảm Đau Nhức Vai Gáy, Lưu Thông Khí Huyết",
+    "description": "Gối chườm thảo dược có tác dụng giảm đau nhức vùng cổ, vai, gáy, hỗ trợ lưu thông khí huyết",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p33-shopee-01.webp",
+    "video": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p33-shopee-video.mp4",
+    "videoPoster": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p33-shopee-video-poster.webp",
+    "images": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p33-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p33-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p33-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p33-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p33-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p33-shopee-06.webp"
+    ],
+    "descriptionImages": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p33-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p33-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p33-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p33-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p33-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p33-shopee-06.webp"
+    ],
+    "descriptionSections": [
+      {
+        "title": "Thông tin sản phẩm",
+        "content": "Gối chườm thảo dược có tác dụng giảm đau nhức vùng cổ, vai, gáy, hỗ trợ lưu thông khí huyết Sản phẩm thảo dược trị liệu dùng theo hướng dẫn trên bao bì."
+      },
+      {
+        "title": "Thương hiệu và xuất xứ",
+        "content": "Thương hiệu Sunbeleaf. Sản phẩm được đóng gói tại Việt Nam, thông tin lô sản xuất và hạn dùng thể hiện trên bao bì."
+      },
+      {
+        "title": "Hướng dẫn sử dụng",
+        "content": "Sử dụng theo hướng dẫn in trên bao bì. Điều chỉnh lượng nước và thời gian pha theo khẩu vị cá nhân."
+      },
+      {
+        "title": "Bảo quản",
+        "content": "Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp. Đóng kín bao bì sau khi mở."
+      },
+      {
+        "title": "Lưu ý",
+        "content": "Thông tin về công dụng chỉ mang tính tham khảo. Sản phẩm không phải là thuốc và không có tác dụng thay thế thuốc chữa bệnh."
+      }
+    ],
     "price": 600000,
-    "listPrice": 0
+    "listPrice": 0,
+    "sku": "",
+    "variantGroups": [],
+    "features": [
+      "hot"
+    ]
   },
   {
     "id": 34,
-    "name": "Hộp quà Trà Sức Khỏe - Hộp Quà Cao Cấp, Chăm Sóc Sức Khỏe",
-    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-sunbeleaf-bo-qua-tra-suc-khoe.webp",
-    "categoryId": "all",
+    "categoryId": "bo-qua",
     "subCategoryId": "bo-qua",
+    "name": "Hộp quà Trà Sức Khỏe - Hộp Quà Cao Cấp, Chăm Sóc Sức Khỏe",
+    "description": "Hộp quà Trà Sức Khỏe với 3 loại trà thảo dược tốt cho sức khỏe cùng 2 hủ hạt dinh dưỡng",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-sunbeleaf-bo-qua-tra-suc-khoe.webp",
+    "video": "",
+    "videoPoster": "",
+    "images": [],
+    "descriptionImages": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-sunbeleaf-bo-qua-tra-suc-khoe.webp"
+    ],
+    "descriptionSections": [
+      {
+        "title": "Thông tin sản phẩm",
+        "content": "Hộp quà Trà Sức Khỏe với 3 loại trà thảo dược tốt cho sức khỏe cùng 2 hủ hạt dinh dưỡng Bộ quà được phối hợp và đóng gói trang trọng."
+      },
+      {
+        "title": "Thương hiệu và xuất xứ",
+        "content": "Thương hiệu Sunbeleaf. Sản phẩm được đóng gói tại Việt Nam, thông tin lô sản xuất và hạn dùng thể hiện trên bao bì."
+      },
+      {
+        "title": "Hướng dẫn sử dụng",
+        "content": "Sử dụng theo hướng dẫn in trên bao bì. Điều chỉnh lượng nước và thời gian pha theo khẩu vị cá nhân."
+      },
+      {
+        "title": "Bảo quản",
+        "content": "Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp. Đóng kín bao bì sau khi mở."
+      },
+      {
+        "title": "Lưu ý",
+        "content": "Thông tin về công dụng chỉ mang tính tham khảo. Sản phẩm không phải là thuốc và không có tác dụng thay thế thuốc chữa bệnh."
+      }
+    ],
     "price": 512000,
-    "listPrice": 0
+    "listPrice": 0,
+    "sku": "",
+    "variantGroups": [],
+    "features": [
+      "vegetarian",
+      "hot"
+    ]
   },
   {
     "id": 35,
-    "name": "Bộ Quà Da Cao Cấp - Báu Vật Từ Thiên Nhiên - Hộp Quà Cao Cấp Thượng Hạng",
-    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p35-shopee-01.webp",
-    "categoryId": "all",
+    "categoryId": "bo-qua",
     "subCategoryId": "bo-qua",
+    "name": "Bộ Quà Da Cao Cấp - Báu Vật Từ Thiên Nhiên - Hộp Quà Cao Cấp Thượng Hạng",
+    "description": "Bộ Quà Da Cao Cấp - Báu Vật Từ Thiên Nhiên bao gồm 5 loại trà thượng hạng thuộc dòng Trà Cổ Việt, thu hái ở dãy Tây Côn Lĩnh, tỉnh Hà Giang",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p35-shopee-01.webp",
+    "video": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p35-shopee-video.mp4",
+    "videoPoster": "https://deltadasia.com/wp-content/uploads/2026/06/zma-p35-shopee-video-poster.webp",
+    "images": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p35-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p35-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p35-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p35-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p35-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p35-shopee-06.webp"
+    ],
+    "descriptionImages": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p35-shopee-01.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p35-shopee-02.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p35-shopee-03.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p35-shopee-04.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p35-shopee-05.webp",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-p35-shopee-06.webp"
+    ],
+    "descriptionSections": [
+      {
+        "title": "Thông tin sản phẩm",
+        "content": "Bộ Quà Da Cao Cấp - Báu Vật Từ Thiên Nhiên bao gồm 5 loại trà thượng hạng thuộc dòng Trà Cổ Việt, thu hái ở dãy Tây Côn Lĩnh, tỉnh Hà Giang Bộ quà được phối hợp và đóng gói trang trọng."
+      },
+      {
+        "title": "Thương hiệu và xuất xứ",
+        "content": "Thương hiệu Sunbeleaf. Sản phẩm được đóng gói tại Việt Nam, thông tin lô sản xuất và hạn dùng thể hiện trên bao bì."
+      },
+      {
+        "title": "Hướng dẫn sử dụng",
+        "content": "Sử dụng theo hướng dẫn in trên bao bì. Điều chỉnh lượng nước và thời gian pha theo khẩu vị cá nhân."
+      },
+      {
+        "title": "Bảo quản",
+        "content": "Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp. Đóng kín bao bì sau khi mở."
+      },
+      {
+        "title": "Lưu ý",
+        "content": "Thông tin về công dụng chỉ mang tính tham khảo. Sản phẩm không phải là thuốc và không có tác dụng thay thế thuốc chữa bệnh."
+      }
+    ],
     "price": 0,
-    "listPrice": 0
+    "listPrice": 0,
+    "sku": "",
+    "variantGroups": [],
+    "features": [
+      "vegetarian",
+      "hot"
+    ]
   },
   {
     "id": 36,
-    "name": "Lá Xông Giải Cảm Sunbeleaf - Thảo Dược Xông Hơi, Tắm Hoặc Xông Đều Được",
-    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-la-xong-shopee-01.jpg",
-    "categoryId": "all",
+    "categoryId": "thao-duoc-tri-lieu",
     "subCategoryId": "thao-duoc-tri-lieu",
+    "name": "Lá Xông Giải Cảm Sunbeleaf - Thảo Dược Xông Hơi, Tắm Hoặc Xông Đều Được",
+    "description": "Lá xông giải cảm Sunbeleaf dạng túi zip 25g, phù hợp để xông hơi, tắm hoặc sử dụng theo hướng dẫn trên bao bì.",
+    "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-la-xong-shopee-01.jpg",
+    "video": "https://deltadasia.com/wp-content/uploads/2026/06/tra-thao-moc-sunbeleaf-la-xong-giai-cam-video-quang-ba.mp4",
+    "videoPoster": "",
+    "images": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-la-xong-shopee-01.jpg",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-la-xong-shopee-02.jpg",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-la-xong-shopee-03.jpg",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-la-xong-shopee-04.jpg",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-la-xong-shopee-05.jpg",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-la-xong-shopee-06.jpg",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-la-xong-shopee-07.jpg",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-la-xong-shopee-08.jpg",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-la-xong-shopee-09.jpg"
+    ],
+    "descriptionImages": [
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-la-xong-shopee-01.jpg",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-la-xong-shopee-02.jpg",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-la-xong-shopee-03.jpg",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-la-xong-shopee-04.jpg",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-la-xong-shopee-05.jpg",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-la-xong-shopee-06.jpg",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-la-xong-shopee-07.jpg",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-la-xong-shopee-08.jpg",
+      "https://deltadasia.com/wp-content/uploads/2026/06/zma-la-xong-shopee-09.jpg"
+    ],
+    "descriptionSections": [
+      {
+        "title": "Thông tin sản phẩm",
+        "content": "Lá xông giải cảm Sunbeleaf dạng túi zip 25g, phù hợp để xông hơi, tắm hoặc sử dụng theo hướng dẫn trên bao bì. Sản phẩm thảo dược trị liệu dùng theo hướng dẫn trên bao bì."
+      },
+      {
+        "title": "Thương hiệu và xuất xứ",
+        "content": "Thương hiệu Sunbeleaf. Sản phẩm được đóng gói tại Việt Nam, thông tin lô sản xuất và hạn dùng thể hiện trên bao bì."
+      },
+      {
+        "title": "Hướng dẫn sử dụng",
+        "content": "Sử dụng theo hướng dẫn in trên bao bì. Điều chỉnh lượng nước và thời gian pha theo khẩu vị cá nhân."
+      },
+      {
+        "title": "Bảo quản",
+        "content": "Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp. Đóng kín bao bì sau khi mở."
+      },
+      {
+        "title": "Lưu ý",
+        "content": "Thông tin về công dụng chỉ mang tính tham khảo. Sản phẩm không phải là thuốc và không có tác dụng thay thế thuốc chữa bệnh."
+      }
+    ],
     "price": 57500,
-    "listPrice": 0
+    "listPrice": 0,
+    "sku": "",
+    "variantGroups": [
+      {
+        "id": "package-size",
+        "title": "Quy cách sản phẩm",
+        "description": "Chọn quy cách lá xông",
+        "type": "SINGLE",
+        "isRequired": true,
+        "options": [
+          {
+            "id": "package-25g",
+            "name": "Túi Zip 25g",
+            "extraPrice": 0,
+            "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-la-xong-shopee-01.jpg"
+          }
+        ]
+      }
+    ],
+    "features": [
+      "bestseller"
+    ]
+  },
+  {
+    "id": 999001,
+    "categoryId": "tra-tui-loc",
+    "subCategoryId": "tra-hop-25",
+    "name": "test",
+    "description": "San pham test tam thoi de kiem tra quy trinh dat hang va thanh toan. Khi mua san pham nay he thong se mien phi van chuyen.",
+    "image": "/temp/test-product.svg",
+    "video": "",
+    "videoPoster": "",
+    "images": [
+      "/temp/test-product.svg"
+    ],
+    "descriptionImages": [
+      "/temp/test-product.svg"
+    ],
+    "descriptionSections": [
+      {
+        "title": "Thông tin sản phẩm",
+        "content": "San pham test tam thoi de kiem tra quy trinh dat hang va thanh toan. Khi mua san pham nay he thong se mien phi van chuyen. Trà túi lọc đóng hộp, thuận tiện pha và sử dụng hằng ngày."
+      },
+      {
+        "title": "Thương hiệu và xuất xứ",
+        "content": "Thương hiệu Sunbeleaf. Sản phẩm được đóng gói tại Việt Nam, thông tin lô sản xuất và hạn dùng thể hiện trên bao bì."
+      },
+      {
+        "title": "Hướng dẫn sử dụng",
+        "content": "Sử dụng theo hướng dẫn in trên bao bì. Điều chỉnh lượng nước và thời gian pha theo khẩu vị cá nhân."
+      },
+      {
+        "title": "Bảo quản",
+        "content": "Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp. Đóng kín bao bì sau khi mở."
+      },
+      {
+        "title": "Lưu ý",
+        "content": "Thông tin về công dụng chỉ mang tính tham khảo. Sản phẩm không phải là thuốc và không có tác dụng thay thế thuốc chữa bệnh."
+      }
+    ],
+    "price": 2000,
+    "listPrice": 0,
+    "sku": "",
+    "variantGroups": [],
+    "features": [
+      "bestseller"
+    ]
   }
 ]

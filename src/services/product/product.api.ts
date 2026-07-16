@@ -39,6 +39,7 @@ let inventoryCache:
       data: {
         inventory: Record<string, InventoryEntry>;
         productOverrides: Record<string, ProductOverride>;
+        deletedProductIds: string[];
       };
     }
   | null = null;
@@ -61,22 +62,27 @@ export async function getProductRemoteConfig() {
       data?.productOverrides && typeof data.productOverrides === "object"
         ? data.productOverrides
         : {};
+    const deletedProductIds = Array.isArray(data?.deletedProductIds)
+      ? data.deletedProductIds.map((id: unknown) => String(id))
+      : [];
     inventoryCache = {
       expiresAt: now + 30 * 1000,
-      data: { inventory, productOverrides },
+      data: { inventory, productOverrides, deletedProductIds },
     };
     return inventoryCache.data;
   } catch {
     inventoryCache = {
       expiresAt: now + 10 * 1000,
-      data: { inventory: {}, productOverrides: {} },
+      data: { inventory: {}, productOverrides: {}, deletedProductIds: [] },
     };
     return inventoryCache.data;
   }
 }
 
 async function getAllProductsMerged() {
-  const { inventory, productOverrides } = await getProductRemoteConfig();
+  const { inventory, productOverrides, deletedProductIds } =
+    await getProductRemoteConfig();
+  const deletedIds = new Set((deletedProductIds || []).map((id) => String(id)));
 
   // Map base mock catalog
   const mappedBase = mockListOfProduct.map((product) => {
@@ -146,7 +152,9 @@ async function getAllProductsMerged() {
   });
 
   const all = [...mappedBase, ...extraProducts];
-  return all.filter((product) => product.hidden !== true);
+  return all.filter(
+    (product) => product.hidden !== true && !deletedIds.has(String(product.id)),
+  );
 }
 
 export const productService = {
