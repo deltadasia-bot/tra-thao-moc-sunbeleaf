@@ -2387,50 +2387,5 @@
     "features": [
       "bestseller"
     ]
-  },
-  {
-    "id": 999001,
-    "categoryId": "tra-tui-loc",
-    "subCategoryId": "tra-hop-25",
-    "name": "test",
-    "description": "San pham test tam thoi de kiem tra quy trinh dat hang va thanh toan. Khi mua san pham nay he thong se mien phi van chuyen.",
-    "image": "/temp/test-product.svg",
-    "video": "",
-    "videoPoster": "",
-    "images": [
-      "/temp/test-product.svg"
-    ],
-    "descriptionImages": [
-      "/temp/test-product.svg"
-    ],
-    "descriptionSections": [
-      {
-        "title": "Thông tin sản phẩm",
-        "content": "San pham test tam thoi de kiem tra quy trinh dat hang va thanh toan. Khi mua san pham nay he thong se mien phi van chuyen. Trà túi lọc đóng hộp, thuận tiện pha và sử dụng hằng ngày."
-      },
-      {
-        "title": "Thương hiệu và xuất xứ",
-        "content": "Thương hiệu Sunbeleaf. Sản phẩm được đóng gói tại Việt Nam, thông tin lô sản xuất và hạn dùng thể hiện trên bao bì."
-      },
-      {
-        "title": "Hướng dẫn sử dụng",
-        "content": "Sử dụng theo hướng dẫn in trên bao bì. Điều chỉnh lượng nước và thời gian pha theo khẩu vị cá nhân."
-      },
-      {
-        "title": "Bảo quản",
-        "content": "Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp. Đóng kín bao bì sau khi mở."
-      },
-      {
-        "title": "Lưu ý",
-        "content": "Thông tin về công dụng chỉ mang tính tham khảo. Sản phẩm không phải là thuốc và không có tác dụng thay thế thuốc chữa bệnh."
-      }
-    ],
-    "price": 2000,
-    "listPrice": 0,
-    "sku": "",
-    "variantGroups": [],
-    "features": [
-      "bestseller"
-    ]
   }
 ]

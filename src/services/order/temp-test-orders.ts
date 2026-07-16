@@ -361,26 +361,17 @@ export const TEMP_TEST_ORDERS = [
         "price": 57500,
         "image": "https://deltadasia.com/wp-content/uploads/2026/06/zma-la-xong-shopee-01.jpg",
         "options": []
-      },
-      {
-        "id": "order-test-all-2-item-17",
-        "productId": 999001,
-        "name": "test",
-        "quantity": 1,
-        "price": 2000,
-        "image": "/temp/test-product.svg",
-        "options": []
       }
     ],
     "createdAt": "2026-06-29T03:29:06.147Z",
     "updatedAt": "2026-06-29T03:29:06.147Z",
-    "totalAmount": 3763950,
+    "totalAmount": 3761950,
     "payment": {
       "method": "cash",
-      "subtotal": 3763950,
+      "subtotal": 3761950,
       "shippingFee": 0,
       "discount": 0,
-      "total": 3763950,
+      "total": 3761950,
       "status": "paid"
     },
     "deliveryAddress": {

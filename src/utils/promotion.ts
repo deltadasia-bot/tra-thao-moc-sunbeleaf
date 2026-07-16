@@ -4,11 +4,10 @@ const PRICE_INCREASE_RATE = 1.0;
 const DISCOUNT_RATE = 0.4;
 
 export const PROMOTION_DISCOUNT_PERCENT = 60;
-export const TEMP_TEST_PRODUCT_ID = 999001;
 
 export const isPromotionDisabledForProduct = (
-  product: Pick<Product, "id">,
-) => product.id === TEMP_TEST_PRODUCT_ID;
+  _product: Pick<Product, "id">,
+) => false;
 
 export const getPromotionalListPrice = (price: number) =>
   Math.round(price * PRICE_INCREASE_RATE);
