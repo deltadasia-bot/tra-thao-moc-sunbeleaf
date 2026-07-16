@@ -31,6 +31,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === "poll_orders") {
     checkAndSyncOrders();
     checkAndUpdateTracking();
+    checkAndCancelOrders();
   }
 });
 
@@ -54,6 +55,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     // Bấm "Đồng bộ ngay" là lệnh thủ công: chạy cả khi đang tạm dừng và log chi tiết
     checkAndSyncOrders(true);
     checkAndUpdateTracking(true);
+    checkAndCancelOrders(true);
     sendResponse({ success: true });
   } else if (request.action === "sapoPageFetchInMainWorld") {
     executeSapoPageFetchInMainWorld(sender, request.fetchRequest)
@@ -446,6 +448,51 @@ async function checkAndUpdateTracking(force = false) {
     }
   } catch (error) {
     console.error("[Sapo Sync background] Lỗi checkAndUpdateTracking:", error.message);
+  }
+}
+
+// 3. Hủy đơn trên Sapo khi khách đã hủy đơn ở Zalo Mini App
+async function checkAndCancelOrders(force = false) {
+  if (isSyncPaused && !force) return;
+  try {
+    const response = await fetch(`${backendUrl}/api/sapo/extension/pending-cancel`);
+    if (!response.ok) return;
+
+    const data = await response.json();
+    const ordersToCancel = data.orders || [];
+
+    if (ordersToCancel.length === 0) {
+      if (force) addLog("Khong co don nao can huy tren Sapo.");
+      return;
+    }
+
+    if (force) addLog(`Co ${ordersToCancel.length} don can huy tren Sapo.`);
+
+    const tabs = await chrome.tabs.query({ url: "https://*.mysapogo.com/admin*" });
+    if (tabs.length === 0) {
+      if (force) addLog("Khong tim thay tab Sapo de huy don. Hay mo va dang nhap Sapo.");
+      return;
+    }
+
+    const activeTab = tabs[0];
+    const contentReady = await ensureContentScript(activeTab.id);
+    if (!contentReady) return;
+
+    for (const order of ordersToCancel) {
+      const result = await sendMessageToTab(activeTab.id, {
+        action: "cancelOrder",
+        order,
+        backendUrl: backendUrl
+      }, 120000);
+
+      if (result?.success) {
+        addLog(`Da huy don ${order.orderCode || order.id} tren Sapo.`);
+      } else {
+        addLog(`Loi huy don ${order.orderCode || order.id} tren Sapo: ${result?.error || result?.extensionError || "khong ro"}`);
+      }
+    }
+  } catch (error) {
+    console.error("[Sapo Sync background] Lỗi checkAndCancelOrders:", error.message);
   }
 }
 

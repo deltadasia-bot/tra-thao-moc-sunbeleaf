@@ -13,9 +13,9 @@ const btnShowCatalog = document.getElementById("btnShowCatalog");
 const txtSapoCatalog = document.getElementById("txtSapoCatalog");
 
 const DEFAULT_BACKEND_URL = "https://tra-thao-moc-sunbeleaf-production.up.railway.app";
-const REQUIRED_CONTENT_BUILD = "1.0.36";
-const PING_ACTION = "pingSunbeleafSapoV136";
-const PRODUCT_ACTION = "createProductsOnSapoV136";
+const REQUIRED_CONTENT_BUILD = "1.0.37";
+const PING_ACTION = "pingSunbeleafSapoV137";
+const PRODUCT_ACTION = "createProductsOnSapoV137";
 let isSyncPaused = false;
 let productSyncWatchdog = null;
 let productSyncRunning = false;

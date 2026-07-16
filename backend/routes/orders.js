@@ -212,7 +212,14 @@ router.patch("/:id/cancel", (req, res) => {
     });
   }
 
-  const updated = db.updateOrder(req.params.id, { state: "cancelled" });
+  let updated = db.updateOrder(req.params.id, { state: "cancelled" });
+
+  // Nếu đơn đã được đồng bộ lên Sapo, đánh dấu cần hủy trên Sapo để extension
+  // xử lý (hủy đơn trên Sapo Go bằng phiên đăng nhập của cửa hàng).
+  if (updated?.sapoOrderId) {
+    updated = db.markSapoCancelPending(req.params.id) || updated;
+  }
+
   return res.json({ success: true, order: updated });
 });
 

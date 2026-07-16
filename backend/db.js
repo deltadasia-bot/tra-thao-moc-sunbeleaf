@@ -517,6 +517,41 @@ module.exports = {
     });
   },
 
+  // Đánh dấu đơn (đã có trên Sapo) cần được hủy trên Sapo bởi extension.
+  markSapoCancelPending(id) {
+    const order = this.getOrder(id);
+    if (!order || !order.sapoOrderId) return order;
+    return upsertOrder({
+      ...order,
+      sapoCancelStatus: "pending",
+      sapoCancelError: null,
+      updatedAt: new Date().toISOString(),
+    });
+  },
+
+  markSapoCancelled(id) {
+    const order = this.getOrder(id);
+    if (!order) return null;
+    return upsertOrder({
+      ...order,
+      sapoCancelStatus: "done",
+      sapoCancelledAt: new Date().toISOString(),
+      sapoCancelError: null,
+      updatedAt: new Date().toISOString(),
+    });
+  },
+
+  setSapoCancelError(id, error) {
+    const order = this.getOrder(id);
+    if (!order) return null;
+    return upsertOrder({
+      ...order,
+      sapoCancelStatus: "failed",
+      sapoCancelError: String(error || "Sapo cancel failed").slice(0, 1000),
+      updatedAt: new Date().toISOString(),
+    });
+  },
+
   setNhanhSyncResult(id, result) {
     const order = this.getOrder(id);
     if (!order) return null;

@@ -1,6 +1,6 @@
 // content.js
 
-const SUNBELEAF_SAPO_CONTENT_BUILD = "1.0.36";
+const SUNBELEAF_SAPO_CONTENT_BUILD = "1.0.37";
 
 let capturedSapoLocationId = "";
 
@@ -123,13 +123,13 @@ installSapoLocationHeaderCapture();
 console.log("[Sunbeleaf Sapo Assistant] Content script đã tải hoạt động trên trang Sapo Go.");
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === "pingSunbeleafSapoV136") {
+  if (request.action === "pingSunbeleafSapoV137") {
     sendResponse({
       success: true,
       build: SUNBELEAF_SAPO_CONTENT_BUILD,
       url: location.href
     });
-  } else if (request.action === "createProductsOnSapoV136") {
+  } else if (request.action === "createProductsOnSapoV137") {
     handleCreateProductsOnSapo(request.backendUrl, request.upsert)
       .then((result) => sendResponse({
         ...result,
@@ -149,6 +149,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   } else if (request.action === "queryTracking") {
     handleQueryTracking(request.id, request.sapoOrderId, request.backendUrl)
       .then((result) => sendResponse(result || { success: true }))
+      .catch((error) => sendResponse({ success: false, error: error.message }));
+    return true;
+  } else if (request.action === "cancelOrder") {
+    handleCancelOrderOnSapo(request.order, request.backendUrl)
+      .then((result) => sendResponse(result))
       .catch((error) => sendResponse({ success: false, error: error.message }));
     return true;
   } else if (request.action === "createProductsOnSapo") {
@@ -1304,6 +1309,88 @@ async function handleQueryTracking(zaloOrderId, sapoOrderId, backendUrl) {
   }
 }
 
+// 3. Hủy đơn trên Sapo khi khách đã hủy đơn ở Zalo Mini App
+async function handleCancelOrderOnSapo(order, backendUrl) {
+  const zaloOrderId = order?.id;
+  const sapoOrderId = order?.sapoOrderId;
+  if (!zaloOrderId || !sapoOrderId) {
+    return { success: false, error: "Thiếu id đơn Zalo hoặc Sapo." };
+  }
+
+  addLogToStorage(`Bắt đầu hủy đơn trên Sapo: ${order.orderCode || zaloOrderId} (Sapo #${sapoOrderId})`);
+
+  try {
+    const csrfToken = await resolveSapoCsrfToken();
+    const locationId = await resolveSapoLocationId();
+
+    const headers = {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+      "X-Requested-With": "XMLHttpRequest",
+      ...(locationId ? { "X-Sapo-LocationId": String(locationId) } : {}),
+      ...(csrfToken
+        ? {
+            "X-CSRF-Token": csrfToken,
+            "X-CSRFToken": csrfToken,
+            "X-XSRF-TOKEN": csrfToken
+          }
+        : {})
+    };
+
+    // Sapo Go dùng API kiểu Shopify: POST /admin/orders/{id}/cancel.json
+    const response = await fetch(`/admin/orders/${sapoOrderId}/cancel.json`, {
+      method: "POST",
+      headers,
+      credentials: "same-origin",
+      body: JSON.stringify({ reason: "customer", email: false, restock: true })
+    });
+
+    const responseText = await response.text();
+    let resData;
+    try {
+      resData = responseText ? JSON.parse(responseText) : {};
+    } catch (_error) {
+      resData = { raw: responseText };
+    }
+
+    // Thành công khi HTTP ok, hoặc Sapo báo đơn đã ở trạng thái hủy rồi.
+    const cancelledOrder = resData.order || resData.data?.order || resData.data || resData;
+    const alreadyCancelled =
+      /already.*cancel|đã.*hủy|cancelled/i.test(responseText || "") ||
+      cancelledOrder?.cancelled_status === "cancelled" ||
+      Boolean(cancelledOrder?.cancelled_on);
+
+    if (!response.ok && !alreadyCancelled) {
+      const errorMsg = JSON.stringify(resData.errors || resData.data_error || resData).slice(0, 500);
+      throw new Error(`Sapo từ chối hủy đơn: ${errorMsg}`);
+    }
+
+    const reportRes = await fetch(`${backendUrl}/api/sapo/extension/cancel-success`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: zaloOrderId })
+    });
+    if (!reportRes.ok) {
+      throw new Error("Không báo được kết quả hủy đơn về Zalo Backend.");
+    }
+
+    addLogToStorage(`Đã hủy đơn trên Sapo: ${order.orderCode || zaloOrderId}`);
+    showToastNotification(`Đã hủy đơn ${order.orderCode || zaloOrderId} trên Sapo theo yêu cầu của khách.`);
+    return { success: true };
+  } catch (error) {
+    addLogToStorage(`Lỗi hủy đơn Sapo ${order.orderCode || zaloOrderId}: ${error.message}`);
+    try {
+      await fetch(`${backendUrl}/api/sapo/extension/cancel-failure`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: zaloOrderId, error: error.message })
+      });
+    } catch (_reportError) {}
+    showToastNotification(`Lỗi hủy đơn ${order.orderCode || zaloOrderId} trên Sapo: ${error.message}`, true);
+    return { success: false, error: error.message };
+  }
+}
+
 // Hàm hiển thị Toast báo tin trên giao diện Sapo
 function showToastNotification(message, isError = false) {
   const toastId = "sunbeleaf-toast";
@@ -2114,7 +2201,7 @@ async function handleCreateProductsOnSapo(backendUrl, upsert = false) {
     }
     
     addLogToStorage(`Quét thấy ${zaloProducts.length} SP Zalo. Tiến hành xử lý...`);
-    addLogToStorage("Che do v1.0.36: XLSX theo dung template import Sapo; tao don kem source_id (Nguon don hang).");
+    addLogToStorage("Che do v1.0.37: XLSX theo dung template import Sapo; tao don kem source_id (Nguon don hang).");
     
     let createdCount = 0;
     let updatedCount = 0;

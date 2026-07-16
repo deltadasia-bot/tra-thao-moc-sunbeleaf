@@ -588,6 +588,64 @@ router.get("/extension/pending-tracking", (req, res) => {
   }
 });
 
+// Lấy danh sách đơn đã hủy trên Zalo nhưng chưa hủy trên Sapo
+router.get("/extension/pending-cancel", (req, res) => {
+  try {
+    const allOrders = require("../db").getAllOrders();
+    const pending = allOrders.filter(
+      (order) =>
+        order.state === "cancelled" &&
+        order.sapoOrderId &&
+        order.sapoCancelStatus !== "done",
+    );
+    return res.json({
+      orders: pending.map((order) => ({
+        id: order.id,
+        orderCode: order.orderCode,
+        sapoOrderId: order.sapoOrderId,
+      })),
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+// Ghi nhận đã hủy đơn thành công trên Sapo
+router.post("/extension/cancel-success", (req, res) => {
+  const { id } = req.body;
+  if (!id) {
+    return res.status(400).json({ error: "Thiếu id đơn hàng" });
+  }
+  try {
+    const updated = require("../db").markSapoCancelled(id);
+    if (!updated) {
+      return res.status(404).json({ error: "Không tìm thấy đơn hàng" });
+    }
+    console.log(`[Sapo Extension] Đã hủy đơn trên Sapo: Zalo ID ${id}`);
+    return res.json({ success: true, order: updated });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+// Ghi nhận hủy đơn trên Sapo thất bại
+router.post("/extension/cancel-failure", (req, res) => {
+  const { id, error } = req.body;
+  if (!id) {
+    return res.status(400).json({ error: "Thiếu id đơn hàng" });
+  }
+  try {
+    const updated = require("../db").setSapoCancelError(id, error);
+    if (!updated) {
+      return res.status(404).json({ error: "Không tìm thấy đơn hàng" });
+    }
+    console.log(`[Sapo Extension] Hủy đơn trên Sapo thất bại: Zalo ID ${id} -> ${error}`);
+    return res.json({ success: true, order: updated });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 // Cập nhật mã vận đơn thực tế từ Sapo
 router.post("/extension/update-tracking", (req, res) => {
   const { id, trackingNumber, shippingCarrier, trackingUrl, state } = req.body;
